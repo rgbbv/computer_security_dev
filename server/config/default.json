@@ -1,0 +1,26 @@
+{
+  "JWT_SECRET": "COMPUTER!SEC",
+  "JWT_EXP": "2400m",
+  "DB": {
+    "DB_USER": "CompSecClsAdmin",
+    "DB_PASSWORD": "AEUfAEOpKMpQ9T5S",
+    "DB_NAME": "CompSec"
+  },
+  "LOGGER": {
+    "LEVEL": "info",
+    "TRANSPORTS": [
+      {
+        "TYPE": "file",
+        "FILE_RELATIVE_PATH": "logs/error.log",
+        "LEVEL": "error"
+      },
+      {
+        "TYPE": "file",
+        "FILE_RELATIVE_PATH": "logs/combined.log",
+        "LEVEL": "silly"
+      }
+    ]
+  },
+  "DEFAULT_HIDDEN_PROPERTIES": "-_id -__v",
+  "SERVER_TIMEOUT": 600000
+}
