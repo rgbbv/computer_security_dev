@@ -22,7 +22,7 @@ let userSchema = new mongoose.Schema({
     hash: {type: String, hide: true}
 });
 
-userSchema.methods.generateJwt = function (fbid) {
+userSchema.methods.generateJwt = function () {
     return jwt.sign({},
         config.get("JWT_SECRET"), { expiresIn: config.get("JWT_EXP") });
 };
