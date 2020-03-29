@@ -5,11 +5,11 @@ const crypto = require('crypto');
 let mongooseHidden = require('mongoose-hidden')();
 
 let userSchema = new mongoose.Schema({
-    first_name: {
+    firstName: {
         type: String,
         required: 'First name cannot be empty'
     },
-    last_name: {
+    lastName: {
         type: String,
         required: 'Last name cannot be empty'
     },
@@ -20,11 +20,13 @@ let userSchema = new mongoose.Schema({
     },
     salt: {type: String, hide: true},
     hash: {type: String, hide: true}
+}, {
+    toObject: { virtuals: true },
+    toJSON: { virtuals: true }
 });
 
 userSchema.methods.generateJwt = function () {
-    return jwt.sign({},
-        config.get("JWT_SECRET"), { expiresIn: config.get("JWT_EXP") });
+    return jwt.sign({ id: this.id }, config.get("JWT_SECRET"), { expiresIn: config.get("JWT_EXP") });
 };
 
 userSchema.methods.setPassword = function(password) {
