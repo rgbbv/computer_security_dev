@@ -15,11 +15,13 @@ const BoomHelper = require("../helpers/BoomHelper");
  */
 function verifyUserAccess(req, res, next) {
     const unauthorizedMessage = "Unauthorized to change this resource! incidence have been reported!";
-    User.findById(req.params.id).exec((err, user) => {
-        if (String(user.id) !== String(req.id)) {
+    User.findById(req.params.id).exec().then((user) => {
+        if (!user || String(user.id) !== String(req.id)) {
             return res.status(403).send({auth: false, message: unauthorizedMessage});
         }
         next();
+    }).catch((err) => {
+        return res.status(500).send({message: "Internal server error", err: err})
     });
 }
 
