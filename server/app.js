@@ -28,11 +28,11 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.json());
 app.use(cors({ origin: 'http://localhost:4200' }));
 app.use(boom());
-app.use(passport.initialize());
+app.use(passport.initialize({}));
 require('./common/passport');
 
 app.use('/', indexRouter);
-app.use('/users', usersRouter);
+app.use('/api/users', usersRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

@@ -20,14 +20,10 @@ let userSchema = new mongoose.Schema({
     },
     salt: {type: String, hide: true},
     hash: {type: String, hide: true}
-}, {
-    strict: false,
-    toObject: { virtuals: true },
-    toJSON: { virtuals: true }
 });
 
 userSchema.methods.generateJwt = function (fbid) {
-    return jwt.sign({ fbid: fbid },
+    return jwt.sign({},
         config.get("JWT_SECRET"), { expiresIn: config.get("JWT_EXP") });
 };
 
