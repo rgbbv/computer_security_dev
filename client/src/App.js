@@ -7,6 +7,7 @@ import './App.css';
 
 function App(props) {
   const [logStatus, setStatus] = useState(false);
+  var alreadyRegistered = true
   const [passwordsList, setPasswords] = useState();
   var port = chrome.runtime.connect({name: "knockknock"});
   port.onMessage.addListener(function(msg) {
@@ -23,14 +24,32 @@ function App(props) {
         ${msg}`)
     }
   });
+
+  toRegister = () => {
+    alreadyRegistered = false 
+  }
+
+  toLogin = () => {
+    alreadyRegistered = true 
+  }
   
   
-  if (!logStatus) {
+  if (!logStatus && !alreadyRegistered) {
     return (
       <div id='app'>
         <Login port={port}/>
+        <Button onClick={this.toRegister.bind(this)} variant="contained" color="primary"
+         id='change'>need to register?</Button>
       </div>
-      
+    )
+  }
+  else if (!registerStatus) {
+    return (
+      <div id='app'>
+      <Register port={port}/>
+      <Button onClick={this.toLogin.bind(this)} variant="contained" color="primary"
+       id='change'>already registered?</Button>
+    </div>
     )
   }
   else {
