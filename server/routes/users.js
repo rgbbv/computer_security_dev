@@ -35,13 +35,6 @@ router.route('/users')
     });
 
 router.route('/user/id=:id')
-    .get(jwtHelper.verifyJwtToken, (req, res, next) => {
-        if (!ObjectId.isValid(req.params.id))
-            return res.status(400).send('No record with given id: ' + req.params.id);
-        User.findById(req.params.id, (err, doc) => {
-            BoomHelper.apiResponseHandler(res, doc, err);
-        });
-    })
     .put(jwtHelper.verifyJwtToken, verifyUserAccess, (req, res, next) => {
         if (!ObjectId.isValid(req.params.id))
             return res.status(400).send('No record with given id: ' + req.params.id);
