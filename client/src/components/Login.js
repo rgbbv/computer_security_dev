@@ -1,26 +1,23 @@
 /*global chrome*/
 import React from 'react'
-import Button from '@material-ui/core/Button';
-import TextField from '@material-ui/core/TextField';
+import Button from '@material-ui/core/Button'
+import TextField from '@material-ui/core/TextField'
+import './Login.css'
 
 class Login extends React.Component {
-    state = { name: '', email: '', debug: ''}
+    state = { email: '', password: '' }
 
     onChangeEmail(event) {
-        this.setState({email: event.target.value});
+        this.setState({email: event.target.value})
     }
     
-    onChangeName(event) {
-        this.setState({name: event.target.value});
-    }
-    
-    onChangedebug(event) {
-      this.setState({debug: event.target.value});
+    onChangePassword(event) {
+        this.setState({password: event.target.value})
     }
 
     login = () => {
-      var port = this.props.port;
-      port.postMessage({joke: "login"});
+      var port = this.props.port
+      port.postMessage({name: "login", email: this.state.email, password: this.state.password  })
     }
 
     render () {
@@ -29,10 +26,10 @@ class Login extends React.Component {
             <div id="welcomer">
                 <h1>Welcome to the password vault</h1>
                 <form className="form">
-                  <TextField id="outlined-name" label="Username" value={this.state.name}
-                    onChange={this.onChangeName.bind(this)} margin="dense" variant="outlined" />
                   <TextField id="outlined-email" label="Email" value={this.state.email}
                     onChange={this.onChangeEmail.bind(this)} margin="dense" variant="outlined" />
+                  <TextField id="outlined-password" label="Password" value={this.state.password}
+                    onChange={this.onChangePassword.bind(this)} margin="dense" variant="outlined" />
                 <Button onClick={this.login.bind(this)} variant="contained" color="primary"
                 id='button'>Login</Button>
                 </form>
@@ -42,60 +39,3 @@ class Login extends React.Component {
 }
 
 export default Login
-
-
-//     idGenerator = () => '_' + Math.random().toString(36).substr(2, 9)
-
-//     onChangeEmail(event) {
-//         this.setState({email: event.target.value});
-//     }
-    
-//     onChangeName(event) {
-//         this.setState({name: event.target.value});
-//     }
-    
-//     onChangedebug(event) {
-//       this.setState({debug: event.target.value});
-//     }
-
-//     enter = () => {
-//       var id = this.state.debug
-//       this.props.putId('', '', id);
-//     }
-
-//     render () {
-//         if (debug) {
-//           return (
-//             <div id="welcomer">
-//                 <h1>Welcome to the gym system</h1>
-//                 <form className="form">
-//                   <TextField id="outlined-debug" label="Debug" value={this.state.debug}
-//                     onChange={this.onChangedebug.bind(this)} margin="dense" variant="outlined" />
-//                 <Button onClick={this.enter.bind(this)} variant="contained" color="primary"
-//                 id='button'>enter</Button>
-//                 </form>
-//             </div>
-//           )
-//         }
-//         return (
-//             <div id="welcomer">
-//                 <h1>Welcome to the gym system</h1>
-//                 <form className="form">
-//                   <TextField id="outlined-name" label="Username" value={this.state.name}
-//                     onChange={this.onChangeName.bind(this)} margin="dense" variant="outlined" />
-//                   <TextField id="outlined-email" label="Email" value={this.state.email}
-//                     onChange={this.onChangeEmail.bind(this)} margin="dense" variant="outlined" />
-//                 <Button onClick={this.login.bind(this)} variant="contained" color="primary"
-//                 id='button'>Login</Button>
-//                 </form>
-//             </div>
-//         )
-//     }
-// }
-
-  
-//   const mapStateToProps = state => ({
-//     login: state.login,
-//   });
-  
-//   export default connect(mapStateToProps, { putId })(Login);
