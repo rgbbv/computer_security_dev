@@ -5,46 +5,41 @@ import Register from "./components/Register";
 import Button from "@material-ui/core/Button";
 import PasswordList from "./components/PasswordList";
 import "./App.css";
-import {history} from './index';
-import {withRouter, Switch, Route } from 'react-router-dom';
+import { history } from "./index";
+import { withRouter, Switch, Route } from "react-router-dom";
 import { RegisterActionsConstants } from "./stores/Register/Constants";
 import { LoginActionsConstants } from "./stores/Login/Constants";
-
 
 const port = chrome.runtime.connect({ name: "client_port" });
 
 port.onMessage.addListener(function (msg) {
-    if (msg.type === LoginActionsConstants.LOGIN_SUCCESS) {
-        console.log("accepted logged in message");
-        history.push('/passwordsList')
-    } else if (msg.type === RegisterActionsConstants.REGISTER_SUCCESS) {
-        console.log("accepted registered message");
-        history.push('/passwordsList');
-    } else if (msg.name === "passwords list") {
-        // setPasswordsList(msg.passwords);
-    } else {
-        console.log(
-            `got something else
-        ${msg}`
-        );
-    }
+  if (msg.type === LoginActionsConstants.LOGIN_SUCCESS) {
+    history.push("/passwordsList", msg.payload);
+  } else if (msg.type === RegisterActionsConstants.REGISTER_SUCCESS) {
+    history.push("/passwordsList", msg.payload);
+  }
 });
 
-
 export default class App extends React.Component {
-
   render() {
     return (
-        <div>
-            <Login port={port} />
-            <Switch >
-                <Route exact path="/" component={App} />
-                <Route exact path="/register" render={(props) => <Register {...props} /> } />
-                <Route exact path="/passwordsList" render={(props) => <PasswordList {...props} /> }/>
-            </Switch>
-        </div>
-
-    )
+      <div>
+        <Login port={port} />
+        <Switch>
+          <Route exact path="/" component={App} />
+          <Route
+            exact
+            path="/register"
+            render={(props) => <Register {...props} port={port} />}
+          />
+          <Route
+            exact
+            path="/passwordsList"
+            render={(props) => <PasswordList {...props} port={port} />}
+          />
+        </Switch>
+      </div>
+    );
   }
 }
 //

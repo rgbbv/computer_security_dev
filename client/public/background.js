@@ -19,24 +19,29 @@ chrome.runtime.onConnect.addListener(function (port) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(msg.payload),
       })
-        .then((res) =>
-            res.status === 200 ?
-          port.postMessage({ type: "REGISTER_SUCCESS", payload: res }) :
-                port.postMessage({ type: "REGISTER_FAILURE", err: "error" })
+        .then((res) => res.text())
+        .then(
+          (text) =>
+            port.postMessage({
+              type: "REGISTER_SUCCESS",
+              payload: JSON.parse(text),
+            })
+          // port.postMessage({ type: "REGISTER_FAILURE", err: "error" })}
         )
-        .catch((err) => console.log(err));
+        .catch((err) =>
+          port.postMessage({ type: "REGISTER_FAILURE", err: "error" })
+        );
     } else if (msg.type === "LOGIN") {
       fetch(baseApi + "/user/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(msg.payload),
       })
-          .then((res) =>
-              res.status === 200 ?
-              port.postMessage({ type: "LOGIN_SUCCESS", payload: res }) :
-                  port.postMessage({ type: "LOGIN_FAILURE", err: "error" })
-          )
-          .catch((err) => port.postMessage({ type: "LOGIN_FAILURE", err: err }));
+        .then((res) => res.text())
+        .then((text) =>
+          port.postMessage({ type: "LOGIN_SUCCESS", payload: JSON.parse(text) })
+        )
+        .catch((err) => port.postMessage({ type: "LOGIN_FAILURE", err: err }));
     } else if (msg.name === "register") {
       console.log(
         `registered first name: ${msg.firstName} last name: ${msg.lastName}

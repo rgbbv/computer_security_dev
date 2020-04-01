@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
 const config = require("config");
 const crypto = require('crypto');
+let PassVault = require('./passVault');
 let mongooseHidden = require('mongoose-hidden')();
 
 let userSchema = new mongoose.Schema({
@@ -18,6 +19,7 @@ let userSchema = new mongoose.Schema({
         required: 'Email cannot be empty',
         unique: true
     },
+    passwords: [PassVault.schema],
     salt: {type: String, hide: true},
     hash: {type: String, hide: true}
 }, {

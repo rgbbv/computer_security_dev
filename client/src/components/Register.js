@@ -18,15 +18,6 @@ import Visibility from "@material-ui/icons/Visibility";
 import VisibilityOff from "@material-ui/icons/VisibilityOff";
 import { RegisterActionsConstants } from "../stores/Register/Constants";
 
-const port = chrome.runtime.connect({ name: "client_port" });
-port.onMessage.addListener(function (msg) {
-  if (msg.type === RegisterActionsConstants.REGISTER_SUCCESS) {
-    console.log(msg.payload);
-  } else if (msg.type === RegisterActionsConstants.REGISTER_FAILURE) {
-    console.log(msg.payload);
-  }
-});
-
 class Register extends React.Component {
   state = {
     firstName: "",
@@ -145,7 +136,11 @@ class Register extends React.Component {
                   onMouseDown={(event) => event.preventDefault()}
                   edge="end"
                 >
-                  {this.state.showPassword ? <Visibility /> : <VisibilityOff />}
+                  {!this.state.showPassword ? (
+                    <Visibility />
+                  ) : (
+                    <VisibilityOff />
+                  )}
                 </IconButton>
               </InputAdornment>
             }
@@ -163,7 +158,6 @@ class Register extends React.Component {
           >
             Register
           </Button>
-
         )}
       </Box>
     );

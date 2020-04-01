@@ -5,6 +5,7 @@
   "dependencies": {
     "@babel/core": "7.9.0",
     "@material-ui/core": "^4.9.7",
+    "@material-ui/icons": "^4.9.1",
     "@svgr/webpack": "4.3.3",
     "@testing-library/jest-dom": "^4.2.4",
     "@testing-library/react": "^9.5.0",
@@ -46,10 +47,15 @@
     "postcss-normalize": "8.0.1",
     "postcss-preset-env": "6.7.0",
     "postcss-safe-parser": "4.0.1",
+    "prop-types": "latest",
     "react": "^16.13.1",
     "react-app-polyfill": "^1.0.6",
     "react-dev-utils": "^10.2.1",
     "react-dom": "^16.13.1",
+    "react-redux": "^7.2.0",
+    "react-router-dom": "^5.1.2",
+    "redux": "^4.0.5",
+    "reduxsauce": "^1.1.2",
     "resolve": "1.15.0",
     "resolve-url-loader": "3.1.1",
     "sass-loader": "8.0.2",
@@ -68,7 +74,8 @@
   "scripts": {
     "start": "node scripts/start.js",
     "build": "node scripts/build.js",
-    "test": "node scripts/test.js"
+    "test": "node scripts/test.js",
+    "prettier-fix": "prettier --write **/*.js"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -139,5 +146,11 @@
     "presets": [
       "react-app"
     ]
+  },
+  "devDependencies": {
+    "history": "^4.10.1",
+    "prettier": "^2.0.2",
+    "react-devtools": "^4.6.0",
+    "redux-devtools-extension": "^2.13.8"
   }
 }
