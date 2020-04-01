@@ -15,8 +15,12 @@
   },
 
   "background": {
-    "scripts": ["background.js"],
+    "page": "background.html",
     "persistent": true
-  }
+  },
+
+  "permissions": [
+    "storage"
+  ]
 
 }

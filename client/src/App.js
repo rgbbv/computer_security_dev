@@ -10,13 +10,15 @@ function App(props) {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [isRegistered, setIsRegistered] = useState(true)
   const [passwordsList, setPasswordsList] = useState()
+  const [userInfo, setUserInfo] = useState({})
   var port = chrome.runtime.connect({name: "client_port"})
   port.onMessage.addListener(function(msg) {
-    if (msg.text == "logged in") {
+    if (msg.name == "logged in") {
       console.log('accepted logged in message')
       setIsLoggedIn(true)
+      setUserInfo({email: msg.email, password: msg.password})
     }
-    else if (msg.text == "registered") {
+    else if (msg.name == "registered") {
       console.log('accepted registered message')
       setIsRegistered(true)
       setIsLoggedIn(true)
@@ -52,7 +54,7 @@ function App(props) {
   else {
     return (
       <div id='app'>
-        <PasswordList passwords={passwordsList}/>
+        <PasswordList passwords={passwordsList} />
       </div>
     )
   }

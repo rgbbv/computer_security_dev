@@ -48,14 +48,4 @@ class PasswordList extends React.Component {
      }
 }
 
-//     render () {
-//     console.log(this.props.passwords)
-//     return (
-//         <div>
-//             <p>list</p>
-//         </div>
-//       )
-//     }
-// }
-
 export default PasswordList
