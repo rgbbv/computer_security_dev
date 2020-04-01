@@ -1,5 +1,6 @@
 /*global chrome*/
 
+const baseApi = "http://localhost:3000/api";
 var passwords = [
   { id: 1, name: "gmail", password: "gmail_password" },
   { id: 2, name: "facebook", password: "facebook_password" },
@@ -13,16 +14,29 @@ chrome.runtime.onConnect.addListener(function (port) {
       port.postMessage({ text: "logged in" });
       port.postMessage({ name: "passwords list", passwords: passwords });
     } else if (msg.type === "REGISTER") {
-      console.log(msg);
-      fetch("http://localhost:3000/api/users", {
+      fetch(baseApi + "/users", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(msg.payload),
       })
         .then((res) =>
-          port.postMessage({ type: "REGISTER_SUCCESS", payload: res })
+            res.status === 200 ?
+          port.postMessage({ type: "REGISTER_SUCCESS", payload: res }) :
+                port.postMessage({ type: "REGISTER_FAILURE", err: "error" })
         )
         .catch((err) => console.log(err));
+    } else if (msg.type === "LOGIN") {
+      fetch(baseApi + "/user/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(msg.payload),
+      })
+          .then((res) =>
+              res.status === 200 ?
+              port.postMessage({ type: "LOGIN_SUCCESS", payload: res }) :
+                  port.postMessage({ type: "LOGIN_FAILURE", err: "error" })
+          )
+          .catch((err) => port.postMessage({ type: "LOGIN_FAILURE", err: err }));
     } else if (msg.name === "register") {
       console.log(
         `registered first name: ${msg.firstName} last name: ${msg.lastName}

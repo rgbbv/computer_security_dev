@@ -163,6 +163,7 @@ class Register extends React.Component {
           >
             Register
           </Button>
+
         )}
       </Box>
     );
