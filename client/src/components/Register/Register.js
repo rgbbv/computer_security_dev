@@ -17,8 +17,8 @@ import {
 import LockIcon from "@material-ui/icons/Lock";
 import Visibility from "@material-ui/icons/Visibility";
 import VisibilityOff from "@material-ui/icons/VisibilityOff";
-import { RegisterActionsConstants } from "../stores/Register/Constants";
-import { history } from "../index";
+import { RegisterActionsConstants } from "../../stores/Register/Constants";
+import { history } from "../../index";
 
 function Register(props) {
   const [errorMessage, setErrorMessage] = useState("");

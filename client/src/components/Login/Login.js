@@ -17,8 +17,8 @@ import "./Login.css";
 import LockIcon from "@material-ui/icons/Lock";
 import Visibility from "@material-ui/icons/Visibility";
 import VisibilityOff from "@material-ui/icons/VisibilityOff";
-import { history } from "../index";
-import { LoginActionsConstants } from "../stores/Login/Constants";
+import { history } from "../../index";
+import { LoginActionsConstants } from "../../stores/Login/Constants";
 
 function Login(props) {
   const [errorMessage, setErrorMessage] = useState("");
