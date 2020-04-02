@@ -1,0 +1,7 @@
+const PasswordListActionsConstants = {
+    UPDATE_PASSWORD: "UPDATE_PASSWORD",
+    UPDATE_PASSWORD_SUCCESS: "UPDATE_PASSWORD_SUCCESS",
+    UPDATE_PASSWORD_FAILURE: "UPDATE_PASSWORD_FAILURE",
+};
+
+export { PasswordListActionsConstants };
