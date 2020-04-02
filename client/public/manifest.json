@@ -6,7 +6,7 @@
     "48": "logo-small.png",
     "128": "logo-small.png"
   },
-  "permissions": ["http://localhost/*"],
+  "permissions": ["storage", "http://localhost/*"],
 
   "version": "1.0",
 
@@ -18,10 +18,5 @@
   "background": {
     "scripts": ["background.js"],
     "persistent": true
-  },
-
-  "permissions": [
-    "storage"
-  ]
-
+  }
 }

@@ -38,7 +38,7 @@ chrome.runtime.onConnect.addListener(function (port) {
               )
         )
         .catch((err) =>
-          port.postMessage({ type: "REGISTER_FAILURE", err: err })
+          port.postMessage({ type: "REGISTER_FAILURE", payload: { errorMessage: "Internal server error" }})
         );
     } else if (msg.type === "LOGIN") {
       // create_and_set_EncryptionPassword(msg.password+1)
@@ -67,7 +67,7 @@ chrome.runtime.onConnect.addListener(function (port) {
                 })
               )
         )
-        .catch((err) => port.postMessage({ type: "LOGIN_FAILURE", err: err }));
+        .catch((err) => port.postMessage({ type: "LOGIN_FAILURE", payload: { errorMessage: "Internal server error" }}));
     } else if (msg.name === "new password") {
       // console.log(`add new password name:${msg.name} password:${msg.password}`)
       // encryptedPassword = encrypt(msg.password)
