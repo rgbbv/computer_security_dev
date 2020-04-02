@@ -1,24 +1,13 @@
 /*global chrome*/
 import React, { useState } from "react";
-import Login from "./components/Login";
-import Register from "./components/Register";
+import Login from "./components/Login/Login";
+import Register from "./components/Register/Register";
 import Button from "@material-ui/core/Button";
-import PasswordList from "./components/PasswordList";
+import PasswordList from "./components/PasswordList/PasswordList";
 import "./App.css";
-import { history } from "./index";
-import { withRouter, Switch, Route } from "react-router-dom";
-import { RegisterActionsConstants } from "./stores/Register/Constants";
-import { LoginActionsConstants } from "./stores/Login/Constants";
+import { Switch, Route } from "react-router-dom";
 
 const port = chrome.runtime.connect({ name: "client_port" });
-
-port.onMessage.addListener(function (msg) {
-  if (msg.type === LoginActionsConstants.LOGIN_SUCCESS) {
-    history.push("/passwordsList", msg.payload);
-  } else if (msg.type === RegisterActionsConstants.REGISTER_SUCCESS) {
-    history.push("/passwordsList", msg.payload);
-  }
-});
 
 export default class App extends React.Component {
   render() {

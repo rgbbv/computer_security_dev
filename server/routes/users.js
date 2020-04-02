@@ -29,9 +29,9 @@ router.route('/users')
     .post((req, res, next) => {
         let user = new User(req.body);
         user.setPassword(req.body.password);
-        user.save((err, doc) => {
-            BoomHelper.apiResponseHandler(res, {user: doc, accessToken: user.generateJwt()}, err);
-        })
+        user.save()
+            .then((doc) => res.status(200).json({user: doc, accessToken: user.generateJwt()}))
+            .catch((err) => res.status(500).json({errorMessage: "Internal server error"}))
     });
 
 router.route('/user/id=:id')
