@@ -13,17 +13,17 @@ function App(props) {
   const [userInfo, setUserInfo] = useState({})
   var port = chrome.runtime.connect({name: "client_port"})
   port.onMessage.addListener(function(msg) {
-    if (msg.name == "logged in") {
+    if (msg.name === "logged in") {
       console.log('accepted logged in message')
       setIsLoggedIn(true)
       setUserInfo({email: msg.email, password: msg.password})
     }
-    else if (msg.name == "registered") {
+    else if (msg.name === "registered") {
       console.log('accepted registered message')
       setIsRegistered(true)
       setIsLoggedIn(true)
     }
-    else if (msg.name == "passwords list") {
+    else if (msg.name === "passwords list") {
       setPasswordsList(msg.passwords)
   }
     else {
