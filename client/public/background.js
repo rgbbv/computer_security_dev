@@ -1,6 +1,6 @@
 /*global chrome*/
-// import { create_and_set_AuthenticationKey, create_and_set_EncryptionPassword, create_ServerPassword,
-// authenticateMessages, encrypt, makeHMAC } from "../src/crypto.js"
+import { create_and_set_AuthenticationKey, create_and_set_EncryptionPassword, create_ServerPassword,
+authenticateMessages, encrypt, makeHMAC } from "../src/crypto.js"
 // var encryptionPassword = ''
 // var serverPassword = ''
 // var authenticationKey = ''
