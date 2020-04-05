@@ -5,25 +5,7 @@ const passport = require('passport');
 const User = require('../models/user');
 const jwtHelper = require('../helpers/jwtHelper');
 const BoomHelper = require("../helpers/BoomHelper");
-
-/**
- * Validates the operations against the user token payload, if some user is attempting to change a resource
- * that he is not own then report and return 403 ret code, otherwise permit to change the resource.
- * @param req
- * @param res
- * @param next
- */
-function verifyUserAccess(req, res, next) {
-    const unauthorizedMessage = "Unauthorized to change this resource! incidence have been reported!";
-    User.findById(req.params.id).exec().then((user) => {
-        if (!user || String(user.id) !== String(req.id)) {
-            return res.status(403).send({auth: false, message: unauthorizedMessage});
-        }
-        next();
-    }).catch((err) => {
-        return res.status(500).send({message: "Internal server error", err: err})
-    });
-}
+const {verifyUserAccess} = require("../controllers/user.controller");
 
 router.route('/users')
     .post((req, res, next) => {
