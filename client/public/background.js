@@ -1,6 +1,9 @@
 /*global chrome*/
 import { create_and_set_AuthenticationKey, create_and_set_EncryptionPassword, create_ServerPassword,
 authenticateMessages, encrypt, makeHMAC } from "../src/crypto.js"
+import {LoginActionsConstants} from "../src/stores/Login/Constants";
+import {RegisterActionsConstants} from "../src/stores/Register/Constants";
+
 // var encryptionPassword = ''
 // var serverPassword = ''
 // var authenticationKey = ''
@@ -10,7 +13,7 @@ const baseApi = "http://localhost:3000/api";
 chrome.runtime.onConnect.addListener(function (port) {
   console.assert(port.name === "client_port");
   port.onMessage.addListener(function (msg) {
-    if (msg.type === "REGISTER") {
+    if (msg.type === RegisterActionsConstants.REGISTER) {
         // TODO: change body in request (login & register) to use the server password.
         //  save response accessToken as cookie,
         //  save response user data and encryptions to local storage
@@ -26,21 +29,21 @@ chrome.runtime.onConnect.addListener(function (port) {
           res.status === 200
             ? res.text().then((text) =>
                 port.postMessage({
-                  type: "REGISTER_SUCCESS",
+                  type: RegisterActionsConstants.REGISTER_SUCCESS,
                   payload: JSON.parse(text),
                 })
               )
             : res.text().then((text) =>
                 port.postMessage({
-                  type: "REGISTER_FAILURE",
+                  type: RegisterActionsConstants.REGISTER_FAILURE,
                   payload: JSON.parse(text),
                 })
               )
         )
         .catch((err) =>
-          port.postMessage({ type: "REGISTER_FAILURE", payload: { errorMessage: "Internal server error" }})
+          port.postMessage({ type: RegisterActionsConstants.REGISTER_FAILURE, payload: { errorMessage: "Internal server error" }})
         );
-    } else if (msg.type === "LOGIN") {
+    } else if (msg.type === LoginActionsConstants.LOGIN) {
       // create_and_set_EncryptionPassword(msg.password+1)
       // create_and_set_AuthenticationKey(msg.password+2)
       // serverPassword = create_ServerPassword(msg.password+3) //sent to server
@@ -56,18 +59,18 @@ chrome.runtime.onConnect.addListener(function (port) {
           res.status === 200
             ? res.text().then((text) =>
                 port.postMessage({
-                  type: "LOGIN_SUCCESS",
+                  type: LoginActionsConstants.LOGIN_SUCCESS,
                   payload: JSON.parse(text),
                 })
               )
             : res.text().then((text) =>
                 port.postMessage({
-                  type: "LOGIN_FAILURE",
+                  type: LoginActionsConstants.LOGIN_FAILURE,
                   payload: JSON.parse(text),
                 })
               )
         )
-        .catch((err) => port.postMessage({ type: "LOGIN_FAILURE", payload: { errorMessage: "Internal server error" }}));
+        .catch((err) => port.postMessage({ type: LoginActionsConstants.LOGIN_FAILURE, payload: { errorMessage: "Internal server error" }}));
     } else if (msg.name === "new password") {
       // console.log(`add new password name:${msg.name} password:${msg.password}`)
       // encryptedPassword = encrypt(msg.password)
