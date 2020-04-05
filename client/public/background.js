@@ -85,9 +85,13 @@ chrome.runtime.onConnect.addListener(function (port) {
       // hmacResult = makeHMAC(encryptedPassword) //result to verify no change in the message
       // TODO: send to server {name, encryptedPassword, hmacResult}
     } else if (msg.type === NotificationActionsConstants.UPDATE_NOTIFICATION) {
+        //TODO: background should inject the accessToken from the cookie
         fetch(baseApi + "/user/" + msg.payload.userId + "/notification/" + msg.payload.notification.id, {
             method: "PUT",
-            headers: { "Content-Type": "application/json" },
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVlODlkZjZlNGMwOTExNTA1YzMzNzdlNCIsImlhdCI6MTU4NjEwNzQxOSwiZXhwIjoxNTg2MjUxNDE5fQ.i8Nzd2hNVaLrc-CzldXbznGkr-Oj-wDzROh9iPOIk64'
+            },
             body: JSON.stringify(msg.payload.notification),
         })
             .then((res) =>

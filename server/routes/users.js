@@ -36,13 +36,15 @@ router.route('/user/:userId/notification/:notificationId')
     .put(jwtHelper.verifyJwtToken, verifyUserAccess, (req, res, next) => {
         if (!ObjectId.isValid(req.params.userId))
             return res.status(400).send('No record with given id: ' + req.params.userId);
-        User.findOneAndUpdate({'_id': req.params.userId, 'notifications._id': req.params.notificationId},
-        { $set: Object.entries(req.body).reduce((acc, [k, v]) => {acc['notifications.$.' + k] = v; return acc}, {}) },
-            {new: true}).exec()
-            .then((doc) => {
-                console.log(doc)
-                res.status(200).json(doc);
-        }).catch((err) => res.status(500).send(err));
+
+        const filter = {'_id': req.params.userId, 'notifications._id': req.params.notificationId};
+        const update = Object.entries(req.body).reduce((acc, [k, v]) => {
+            acc['notifications.$.' + k] = v;
+            return acc
+        }, {});
+        User.findOneAndUpdate(filter, {$set: update}, {new: true}).exec()
+            .then((doc) => res.status(200).json(doc))
+            .catch((err) => res.status(500).send(err));
     });
 
 router.post('/user/login', (req, res, next) => {

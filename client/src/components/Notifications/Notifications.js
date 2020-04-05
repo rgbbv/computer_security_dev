@@ -10,7 +10,6 @@ import {
     Typography
 } from "@material-ui/core";
 import InfoIcon from '@material-ui/icons/Info';
-import {LoginActionsConstants} from "../../stores/Login/Constants";
 import {history} from "../../index";
 import {NotificationActionsConstants} from "../../stores/Notification/Constants";
 
@@ -46,7 +45,6 @@ function Notifications(props) {
         } else if (!notifications[index]["read"]) {
             setSelectedIndex(index);
             notifications[index]["read"] = true;
-            // setNotifications(notifications);
             props.port.postMessage({
                 type: NotificationActionsConstants.UPDATE_NOTIFICATION,
                 payload: {
@@ -61,7 +59,7 @@ function Notifications(props) {
 
     return (
         <List className={classes.root}>
-            { notifications.map((item, index) =>
+            { notifications.reverse().map((item, index) =>
             <ListItem button selected={index === selectedIndex} alignItems="flex-start" onClick={() => handleListItemClick(index)}>
                 <ListItemIcon>
                     {!item.read ?
