@@ -16,20 +16,33 @@ router.route('/users')
             .catch((err) => res.status(500).json({errorMessage: "Internal server error"}))
     });
 
-router.route('/user/id=:id')
+router.route('/user/:userId')
     .put(jwtHelper.verifyJwtToken, verifyUserAccess, (req, res, next) => {
-        if (!ObjectId.isValid(req.params.id))
-            return res.status(400).send('No record with given id: ' + req.params.id);
-        User.findByIdAndUpdate(req.params.id, { $set: req.body }, { new: true }, (err, doc) => {
+        if (!ObjectId.isValid(req.params.userId))
+            return res.status(400).send('No record with given id: ' + req.params.userId);
+        User.findByIdAndUpdate(req.params.userId, { $set: req.body }, { new: true }, (err, doc) => {
             BoomHelper.apiResponseHandler(res, doc, err);
         });
     })
     .delete(jwtHelper.verifyJwtToken, verifyUserAccess, (req, res, next) => {
-        if (!ObjectId.isValid(req.params.id))
-            return res.status(400).send('No record with given id: ' + req.params.id);
-        User.findByIdAndRemove(req.params.id, (err, doc) => {
+        if (!ObjectId.isValid(req.params.userId))
+            return res.status(400).send('No record with given id: ' + req.params.userId);
+        User.findByIdAndRemove(req.params.userId, (err, doc) => {
             BoomHelper.apiResponseHandler(res, doc, err);
         });
+    });
+
+router.route('/user/:userId/notification/:notificationId')
+    .put(jwtHelper.verifyJwtToken, verifyUserAccess, (req, res, next) => {
+        if (!ObjectId.isValid(req.params.userId))
+            return res.status(400).send('No record with given id: ' + req.params.userId);
+        User.findOneAndUpdate({'_id': req.params.userId, 'notifications._id': req.params.notificationId},
+        { $set: Object.entries(req.body).reduce((acc, [k, v]) => {acc['notifications.$.' + k] = v; return acc}, {}) },
+            {new: true}).exec()
+            .then((doc) => {
+                console.log(doc)
+                res.status(200).json(doc);
+        }).catch((err) => res.status(500).send(err));
     });
 
 router.post('/user/login', (req, res, next) => {

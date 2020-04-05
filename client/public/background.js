@@ -3,6 +3,7 @@ import { create_and_set_AuthenticationKey, create_and_set_EncryptionPassword, cr
 authenticateMessages, encrypt, makeHMAC } from "../src/crypto.js"
 import {LoginActionsConstants} from "../src/stores/Login/Constants";
 import {RegisterActionsConstants} from "../src/stores/Register/Constants";
+import {NotificationActionsConstants} from "../src/stores/Notification/Constants";
 
 // var encryptionPassword = ''
 // var serverPassword = ''
@@ -83,6 +84,30 @@ chrome.runtime.onConnect.addListener(function (port) {
       // encryptedPassword = encrypt(msg.password) //encrypt before sending to server
       // hmacResult = makeHMAC(encryptedPassword) //result to verify no change in the message
       // TODO: send to server {name, encryptedPassword, hmacResult}
+    } else if (msg.type === NotificationActionsConstants.UPDATE_NOTIFICATION) {
+        fetch(baseApi + "/user/" + msg.payload.userId + "/notification/" + msg.payload.notification.id, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(msg.payload.notification),
+        })
+            .then((res) =>
+                res.status === 200
+                    ? res.text().then((text) =>
+                        port.postMessage({
+                            type: NotificationActionsConstants.UPDATE_NOTIFICATION_SUCCESS,
+                            payload: JSON.parse(text),
+                        })
+                    )
+                    : res.text().then((text) =>
+                        port.postMessage({
+                            type: NotificationActionsConstants.UPDATE_NOTIFICATION_FAILURE,
+                            payload: JSON.parse(text),
+                        })
+                    )
+            )
+            .catch((err) =>
+                port.postMessage({ type: NotificationActionsConstants.UPDATE_NOTIFICATION_FAILURE, payload: { errorMessage: "Internal server error" }})
+            );
     }
   });
 });

@@ -13,9 +13,10 @@ module.exports.verifyUserAccess = function (req, res, next) {
     const unauthorizedNotification = "We blocked an unauthorized activity. " +
         "User with ID: " + req.id + " tried to change your private information!";
 
-    if (req.params.id !== String(req.id)) {
-        let notification = new Notification({date: new Date(), read: false, content: unauthorizedNotification});
-        User.findByIdAndUpdate(req.params.id, { $push: {notifications: notification} }, {new: false},
+    if (req.params.userId !== String(req.id)) {
+        let notification = new Notification({date: new Date(), read: false, content: unauthorizedNotification,
+                                             severity: 'High', sender: 'System'});
+        User.findByIdAndUpdate(req.params.userId, { $push: {notifications: notification} }, {new: false},
             () => res.status(403).send({auth: false, message: unauthorizedMessage}))
     } else {
         next();
