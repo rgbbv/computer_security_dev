@@ -12,10 +12,12 @@ import {
 import InfoIcon from '@material-ui/icons/Info';
 import {history} from "../../index";
 import {NotificationActionsConstants} from "../../stores/Notification/Constants";
+import { formatDistance, parseISO } from 'date-fns';
 
 const useStyles = makeStyles((theme) => ({
     root: {
         width: '100%',
+        minWidth: '50ch',
         maxWidth: '50ch',
         backgroundColor: theme.palette.background.paper,
     },
@@ -59,8 +61,8 @@ function Notifications(props) {
 
     return (
         <List className={classes.root}>
-            { notifications.reverse().map((item, index) =>
-            <ListItem button selected={index === selectedIndex} alignItems="flex-start" onClick={() => handleListItemClick(index)}>
+            { notifications.reduceRight((acc, item, index) =>
+            acc.concat(<ListItem button selected={index === selectedIndex} alignItems="flex-start" onClick={() => handleListItemClick(index)}>
                 <ListItemIcon>
                     {!item.read ?
                     <Badge color="primary" variant="dot">
@@ -80,12 +82,15 @@ function Notifications(props) {
                             >
                                 {item.sender}
                             </Typography>
-                            {index === selectedIndex ? " — " + item.content : " — " + item.content.substring(0, 50) + "..."}
+                            {index === selectedIndex ? " — " + item.content + "\n" : " — " + item.content.substring(0, 50) + "...\n"}
+                            <Typography component="span">
+                                {formatDistance(parseISO(item.date), new Date()) + " ago"}
+                            </Typography>
                         </React.Fragment>
                     }
                 />
                 <Divider variant="inset" component="li" />
-            </ListItem>
+            </ListItem>), []
         )}
         </List>
     )
