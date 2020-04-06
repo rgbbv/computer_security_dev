@@ -5,25 +5,7 @@ const passport = require('passport');
 const User = require('../models/user');
 const jwtHelper = require('../helpers/jwtHelper');
 const BoomHelper = require("../helpers/BoomHelper");
-
-/**
- * Validates the operations against the user token payload, if some user is attempting to change a resource
- * that he is not own then report and return 403 ret code, otherwise permit to change the resource.
- * @param req
- * @param res
- * @param next
- */
-function verifyUserAccess(req, res, next) {
-    const unauthorizedMessage = "Unauthorized to change this resource! incidence have been reported!";
-    User.findById(req.params.id).exec().then((user) => {
-        if (!user || String(user.id) !== String(req.id)) {
-            return res.status(403).send({auth: false, message: unauthorizedMessage});
-        }
-        next();
-    }).catch((err) => {
-        return res.status(500).send({message: "Internal server error", err: err})
-    });
-}
+const {verifyUserAccess} = require("../controllers/user.controller");
 
 router.route('/users')
     .post((req, res, next) => {
@@ -34,20 +16,35 @@ router.route('/users')
             .catch((err) => res.status(500).json({errorMessage: "Internal server error"}))
     });
 
-router.route('/user/id=:id')
+router.route('/user/:userId')
     .put(jwtHelper.verifyJwtToken, verifyUserAccess, (req, res, next) => {
-        if (!ObjectId.isValid(req.params.id))
-            return res.status(400).send('No record with given id: ' + req.params.id);
-        User.findByIdAndUpdate(req.params.id, { $set: req.body }, { new: true }, (err, doc) => {
+        if (!ObjectId.isValid(req.params.userId))
+            return res.status(400).send('No record with given id: ' + req.params.userId);
+        User.findByIdAndUpdate(req.params.userId, { $set: req.body }, { new: true }, (err, doc) => {
             BoomHelper.apiResponseHandler(res, doc, err);
         });
     })
     .delete(jwtHelper.verifyJwtToken, verifyUserAccess, (req, res, next) => {
-        if (!ObjectId.isValid(req.params.id))
-            return res.status(400).send('No record with given id: ' + req.params.id);
-        User.findByIdAndRemove(req.params.id, (err, doc) => {
+        if (!ObjectId.isValid(req.params.userId))
+            return res.status(400).send('No record with given id: ' + req.params.userId);
+        User.findByIdAndRemove(req.params.userId, (err, doc) => {
             BoomHelper.apiResponseHandler(res, doc, err);
         });
+    });
+
+router.route('/user/:userId/notification/:notificationId')
+    .put(jwtHelper.verifyJwtToken, verifyUserAccess, (req, res, next) => {
+        if (!ObjectId.isValid(req.params.userId))
+            return res.status(400).send('No record with given id: ' + req.params.userId);
+
+        const filter = {'_id': req.params.userId, 'notifications._id': req.params.notificationId};
+        const update = Object.entries(req.body).reduce((acc, [k, v]) => {
+            acc['notifications.$.' + k] = v;
+            return acc
+        }, {});
+        User.findOneAndUpdate(filter, {$set: update}, {new: true}).exec()
+            .then((doc) => res.status(200).json(doc))
+            .catch((err) => res.status(500).send(err));
     });
 
 router.post('/user/login', (req, res, next) => {

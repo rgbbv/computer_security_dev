@@ -6,6 +6,7 @@ import Button from "@material-ui/core/Button";
 import PasswordList from "./components/PasswordList/PasswordList";
 import "./App.css";
 import { Switch, Route } from "react-router-dom";
+import Notifications from "./components/Notifications/Notifications";
 
 const port = chrome.runtime.connect({ name: "client_port" });
 
@@ -25,6 +26,11 @@ export default class App extends React.Component {
             exact
             path="/passwordsList"
             render={(props) => <PasswordList {...props} port={port} />}
+          />
+          <Route
+            exact
+            path="/notifications"
+            render={(props) => <Notifications {...props} port={port} />}
           />
         </Switch>
       </div>

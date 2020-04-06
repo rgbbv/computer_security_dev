@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const config = require("config");
 const crypto = require('crypto');
 let PassVault = require('./passVault');
+let Notification = require('./notification');
 let mongooseHidden = require('mongoose-hidden')();
 
 let userSchema = new mongoose.Schema({
@@ -20,6 +21,7 @@ let userSchema = new mongoose.Schema({
         unique: true
     },
     passwords: [PassVault.schema],
+    notifications: [Notification.schema],
     salt: {type: String, hide: true},
     hash: {type: String, hide: true}
 }, {
