@@ -1,7 +1,12 @@
-import { SHA256, HmacSHA256, AES }  from "crypto-js"
+const sha256 = require('crypto-js/sha256');
+const hmacSHA256 = require('crypto-js/hmac-sha256');
+const aes = require('crypto-js/aes');
+const encHex = require('crypto-js/enc-hex');
 
-var encryptionPassword = ''
-var authenticationKey = ''
+// import sha256 from 'crypto-js/sha256';
+// import hmacSHA256 from 'crypto-js/hmac-sha256';
+// import aes from "crypto-js/aes";
+// import encHex from 'crypto-js/enc-hex';
 
 /**
  * The client login with a master password, then it derives from the master password three secretes: K1, K2, K3.
@@ -15,35 +20,50 @@ var authenticationKey = ''
  *  - To decrypt a user password we will perform:
  *      - verify t' = MacK2(c') then compute p = Ek1^-1(c') , otherwise, discard and notify on contaminated password.
  */
+const deriveSecrets = (masterPassword) => {
+    const encryptionSecret = sha256(masterPassword + '1').toString(encHex);
+    const authenticationSecret = sha256(masterPassword + '2').toString(encHex);
+    const serverSecret = sha256(masterPassword + '3').toString(encHex);
 
-export const create_and_set_EncryptionPassword = (encryptionPassword) => {
-     this.encryptionPassword = SHA256(encryptionPassword).toString() }
-     
-export const create_and_set_AuthenticationKey = (authenticationKey) => {
-     this.authenticationKey = SHA256(authenticationKey).toString() }
+    return [encryptionSecret, authenticationSecret, serverSecret];
+};
 
-export const create_ServerPassword = (serverPassword) => {
-     this.serverPassword = SHA256(serverPassword).toString() }
+const encrypt = (password, encryptionSecret) => aes.encrypt(password, encryptionSecret).toString();
 
-export const encrypt = (password) => AES.encrypt(password, encryptionPassword).toString()
+const authenticate = (encryptedPassword, authenticationSecret) => hmacSHA256(encryptedPassword, authenticationSecret);
 
-export const makeHMAC = (encryptedPassword) => HmacSHA256(encryptedPassword, authenticationKey)
+const encryptAndAuthenticate = (password, encryptionSecret, authenticationSecret) => {
+    const c = encrypt(password, encryptionSecret).toString(encHex);
+    const t = authenticate(c, authenticationSecret).toString(encHex);
 
-export const authenticateMessages = (messages) => {
-    const [passHMAC, failHMAC] = 
-    messages.reduce(([pass, fail], e) => 
-      (checkHMAC(e) ? [[...pass, e], fail] : [pass, [...fail, e]]), [[], []])
+    return c + t;
+};
 
-    failHMAC.forEach((fail) => console.log(`password for name: ${fail.name} was contaminated`))
+const authenticateMessages = (messages, encryptionSecret, authenticationSecret) => {
+    const [passHMAC, failHMAC] =
+        messages.reduce(([pass, fail], e) =>
+            (checkHMAC(e, authenticationSecret) ? [[...pass, e], fail] : [pass, [...fail, e]]), [[], []]);
+
+    failHMAC.forEach((fail) => console.log(`password for name: ${fail.name} was contaminated`));
     // the authentication for these messages is failed
 
     const new_passwords = passHMAC.forEach(
-      (cell) => {cell.password = AES.decrypt(cell.password, encryptionPassword)})
-    
-    return new_passwords
-}
+        (cell) => {
+            cell.password = aes.decrypt(cell.password, encryptionSecret)
+        });
 
-const checkHMAC = (message) => {
-    true // for now!!!
-    // HMAC(message.password, authenticationKey) === message.authenticator
-  }
+    return new_passwords
+};
+
+const checkHMAC = (message, authenticationSecret) => {
+    const c = message.substr(0, message.length - 256);
+    const t = message.substr(message.length - 256);
+
+    return t === hmacSHA256(c, authenticationSecret);
+};
+
+const [encryptionSecret, authenticationSecret, serverSecret]  = deriveSecrets("sdfsdf");
+const pass = 'myPass';
+const ct = encryptAndAuthenticate(pass, encryptionSecret, authenticationSecret);
+checkHMAC(ct, authenticationSecret);
+console.log("sdf");

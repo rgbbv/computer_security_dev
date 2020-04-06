@@ -1,20 +1,22 @@
 /*global chrome*/
-import { create_and_set_AuthenticationKey, create_and_set_EncryptionPassword, create_ServerPassword,
-authenticateMessages, encrypt, makeHMAC } from "../src/crypto.js"
+import { deriveSecrets } from "../src/crypto.js"
+import Cookies from 'universal-cookie';
 import {LoginActionsConstants} from "../src/stores/Login/Constants";
 import {RegisterActionsConstants} from "../src/stores/Register/Constants";
 import {NotificationActionsConstants} from "../src/stores/Notification/Constants";
 
-// var encryptionPassword = ''
-// var serverPassword = ''
-// var authenticationKey = ''
-
 const baseApi = "http://localhost:3000/api";
+const cookies = new Cookies();
+let encryptionSecret = '';
+let authenticationSecret = '';
+let serverSecret = '';
 
 chrome.runtime.onConnect.addListener(function (port) {
   console.assert(port.name === "client_port");
   port.onMessage.addListener(function (msg) {
     if (msg.type === RegisterActionsConstants.REGISTER) {
+        [encryptionSecret, authenticationSecret, msg.payload.password] = deriveSecrets(msg.payload.password);
+
         // TODO: change body in request (login & register) to use the server password.
         //  save response accessToken as cookie,
         //  save response user data and encryptions to local storage
@@ -26,20 +28,25 @@ chrome.runtime.onConnect.addListener(function (port) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(msg.payload),
       })
-        .then((res) =>
-          res.status === 200
-            ? res.text().then((text) =>
+        .then((res) => {
+          if (res.status === 200) {
+             res.text().then((text) => {
+                 const res = JSON.parse(text);
+                 cookies.set("accessToken", res.accessToken);
+                 localStorage.setItem("user", JSON.stringify(res.user));
                 port.postMessage({
                   type: RegisterActionsConstants.REGISTER_SUCCESS,
-                  payload: JSON.parse(text),
-                })
-              )
-            : res.text().then((text) =>
-                port.postMessage({
-                  type: RegisterActionsConstants.REGISTER_FAILURE,
-                  payload: JSON.parse(text),
-                })
-              )
+                  payload: res,
+                })}
+              )}
+          else {
+              res.text().then((text) =>
+                  port.postMessage({
+                      type: RegisterActionsConstants.REGISTER_FAILURE,
+                      payload: JSON.parse(text),
+                  })
+              )}
+          }
         )
         .catch((err) =>
           port.postMessage({ type: RegisterActionsConstants.REGISTER_FAILURE, payload: { errorMessage: "Internal server error" }})
@@ -90,7 +97,7 @@ chrome.runtime.onConnect.addListener(function (port) {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
-                Authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVlODlkZjZlNGMwOTExNTA1YzMzNzdlNCIsImlhdCI6MTU4NjEwNzQxOSwiZXhwIjoxNTg2MjUxNDE5fQ.i8Nzd2hNVaLrc-CzldXbznGkr-Oj-wDzROh9iPOIk64'
+                Authorization: 'Bearer ' + cookies.get("accessToken")
             },
             body: JSON.stringify(msg.payload.notification),
         })
