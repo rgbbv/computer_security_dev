@@ -42,7 +42,7 @@ function Login(props) {
     setLoginLoading(true);
     // TODO: server password should derive from Hash (MasterPassword || 3)
     props.port.postMessage({
-      type: "LOGIN",
+      type: LoginActionsConstants.LOGIN,
       payload: {
         email: email,
         password: password,
@@ -85,7 +85,7 @@ function Login(props) {
             <InputAdornment position="end">
               <IconButton
                 aria-label="toggle password visibility"
-                onClick={setShowPassword}
+                onClick={() => setShowPassword(!showPassword)}
                 onMouseDown={(event) => event.preventDefault()}
                 edge="end"
               >
