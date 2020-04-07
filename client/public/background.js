@@ -139,11 +139,12 @@ chrome.runtime.onConnect.addListener(function (port) {
         })
             .then((res) =>
                 res.status === 200
-                    ? res.text().then((text) =>
+                    ? res.text().then((text) => {
+                        localStorage.setItem("user", text);
                         port.postMessage({
                             type: NotificationActionsConstants.UPDATE_NOTIFICATION_SUCCESS,
                             payload: JSON.parse(text),
-                        })
+                        })}
                     )
                     : res.text().then((text) =>
                         port.postMessage({
@@ -164,6 +165,12 @@ chrome.runtime.onConnect.addListener(function (port) {
                 type: LoginActionsConstants.IS_USER_LOGGED_IN_FAILURE,
                 payload: {},
             })
+    } else if (msg.type === LoginActionsConstants.LOGOUT) {
+        localStorage.clear();
+        port.postMessage({
+            type: LoginActionsConstants.LOGOUT_SUCCESS,
+            payload: {},
+        })
     }
   });
 });

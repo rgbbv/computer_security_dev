@@ -35,7 +35,7 @@ function Register(props) {
     if (msg.type === RegisterActionsConstants.REGISTER_SUCCESS) {
       setErrorMessage("");
       setRegisterLoading(false);
-      history.push("/passwordsList", msg.payload);
+      history.push("/home", msg.payload);
     } else if (msg.type === RegisterActionsConstants.REGISTER_FAILURE) {
       setRegisterLoading(false);
       setErrorMessage(msg.payload.errorMessage);
