@@ -28,13 +28,19 @@ const deriveSecrets = (masterPassword) => {
     return [encryptionSecret, authenticationSecret, serverSecret];
 };
 
+/**
+ * Encrypt password with encryptionSecret, uses CBC as the default mode
+ * @param password A plain text user password to encrypt
+ * @param encryptionSecret The encryption secret treated as a passphrase and used to derive an actual key and IV
+ * @returns {string} A hexadecimal string representing the encryption over password with secret encryptionSecret
+ */
 const encrypt = (password, encryptionSecret) => aes.encrypt(password, encryptionSecret).toString();
 
-const authenticate = (encryptedPassword, authenticationSecret) => hmacSHA256(encryptedPassword, authenticationSecret);
+const authenticate = (encryptedPassword, authenticationSecret) => hmacSHA256(encryptedPassword, authenticationSecret).toString(encHex);
 
 const encryptAndAuthenticate = (password, encryptionSecret, authenticationSecret) => {
-    const c = encrypt(password, encryptionSecret).toString(encHex);
-    const t = authenticate(c, authenticationSecret).toString(encHex);
+    const c = encrypt(password, encryptionSecret);
+    const t = authenticate(c, authenticationSecret);
 
     return c + t;
 };
@@ -56,14 +62,16 @@ const authenticateMessages = (messages, encryptionSecret, authenticationSecret) 
 };
 
 const checkHMAC = (message, authenticationSecret) => {
-    const c = message.substr(0, message.length - 256);
-    const t = message.substr(message.length - 256);
+    // We are using hmac-sha256 (256 bit) represented as hexadecimal so t' length is 256 / 4 = 64
+    const tTagLength = 64;
+    const cTag = message.substr(0, message.length - tTagLength);
+    const tTag = message.substr(message.length - tTagLength);
 
-    return t === hmacSHA256(c, authenticationSecret);
+    return tTag === authenticate(cTag, authenticationSecret);
 };
 
 const [encryptionSecret, authenticationSecret, serverSecret]  = deriveSecrets("sdfsdf");
 const pass = 'myPass';
 const ct = encryptAndAuthenticate(pass, encryptionSecret, authenticationSecret);
-checkHMAC(ct, authenticationSecret);
-console.log("sdf");
+const auth = checkHMAC(ct, authenticationSecret);
+console.log(auth);
