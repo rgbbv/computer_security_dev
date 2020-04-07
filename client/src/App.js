@@ -2,21 +2,42 @@
 import React, { useState } from "react";
 import Login from "./components/Login/Login";
 import Register from "./components/Register/Register";
-import Button from "@material-ui/core/Button";
 import PasswordList from "./components/PasswordList/PasswordList";
-import "./App.css";
-import { Switch, Route } from "react-router-dom";
 import Notifications from "./components/Notifications/Notifications";
+import { Switch, Route } from "react-router-dom";
+import { history } from "./index";
+import {LoginActionsConstants} from "./stores/Login/Constants";
 
 const port = chrome.runtime.connect({ name: "client_port" });
 
+port.onMessage.addListener(function (msg) {
+    if (msg.type === LoginActionsConstants.IS_USER_LOGGED_IN_SUCCESS) {
+        // TODO: save history stack in local storage as well and navigate the user to the latest screen component
+        history.push('/passwordsList', msg.payload);
+    } else if (msg.type === LoginActionsConstants.IS_USER_LOGGED_IN_FAILURE) {
+        history.push('/login', msg.payload);
+    }
+});
+
 export default class App extends React.Component {
-  render() {
+
+    componentDidMount() {
+        port.postMessage({
+            type: LoginActionsConstants.IS_USER_LOGGED_IN,
+            payload: {},
+        });
+    }
+
+    render() {
     return (
       <div>
-        <Login port={port} />
         <Switch>
           <Route exact path="/" component={App} />
+          <Route
+            exact
+            path="/login"
+            render={(props) => <Login {...props} port={port} />}
+          />
           <Route
             exact
             path="/register"
@@ -37,43 +58,3 @@ export default class App extends React.Component {
     );
   }
 }
-//
-// function App(props) {
-
-//
-//   if (!isLoggedIn && isRegistered) {
-//     return (
-//       <div id="app">
-//         <Login port={port} />
-//         <Button
-//           onClick={() => setIsRegistered(false)}
-//           variant="outlined"
-//           id="change"
-//         >
-//           not registered?
-//         </Button>
-//       </div>
-//     );
-//   } else if (!isRegistered) {
-//     return (
-//       <div id="app">
-//         <Register port={port} />
-//         <Button
-//           onClick={() => setIsRegistered(true)}
-//           variant="outlined"
-//           id="change"
-//         >
-//           already registered?
-//         </Button>
-//       </div>
-//     );
-//   } else {
-//     return (
-//       <div id="app">
-//         <PasswordList passwords={passwordsList} />
-//       </div>
-//     );
-//   }
-// }
-//
-// export default App;
