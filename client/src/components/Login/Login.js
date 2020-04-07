@@ -1,8 +1,7 @@
 /*global chrome*/
 import React, { useState } from "react";
-import Button from "@material-ui/core/Button";
-import TextField from "@material-ui/core/TextField";
 import {
+  Button,
   FormControl,
   FormHelperText,
   InputAdornment,
@@ -12,8 +11,8 @@ import {
   InputLabel,
   Box,
   CircularProgress,
+  TextField,
 } from "@material-ui/core";
-import "./Login.css";
 import LockIcon from "@material-ui/icons/Lock";
 import Visibility from "@material-ui/icons/Visibility";
 import VisibilityOff from "@material-ui/icons/VisibilityOff";
@@ -31,7 +30,7 @@ function Login(props) {
     if (msg.type === LoginActionsConstants.LOGIN_SUCCESS) {
       setErrorMessage("");
       setLoginLoading(false);
-      history.push("/passwordsList", msg.payload);
+      history.push("/home", msg.payload);
     } else if (msg.type === LoginActionsConstants.LOGIN_FAILURE) {
       setLoginLoading(false);
       setErrorMessage(msg.payload.errorMessage);
@@ -40,7 +39,6 @@ function Login(props) {
 
   function login() {
     setLoginLoading(true);
-    // TODO: server password should derive from Hash (MasterPassword || 3)
     props.port.postMessage({
       type: LoginActionsConstants.LOGIN,
       payload: {

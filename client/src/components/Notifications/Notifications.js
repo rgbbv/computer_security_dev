@@ -16,8 +16,7 @@ import { formatDistance, parseISO } from "date-fns";
 const useStyles = makeStyles((theme) => ({
   root: {
     width: "100%",
-    minWidth: "50ch",
-    maxWidth: "50ch",
+    marginBottom: "40px",
     backgroundColor: theme.palette.background.paper,
   },
   inline: {
