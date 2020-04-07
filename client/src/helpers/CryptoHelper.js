@@ -8,7 +8,7 @@ import encHex from "crypto-js/enc-hex";
  * We define Ki = H(K || i) where H is a cryptographic hash function (such as - SHA-256).
  * In our application K1 used for encryption, K2 for authentication, K3 for server password.
  * With those keys (secrets) we want to encrypt (by stream / block cipher, e.g. AES with b=128, a fixed K, the transformation Ek(p)
- * is a permutation on the space of 2^b inputs, we should use CBC (cipher block chaining mode)
+ * is a permutation on the space of 2^b inputs, we should use CBC (cipher block chaining mode))
  * and then authenticate (by MACs - message authentication codes, e.g. HMAC):
  *  - To encrypt a user password p we will perform - c = Ek1(p); t = MacK2(c). The server will store the encrypted and authenticated
  *    users passwords (c || t).

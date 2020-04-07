@@ -26,24 +26,25 @@ const handlePreSignIn = (masterPassword) => {
 
 /**
  * Upon login / signUp we get a server response containing the user data and accessToken, then we should store
- * the user data in local storage and the accessToken as cookie. Right after we verify the integrity of the
- * user passwords.
+ * the user data and accessToken in local storage. Right after we verify the integrity of the user passwords.
+ *
  * @param res The server login / signUp response
  */
 const handlePostSignIn = (res) => {
+    // TODO: check cookie
     // cookies.set("accessToken", res.accessToken);
     localStorage.setItem("accessToken", res.accessToken);
     localStorage.setItem("user", JSON.stringify(res.user));
 
     const authenticationSecret = localStorage.getItem("authenticationSecret");
 
-    // verify passwords integrity
+    // TODO: verify passwords integrity
     res.user["passwords"].map((item) => checkHMAC(item.password, authenticationSecret) ? console.log("success auth") :
         console.log("failure auth"));
 };
 
 /**
- * Returns true is the user is logged in == we have a valid non-expired accessToken.
+ * Returns true is the user is logged in by validating a present, non-expired accessToken.
  */
 const isUserLoggedIn = () => {
     // const accessToken = cookies.get("accessToken"); not working

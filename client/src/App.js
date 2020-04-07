@@ -12,6 +12,7 @@ const port = chrome.runtime.connect({ name: "client_port" });
 
 port.onMessage.addListener(function (msg) {
     if (msg.type === LoginActionsConstants.IS_USER_LOGGED_IN_SUCCESS) {
+        // TODO: save history stack in local storage as well and navigate the user to the latest screen component
         history.push('/passwordsList', msg.payload);
     } else if (msg.type === LoginActionsConstants.IS_USER_LOGGED_IN_FAILURE) {
         history.push('/login', msg.payload);
