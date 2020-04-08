@@ -1,6 +1,5 @@
 /*global chrome*/
 import React, {useState} from "react";
-import {render} from 'react-dom';
 import {
     Button
 } from "@material-ui/core";
@@ -38,10 +37,3 @@ export default function Test(props) {
         </div>
     );
 }
-
-const anchor = document.createElement('div');
-anchor.id = 'rcr-anchor';
-
-document.body.insertBefore(anchor, document.body.childNodes[0]);
-render(
-    <Button>Login</Button>, document.getElementById('rcr-anchor'));

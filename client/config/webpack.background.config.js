@@ -2,6 +2,8 @@ const path = require('path');
 
 module.exports = {
 
+    mode: 'production',
+
     entry: [
         './public/background.js'
     ],

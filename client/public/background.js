@@ -31,7 +31,7 @@ const handlePreSignIn = (masterPassword) => {
  * @param res The server login / signUp response
  */
 const handlePostSignIn = (res) => {
-    // TODO: check cookie
+    // TODO: check cookie (chrome.cookies)
     // cookies.set("accessToken", res.accessToken);
     localStorage.setItem("accessToken", res.accessToken);
     localStorage.setItem("user", JSON.stringify(res.user));

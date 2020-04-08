@@ -2,8 +2,10 @@ const path = require('path');
 
 module.exports = {
 
+    mode: 'production',
+
     entry: [
-        './public/contentScript.js'
+        './public/content/index.js'
     ],
 
     output: {
@@ -16,17 +18,17 @@ module.exports = {
         modules: ['node_modules']
     },
 
-    // module: {
-    //     loaders: [
-    //         {
-    //             test: /\.(js)?$/,
-    //             loader: 'babel-loader',
-    //             exclude: /(node_modules)/,
-    //             include: path.join(__dirname, 'src'),
-    //             query: {
-    //                 presets: ['es2015', 'react']
-    //             }
-    //         }
-    //     ]
-    // }
+    module: {
+        rules: [
+            {
+                test: /\.(jsx|js)?$/,
+                exclude: /(node_modules)/,
+                use: {
+                    loader: 'babel-loader',
+                    options: {
+                        presets: ['@babel/preset-env', '@babel/preset-react']
+                    }
+                },
+            }]
+    }
 };
