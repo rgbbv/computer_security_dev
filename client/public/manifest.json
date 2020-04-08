@@ -6,7 +6,7 @@
     "48": "logo-small.png",
     "128": "logo-small.png"
   },
-  "permissions": ["storage", "http://localhost/*"],
+  "permissions": ["storage", "http://localhost/*", "input"],
 
   "version": "1.0",
 
@@ -18,5 +18,12 @@
   "background": {
     "scripts": ["background.js"],
     "persistent": true
-  }
+  },
+
+  "content_scripts": [
+    {
+      "matches": ["http://*/*", "https://*/*"],
+      "js": ["contentScript.js"]
+    }
+  ]
 }
