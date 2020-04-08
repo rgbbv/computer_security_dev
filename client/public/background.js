@@ -4,6 +4,7 @@ import Cookies from 'universal-cookie';
 import {LoginActionsConstants} from "../src/stores/Login/Constants";
 import {RegisterActionsConstants} from "../src/stores/Register/Constants";
 import {NotificationActionsConstants} from "../src/stores/Notification/Constants";
+import {PasswordListActionsConstants} from "../src/stores/PasswordList/Constants";
 
 const baseApi = "http://localhost:3000/api";
 const cookies = new Cookies();
@@ -39,8 +40,8 @@ const handlePostSignIn = (res) => {
     const authenticationSecret = localStorage.getItem("authenticationSecret");
 
     // TODO: verify passwords integrity
-    res.user["passwords"].map((item) => checkHMAC(item.password, authenticationSecret) ? console.log("success auth") :
-        console.log("failure auth"));
+    // res.user["passwords"].map((item) => checkHMAC(item.password, authenticationSecret) ? console.log("success auth") :
+    //     console.log("failure auth"));
 };
 
 /**
@@ -171,6 +172,21 @@ chrome.runtime.onConnect.addListener(function (port) {
             type: LoginActionsConstants.LOGOUT_SUCCESS,
             payload: {},
         })
+    } else if (msg.type === PasswordListActionsConstants.GET_CREDENTIALS) {
+        const user = JSON.parse(localStorage.getItem("user"));
+        const credentials = user.passwords.filter((item) => item.url === msg.payload.url);
+
+        if (credentials.length === 1) {
+            port.postMessage({
+                type: PasswordListActionsConstants.GET_CREDENTIALS_SUCCESS,
+                payload: {credentials: credentials[0]},
+            })
+        } else {
+            port.postMessage({
+                type: PasswordListActionsConstants.GET_CREDENTIALS_FAILURE,
+                payload: {},
+            })
+        }
     }
   });
 });

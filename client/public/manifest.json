@@ -6,7 +6,7 @@
     "48": "logo-small.png",
     "128": "logo-small.png"
   },
-  "permissions": ["storage", "http://localhost/*", "input"],
+  "permissions": ["storage", "http://localhost/*", "input", "tabs"],
 
   "version": "1.0",
 
