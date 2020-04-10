@@ -106,6 +106,7 @@ chrome.runtime.onConnect.addListener(function (port) {
                   const authenticationSecret = localStorage.getItem("encryptionSecret");
                   handlePostSignIn(res);
                   const {new_res, failHMAC} = authenticateRes(res, encryptionSecret, authenticationSecret)
+                  console.log(`new_res:${JSON.stringify(new_res)}`);
                   port.postMessage({
                       type: LoginActionsConstants.LOGIN_SUCCESS,
                       payload: new_res,
