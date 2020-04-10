@@ -1,11 +1,10 @@
 /*global chrome*/
-import { deriveSecrets, checkHMAC } from "../src/helpers/CryptoHelper.js"
+import { deriveSecrets, authenticateRes } from "../src/helpers/CryptoHelper.js"
 import Cookies from 'universal-cookie';
 import {LoginActionsConstants} from "../src/stores/Login/Constants";
 import {RegisterActionsConstants} from "../src/stores/Register/Constants";
 import {NotificationActionsConstants} from "../src/stores/Notification/Constants";
 import {PasswordListActionsConstants} from "../src/stores/PasswordList/Constants";
-import {authenticateRes} from "../src/helpers/CryptoHelper";
 
 const baseApi = "http://localhost:3000/api";
 const cookies = new Cookies();
@@ -106,11 +105,10 @@ chrome.runtime.onConnect.addListener(function (port) {
                   const encryptionSecret = localStorage.getItem("encryptionSecret");
                   const authenticationSecret = localStorage.getItem("encryptionSecret");
                   handlePostSignIn(res);
-                  const {authenticatedRes, failed} = authenticateRes(res, encryptionSecret, authenticationSecret)
-                  console.log(`authenticatedRes:${authenticatedRes} failed:${failed}`);
+                  const {new_res, failHMAC} = authenticateRes(res, encryptionSecret, authenticationSecret)
                   port.postMessage({
                       type: LoginActionsConstants.LOGIN_SUCCESS,
-                      payload: authenticatedRes,
+                      payload: new_res,
                   })
               })
             : res.text().then((text) =>

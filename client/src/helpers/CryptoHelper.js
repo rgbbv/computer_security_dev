@@ -2,6 +2,8 @@ import sha256 from "crypto-js/sha256";
 import hmacSHA256 from "crypto-js/hmac-sha256";
 import aes from "crypto-js/aes";
 import encHex from "crypto-js/enc-hex";
+import Pkcs7 from "crypto-js/pad-pkcs7";
+import utf8 from "crypto-js/enc-utf8";
 import {set} from "lodash";
 
 /**
@@ -34,13 +36,13 @@ export const hash = (message) =>
  * @returns {string} A hexadecimal string representing the encryption over message with secret encryptionSecret
  */
 export const encrypt = (message, encryptionSecret) =>
-  aes.encrypt(message, encryptionSecret).toString();
+  aes.encrypt(message, encryptionSecret, {padding: Pkcs7}).toString();
 
 export const authenticate = (encryptedMessage, authenticationSecret) =>
-  hmacSHA256(encryptedMessage, authenticationSecret).toString(encHex);
+  hmacSHA256(encryptedMessage, authenticationSecret, ).toString();
 
 export const decrypt = (message, encryptionSecret) =>
-  aes.decrypt(message.toString(), encryptionSecret.toString()).toString();
+  aes.decrypt(message, encryptionSecret, {padding: Pkcs7}).toString(utf8);
 
 export const encryptAndAuthenticate = (
   message,
@@ -72,9 +74,6 @@ export const authenticateMessages = (
   // the authentication for these messages is failed
   console.log(`before confirmedPasswords:${JSON.stringify(passHMAC.concat(failHMAC))}`);
   messages.forEach((entry) => {
-    console.log(`password:${entry.password} encryptionSecret:${encryptionSecret}
-    decrypt:${decrypt(entry.password, encryptionSecret)} toString:${decrypt(entry.password, encryptionSecret).toString()}
-    encHex:${decrypt(entry.password, encryptionSecret).toString(encHex)}`)
     entry.password = decrypt(entry.password, encryptionSecret);
   });
   console.log(`confirmedPasswords:${JSON.stringify(messages)}`);
@@ -93,9 +92,13 @@ export const checkHMAC = (message, authenticationSecret) => {
 };
 
 export const authenticateRes = (res, encryptionSecret, authenticationSecret) => {
+  console.log(JSON.stringify(res.user.passwords))
   // entriesList = [{url, username, password}]
   const entriesList = res.user.passwords;
-  const {confirmedPasswords, failed} = authenticateMessages(entriesList, encryptionSecret, authenticationSecret);
-  set(res, 'user.passwords', confirmedEntriesList);
-  return {res, failed};
+  const {messages, failHMAC} = authenticateMessages(entriesList, encryptionSecret, authenticationSecret);
+  console.log(`messages:${JSON.stringify(messages)}`)
+  res.user.passwords = messages;
+  console.log(`res:${JSON.stringify(res)} failHMAC:${JSON.stringify(failHMAC)}`)
+  const new_res = res;
+  return {new_res, failHMAC};
 }
