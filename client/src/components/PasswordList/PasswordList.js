@@ -9,16 +9,37 @@ import {
   Paper,
   TextField,
   InputAdornment,
+  Popover,
+  Typography,
 } from "@material-ui/core";
-import Visibility from "@material-ui/icons/Visibility";
-import VisibilityOff from "@material-ui/icons/VisibilityOff";
+import {Visibility, VisibilityOff}  from "@material-ui/icons";
+import ReportProblemIcon from "@material-ui/icons/ReportProblem";
 import { PasswordListActionsConstants } from "../../stores/PasswordList/Constants";
+import {findIndex} from "lodash";
 
 function PasswordList(props) {
   const [user, setUser] = useState(props.location.state.user);
   const [showPassword, setShowPassword] = useState(
     props.location.state.user.passwords.map((i) => false)
   );
+  const [corruptedMsg, setCorruptedMsg] = React.useState(null);
+
+  const handleClickCorrupted = (event) => {
+    setCorruptedMsg(event.currentTarget);
+  };
+
+  const handleCloseCorrupted = (event) => {
+    setCorruptedMsg(null);
+  };
+
+  const open = Boolean(corruptedMsg);
+  const id = open ? 'simple-popover' : undefined;
+
+  const isCorrupted = (url) =>{
+    console.log(`url: ${url}`);
+    const corrupted = user.corrupted;
+    return findIndex(corrupted, ['url', url]) === -1;
+  }
 
   // It's actually update user because the http request is PUT with updated passwords list in the body.. but for mean time..
   props.port.onMessage.addListener(function (msg) {
@@ -49,6 +70,7 @@ function PasswordList(props) {
               </TableCell>
               <TableCell>{row.username}</TableCell>
               <TableCell>
+                <div style={{display: "flex"}}>
                 <TextField
                   disabled
                   type={showPassword[index] ? "text" : "password"}
@@ -73,6 +95,31 @@ function PasswordList(props) {
                   }}
                   defaultValue={row.password}
                 />
+                {isCorrupted(row.name) ?
+                <div title="The password has been corrupted!">
+                <ReportProblemIcon
+                 color="secondary" position="end" 
+                 onClick={handleClickCorrupted} aria-label="corrupted">
+                 </ReportProblemIcon>
+                  {/* <Popover
+                  id={id}
+                  open={open}
+                  corruptedMsg={corruptedMsg}
+                  onClose={handleCloseCorrupted}
+                  anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'center',
+                  }}
+                  transformOrigin={{
+                    vertical: 'top',
+                    horizontal: 'center',
+                  }}
+                >
+                  <Typography >The password was corrupted!</Typography>
+                </Popover> */}
+                </div>:
+                <div/>}
+                </div>
               </TableCell>
             </TableRow>
           ))}
