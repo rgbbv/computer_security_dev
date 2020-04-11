@@ -9,8 +9,6 @@ import {
   Paper,
   TextField,
   InputAdornment,
-  Popover,
-  Typography,
 } from "@material-ui/core";
 import {Visibility, VisibilityOff}  from "@material-ui/icons";
 import ReportProblemIcon from "@material-ui/icons/ReportProblem";
@@ -24,21 +22,14 @@ function PasswordList(props) {
   );
   const [corruptedMsg, setCorruptedMsg] = React.useState(null);
 
-  const handleClickCorrupted = (event) => {
-    setCorruptedMsg(event.currentTarget);
-  };
-
-  const handleCloseCorrupted = (event) => {
-    setCorruptedMsg(null);
-  };
-
   const open = Boolean(corruptedMsg);
   const id = open ? 'simple-popover' : undefined;
 
   const isCorrupted = (url) =>{
-    console.log(`url: ${url}`);
+    console.log(`url: ${JSON.stringify(url)}
+    user: ${JSON.stringify(user)}`);
     const corrupted = user.corrupted;
-    return findIndex(corrupted, ['url', url]) === -1;
+    return findIndex(corrupted, ['url', url]) != -1;
   }
 
   // It's actually update user because the http request is PUT with updated passwords list in the body.. but for mean time..
@@ -95,28 +86,12 @@ function PasswordList(props) {
                   }}
                   defaultValue={row.password}
                 />
-                {isCorrupted(row.name) ?
+                {isCorrupted(row.url) ?
                 <div title="The password has been corrupted!">
                 <ReportProblemIcon
                  color="secondary" position="end" 
                  onClick={handleClickCorrupted} aria-label="corrupted">
                  </ReportProblemIcon>
-                  {/* <Popover
-                  id={id}
-                  open={open}
-                  corruptedMsg={corruptedMsg}
-                  onClose={handleCloseCorrupted}
-                  anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'center',
-                  }}
-                  transformOrigin={{
-                    vertical: 'top',
-                    horizontal: 'center',
-                  }}
-                >
-                  <Typography >The password was corrupted!</Typography>
-                </Popover> */}
                 </div>:
                 <div/>}
                 </div>

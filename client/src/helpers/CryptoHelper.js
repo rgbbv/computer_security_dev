@@ -99,6 +99,7 @@ export const authenticateRes = (res, encryptionSecret, authenticationSecret) => 
   console.log(`messages:${JSON.stringify(messages)}`)
   res.user.passwords = messages;
   res.user.corrupted = failHMAC;
+  console.log(`check:${encryptAndAuthenticate("check", encryptionSecret, authenticationSecret)}`)
   console.log(`res:${JSON.stringify(res)} failHMAC:${JSON.stringify(failHMAC)}`)
   const new_res = res;
   return new_res;
