@@ -9,13 +9,18 @@ import {
 } from "@material-ui/core";
 import PowerSettingsNewIcon from "@material-ui/icons/PowerSettingsNew";
 import { LoginActionsConstants } from "../../stores/Login/Constants";
+import {HistoryConstants} from "../../stores/History/Constants";
 import { history } from "../../index";
 
 export default function UserProfile(props) {
   props.port.onMessage.addListener(function (msg) {
     if (msg.type === LoginActionsConstants.LOGOUT_SUCCESS) {
-      history.push("/login");
-    } else if (msg.type === LoginActionsConstants.LOGOUT_SUCCESS) {
+      history.push(HistoryConstants.LOGIN);
+      props.port.postMessage({
+        type: HistoryConstants.CHANGE_HISTORY,
+        payload: {history: HistoryConstants.LOGIN}
+      });
+    } else if (msg.type === LoginActionsConstants.LOGOUT_FAILURE) {
       // Handle failure
     }
   });

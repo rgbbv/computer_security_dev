@@ -8,15 +8,29 @@ import Home from './components/Home/Home';
 import { Switch, Route } from "react-router-dom";
 import { history } from "./index";
 import {LoginActionsConstants} from "./stores/Login/Constants";
+import {HistoryConstants} from "./stores/History/Constants";
 
 const port = chrome.runtime.connect({ name: "client_port" });
 
 port.onMessage.addListener(function (msg) {
     if (msg.type === LoginActionsConstants.IS_USER_LOGGED_IN_SUCCESS) {
         // TODO: save history stack in local storage as well and navigate the user to the latest screen component
-        history.push('/home', msg.payload);
+        if (msg.payload.history != null) {
+          history.push(msg.payload.history, msg.payload);
+        }
+        else {
+          history.push(HistoryConstants.HOME, msg.payload);
+          port.postMessage({
+            type: HistoryConstants.CHANGE_HISTORY,
+            payload: {history: HistoryConstants.HOME},
+          });
+        }
     } else if (msg.type === LoginActionsConstants.IS_USER_LOGGED_IN_FAILURE) {
-        history.push('/login', msg.payload);
+        history.push(HistoryConstants.LOGIN, msg.payload);
+        port.postMessage({
+          type: HistoryConstants.CHANGE_HISTORY,
+          payload: {history: HistoryConstants.LOGIN},
+        });
     }
 });
 

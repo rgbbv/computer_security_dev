@@ -5,6 +5,7 @@ import {LoginActionsConstants} from "../src/stores/Login/Constants";
 import {RegisterActionsConstants} from "../src/stores/Register/Constants";
 import {NotificationActionsConstants} from "../src/stores/Notification/Constants";
 import {PasswordListActionsConstants} from "../src/stores/PasswordList/Constants";
+import {HistoryConstants} from "../src/stores/History/Constants";
 
 const baseApi = "http://localhost:3000/api";
 const cookies = new Cookies();
@@ -164,7 +165,11 @@ chrome.runtime.onConnect.addListener(function (port) {
     } else if (msg.type === LoginActionsConstants.IS_USER_LOGGED_IN) {
         isUserLoggedIn() ? port.postMessage({
                 type: LoginActionsConstants.IS_USER_LOGGED_IN_SUCCESS,
-                payload: { user: JSON.parse(localStorage.getItem("user")) },
+                payload:
+                 { 
+                    user: JSON.parse(localStorage.getItem("user")),
+                    history: localStorage.getItem("history"),
+                 },
             }) :
             port.postMessage({
                 type: LoginActionsConstants.IS_USER_LOGGED_IN_FAILURE,
@@ -191,6 +196,9 @@ chrome.runtime.onConnect.addListener(function (port) {
                 payload: {},
             })
         }
+    } else if (msg.type === HistoryConstants.CHANGE_HISTORY) {
+        console.log(`change history to ${msg.payload.history}`);
+        localStorage.setItem("history", msg.payload.history);
     }
   });
 });

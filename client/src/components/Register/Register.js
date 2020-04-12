@@ -17,6 +17,7 @@ import LockIcon from "@material-ui/icons/Lock";
 import Visibility from "@material-ui/icons/Visibility";
 import VisibilityOff from "@material-ui/icons/VisibilityOff";
 import { RegisterActionsConstants } from "../../stores/Register/Constants";
+import {HistoryConstants} from "../../stores/History/Constants";
 import { history } from "../../index";
 
 function Register(props) {
@@ -34,7 +35,11 @@ function Register(props) {
     if (msg.type === RegisterActionsConstants.REGISTER_SUCCESS) {
       setErrorMessage("");
       setRegisterLoading(false);
-      history.push("/home", msg.payload);
+      history.push(HistoryConstants.HOME, msg.payload);
+      props.port.postMessage({
+        type: HistoryConstants.CHANGE_HISTORY,
+        payload: {history: HistoryConstants.HOME}
+      });
     } else if (msg.type === RegisterActionsConstants.REGISTER_FAILURE) {
       setRegisterLoading(false);
       setErrorMessage(msg.payload.errorMessage);

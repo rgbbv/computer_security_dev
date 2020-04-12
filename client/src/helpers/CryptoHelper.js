@@ -68,15 +68,10 @@ export const authenticateMessages = (
     [[], []]
   );
 
-  failHMAC.forEach((fail) =>
-    console.log(`the password for url: ${fail.url} was contaminated`)
-  );
   // the authentication for these messages is failed
-  console.log(`before confirmedPasswords:${JSON.stringify(passHMAC.concat(failHMAC))}`);
   messages.forEach((entry) => {
     entry.password = decrypt(entry.password, encryptionSecret);
   });
-  console.log(`confirmedPasswords:${JSON.stringify(messages)}`);
   return {messages, failHMAC};
 };
 
@@ -92,15 +87,11 @@ export const checkHMAC = (message, authenticationSecret) => {
 };
 
 export const authenticateRes = (res, encryptionSecret, authenticationSecret) => {
-  console.log(JSON.stringify(res.user.passwords))
   // entriesList = [{url, username, password}]
   const entriesList = res.user.passwords;
   const {messages, failHMAC} = authenticateMessages(entriesList, encryptionSecret, authenticationSecret);
-  console.log(`messages:${JSON.stringify(messages)}`)
   res.user.passwords = messages;
   res.user.corrupted = failHMAC;
-  console.log(`check:${encryptAndAuthenticate("check", encryptionSecret, authenticationSecret)}`)
-  console.log(`res:${JSON.stringify(res)} failHMAC:${JSON.stringify(failHMAC)}`)
   const new_res = res;
   return new_res;
 }

@@ -27,8 +27,6 @@ function PasswordList(props) {
   const id = open ? 'simple-popover' : undefined;
 
   const isCorrupted = (url) =>{
-    console.log(`url: ${JSON.stringify(url)}
-    user: ${JSON.stringify(user)}`);
     const corrupted = user.corrupted;
     return findIndex(corrupted, ['url', url]) != -1;
   }
