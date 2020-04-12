@@ -13,6 +13,7 @@ import {
 import {Visibility, VisibilityOff}  from "@material-ui/icons";
 import ReportProblemIcon from "@material-ui/icons/ReportProblem";
 import { PasswordListActionsConstants } from "../../stores/PasswordList/Constants";
+import "./PasswordList.css";
 import {findIndex} from "lodash";
 
 function PasswordList(props) {
@@ -44,8 +45,8 @@ function PasswordList(props) {
   });
 
   return user.passwords.length !== 0 ? (
-    <TableContainer component={Paper}>
-      <Table aria-label="simple table">
+    <TableContainer component={Paper} id="container" >
+      <Table aria-label="simple table" >
         <TableHead>
           <TableRow>
             <TableCell>URL</TableCell>
@@ -53,7 +54,7 @@ function PasswordList(props) {
             <TableCell>Password</TableCell>
           </TableRow>
         </TableHead>
-        <TableBody>
+        <TableBody >
           {user.passwords.map((row, index) => (
             <TableRow key={row.name}>
               <TableCell component="th" scope="row">
@@ -87,10 +88,10 @@ function PasswordList(props) {
                   defaultValue={row.password}
                 />
                 {isCorrupted(row.url) ?
-                <div title="The password has been corrupted!">
+                <div title="The password has been corrupted!" id="corrupted">
                 <ReportProblemIcon
                  color="secondary" position="end" 
-                 onClick={handleClickCorrupted} aria-label="corrupted">
+                 aria-label="corrupted">
                  </ReportProblemIcon>
                 </div>:
                 <div/>}
