@@ -1,10 +1,11 @@
 /*global chrome*/
-import { deriveSecrets, checkHMAC } from "../src/helpers/CryptoHelper.js"
+import { deriveSecrets, checkHMAC, encryptAndAuthenticate } from "../src/helpers/CryptoHelper.js"
 import Cookies from 'universal-cookie';
 import {LoginActionsConstants} from "../src/stores/Login/Constants";
 import {RegisterActionsConstants} from "../src/stores/Register/Constants";
 import {NotificationActionsConstants} from "../src/stores/Notification/Constants";
 import {PasswordListActionsConstants} from "../src/stores/PasswordList/Constants";
+import {ManagePasswordsActionsConstants} from "../src/stores/ManagePasswords/Constants";
 
 const baseApi = "http://localhost:3000/api";
 const cookies = new Cookies();
@@ -42,6 +43,13 @@ const handlePostSignIn = (res) => {
     // TODO: verify passwords integrity
     // res.user["passwords"].map((item) => checkHMAC(item.password, authenticationSecret) ? console.log("success auth") :
     //     console.log("failure auth"));
+};
+
+const handleUserWebsitePassword = (password) => {
+    encryptionSecret = localStorage.getItem("encryptionSecret");
+    authenticationSecret = localStorage.getItem("authenticationSecret");
+
+    return encryptAndAuthenticate(password, encryptionSecret, authenticationSecret);
 };
 
 /**
@@ -177,6 +185,7 @@ chrome.runtime.onConnect.addListener(function (port) {
         const credentials = user.passwords.filter((item) => item.url === msg.payload.url);
 
         if (credentials.length === 1) {
+            // TODO: decrypt password credentials[0].password =
             port.postMessage({
                 type: PasswordListActionsConstants.GET_CREDENTIALS_SUCCESS,
                 payload: {credentials: credentials[0]},
@@ -187,6 +196,82 @@ chrome.runtime.onConnect.addListener(function (port) {
                 payload: {},
             })
         }
+    } else if (msg.type === ManagePasswordsActionsConstants.GET_MANAGE_PASSWORDS_STATE) {
+        // TODO: should be general get state action (post message type in payload)
+        const state = JSON.parse(localStorage.getItem(msg.payload.key));
+        if (state) {
+            localStorage.removeItem(msg.payload.key);
+            port.postMessage({
+                type: ManagePasswordsActionsConstants.GET_MANAGE_PASSWORDS_STATE_SUCCESS,
+                payload: {state: state}
+            })
+        } else {
+            port.postMessage({
+                type: ManagePasswordsActionsConstants.GET_MANAGE_PASSWORDS_STATE_FAILURE,
+                payload: {}
+            })
+        }
+    } else if (msg.type === ManagePasswordsActionsConstants.SET_MANAGE_PASSWORDS_STATE) {
+        // TODO: should be a general set state action
+        localStorage.setItem(msg.payload.key, JSON.stringify(msg.payload.value));
+    } else if (msg.type === PasswordListActionsConstants.SAVE_PASSWORD) {
+        msg.payload.password = handleUserWebsitePassword(msg.payload.password);
+        fetch(baseApi + "/user/" + JSON.parse(localStorage.getItem("user")).id + "/passwords", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: 'Bearer ' + localStorage.getItem("accessToken")
+            },
+            body: JSON.stringify(msg.payload),
+        })
+            .then((res) =>
+                res.status === 200
+                    ? res.text().then((text) => {
+                        localStorage.setItem("user", text);
+                        port.postMessage({
+                            type: PasswordListActionsConstants.SAVE_PASSWORD_SUCCESS,
+                            payload: JSON.parse(text),
+                        })}
+                    )
+                    : res.text().then((text) =>
+                        port.postMessage({
+                            type: PasswordListActionsConstants.SAVE_PASSWORD_FAILURE,
+                            payload: JSON.parse(text),
+                        })
+                    )
+            )
+            .catch((err) =>
+                port.postMessage({ type: PasswordListActionsConstants.SAVE_PASSWORD_FAILURE, payload: { errorMessage: "Internal server error" }})
+            );
+    } else if (msg.type === PasswordListActionsConstants.UPDATE_PASSWORD) {
+        msg.payload.password = handleUserWebsitePassword(msg.payload.password);
+        fetch(baseApi + "/user/" + JSON.parse(localStorage.getItem("user")).id + "/password/" + msg.payload.id, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: 'Bearer ' + localStorage.getItem("accessToken")
+            },
+            body: JSON.stringify(msg.payload),
+        })
+            .then((res) =>
+                res.status === 200
+                    ? res.text().then((text) => {
+                        localStorage.setItem("user", text);
+                        port.postMessage({
+                            type: PasswordListActionsConstants.UPDATE_PASSWORD_SUCCESS,
+                            payload: JSON.parse(text),
+                        })}
+                    )
+                    : res.text().then((text) =>
+                        port.postMessage({
+                            type: PasswordListActionsConstants.UPDATE_PASSWORD_FAILURE,
+                            payload: JSON.parse(text),
+                        })
+                    )
+            )
+            .catch((err) =>
+                port.postMessage({ type: PasswordListActionsConstants.UPDATE_PASSWORD_FAILURE, payload: { errorMessage: "Internal server error" }})
+            );
     }
   });
 });

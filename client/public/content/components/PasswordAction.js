@@ -14,9 +14,23 @@ export default function PasswordAction(props) {
     const [isOpen, setIsOpen] = useState(true);
     const [username, setUsername] = useState(props.credentials.username);
     const [password, setPassword] = useState(props.credentials.password);
+    const [id, setId] = useState(props.credentials.id);
     const [url, setUrl] = useState(props.credentials.url);
     const [anchorEl, setAnchorEl] = useState(null);
     const [showPassword, setShowPassword] = useState(false);
+
+    const handleClick = () => {
+        setIsOpen(false);
+        props.action === "Update" ?
+            props.port.postMessage({
+                type: PasswordListActionsConstants.UPDATE_PASSWORD,
+                payload: {username: username, password: password, id: id}
+            }) :
+            props.port.postMessage({
+                type: PasswordListActionsConstants.SAVE_PASSWORD,
+                payload: {username: username, password: password, url: url}
+            })
+    };
 
     return (
         <Popper
@@ -35,14 +49,13 @@ export default function PasswordAction(props) {
                             alignItems="center"
                         >
                             <Typography variant="subtitle1" gutterBottom>
-                                Update password?
+                                {props.action} password?
                             </Typography>
                             <TextField
                                 id="outlined-username"
                                 label="Username"
                                 defaultValue={username}
                                 onChange={(e) => setUsername(e.target.value)}
-                                margin="dense"
                                 variant="outlined"
                             />
                             <FormControl variant="outlined">
@@ -76,22 +89,30 @@ export default function PasswordAction(props) {
                                 alignItems="center"
                             >
                                 <Button
-                                    onClick={() => console.log("update")}
+                                    onClick={handleClick}
                                     variant="contained"
                                     color="primary"
+                                    size="small"
                                     id="button"
                                 >
-                                    Update password?
+                                    {props.action} password?
                                 </Button>
                                 <Button
-                                    onClick={() => console.log("no")}
-                                    variant="contained"
+                                    onClick={() => setIsOpen(false)}
+                                    variant="outlined"
+                                    size="small"
                                     color="primary"
                                     id="button"
                                 >
                                     No thanks
                                 </Button>
                             </Box>
+                            <Typography gutterBottom style={{maxWidth: 240}}>
+                                <Box fontStyle="oblique" fontSize={12} m={1}>
+                                    Passwords are saved in your Pass Vault
+                                    account so you can use them on any device
+                                </Box>
+                            </Typography>
                         </Box>
                     </Paper>
                 </Fade>

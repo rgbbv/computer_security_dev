@@ -12,6 +12,8 @@ import {
 } from "@material-ui/core";
 import jq from "jquery";
 import { PasswordListActionsConstants } from "../../../src/stores/PasswordList/Constants";
+import { ManagePasswordsActionsConstants } from "../../../src/stores/ManagePasswords/Constants";
+import PasswordAction from "./PasswordAction";
 import VpnKeyIcon from "@material-ui/icons/VpnKey";
 
 export default function ManagePasswords(props) {
@@ -22,21 +24,29 @@ export default function ManagePasswords(props) {
   const [showPasswordAction, setShowPasswordAction] = useState(false);
   const [passwordAction, setPasswordAction] = useState("");
 
-  if (!getCredentials)
+  if (!getCredentials) {
     props.port.postMessage({
       type: PasswordListActionsConstants.GET_CREDENTIALS,
       payload: {url: window.location.toString()},
     });
+
+    props.port.postMessage({
+      type: ManagePasswordsActionsConstants.GET_MANAGE_PASSWORDS_STATE,
+      payload: {key: "managePasswords"},
+    });
+  }
 
   props.port.onMessage.addListener(function (msg) {
     if (msg.type === PasswordListActionsConstants.GET_CREDENTIALS_SUCCESS) {
       setCredentials(msg.payload.credentials);
       setGetCredentials(true);
       injectSavedCredentials();
-    } else if (
-        msg.type === PasswordListActionsConstants.GET_CREDENTIALS_FAILURE
-    ) {
+    } else if (msg.type === PasswordListActionsConstants.GET_CREDENTIALS_FAILURE) {
       setGetCredentials(true);
+    } else if (msg.type === ManagePasswordsActionsConstants.GET_MANAGE_PASSWORDS_STATE_SUCCESS) {
+      setCredentials(msg.payload.state.credentials);
+      setShowPasswordAction(msg.payload.state.showPasswordAction);
+      setPasswordAction(msg.payload.state.passwordAction);
     }
   });
 
@@ -55,31 +65,26 @@ export default function ManagePasswords(props) {
    * Otherwise (we dont have the current website credentials) interact and ask the user to save his password for the current website.
    */
   jq("form").submit(function (event) {
-    // event.preventDefault();
     const enteredPassword = jq("input:password").val();
     const enteredUsername = jq("input:text").val();
 
     // The user has changed the saved password ask him whether to update the password
     if (Object.keys(credentials).length !== 0 && credentials.password !== enteredPassword) {
-      console.log("ask for update - c");
-      setShowPasswordAction(true);
-      setPasswordAction("Update");
-      // props.port.postMessage({
-      //   type: PasswordListActionsConstants.ASK_FOR_PASSWORD_UPDATE,
-      //   payload: {credentials: {username: enteredUsername, password: enteredPassword, url: credentials.url}},
-      // });
+      props.port.postMessage({
+        type: ManagePasswordsActionsConstants.SET_MANAGE_PASSWORDS_STATE,
+        payload: {value: {credentials: {username: enteredUsername, password: enteredPassword, url: credentials.url, id: credentials.id},
+          showPasswordAction: true, passwordAction: "Update"}, key: "managePasswords"},
+      });
     }
 
     // We dont have this website credentials, ask the user whether to store them
     else if (Object.keys(credentials).length === 0) {
-      setShowPasswordAction(true);
-      setPasswordAction("Save");
-      // props.port.postMessage({
-      //   type: PasswordListActionsConstants.ASK_FOR_PASSWORD_SAVE,
-      //   payload: {credentials: {username: enteredUsername, password: enteredPassword, url: window.location.toString()}},
-      // });
+      props.port.postMessage({
+        type: ManagePasswordsActionsConstants.SET_MANAGE_PASSWORDS_STATE,
+        payload: {value: {credentials: {username: enteredUsername, password: enteredPassword, url: window.location.toString(), id: credentials.id},
+            showPasswordAction: true, passwordAction: "Save"}, key: "managePasswords"},
+      });
     }
-    // jq(this).unbind('submit').submit()
   });
 
   const injectSavedCredentials = () => {
@@ -88,6 +93,7 @@ export default function ManagePasswords(props) {
   };
 
   return (
+       !showPasswordAction ?
       <Popper
           open={showOptions}
           anchorEl={anchorEl}
@@ -118,6 +124,6 @@ export default function ManagePasswords(props) {
               </Paper>
             </Fade>
         )}
-      </Popper>
+      </Popper> : <PasswordAction port={props.port} credentials={credentials} action={passwordAction} />
   );
 }
