@@ -12,10 +12,10 @@ import VisibilityOff from "@material-ui/icons/VisibilityOff";
 
 export default function PasswordAction(props) {
     const [isOpen, setIsOpen] = useState(true);
-    const [username, setUsername] = useState(props.credentials.username);
-    const [password, setPassword] = useState(props.credentials.password);
-    const [id, setId] = useState(props.credentials.id);
-    const [url, setUrl] = useState(props.credentials.url);
+    const [username, setUsername] = useState(props.credentials ? props.credentials.username : "");
+    const [password, setPassword] = useState(props.credentials ? props.credentials.password : "");
+    const [id, setId] = useState(props.credentials ? props.credentials.id : -1);
+    const [url, setUrl] = useState(props.credentials ? props.credentials.url : "");
     const [anchorEl, setAnchorEl] = useState(null);
     const [showPassword, setShowPassword] = useState(false);
 

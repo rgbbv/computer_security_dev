@@ -1,5 +1,5 @@
 /*global chrome*/
-import { deriveSecrets, checkHMAC, encryptAndAuthenticate } from "../src/helpers/CryptoHelper.js"
+import { deriveSecrets, checkHMAC, encryptAndAuthenticate, authenticateAndDecrypt } from "../src/helpers/CryptoHelper.js"
 import Cookies from 'universal-cookie';
 import {LoginActionsConstants} from "../src/stores/Login/Constants";
 import {RegisterActionsConstants} from "../src/stores/Register/Constants";
@@ -45,11 +45,18 @@ const handlePostSignIn = (res) => {
     //     console.log("failure auth"));
 };
 
-const handleUserWebsitePassword = (password) => {
+const encryptUserWebsitePassword = (password) => {
     encryptionSecret = localStorage.getItem("encryptionSecret");
     authenticationSecret = localStorage.getItem("authenticationSecret");
 
     return encryptAndAuthenticate(password, encryptionSecret, authenticationSecret);
+};
+
+const decryptUserWebsitePassword = (encryptedPassword) => {
+    encryptionSecret = localStorage.getItem("encryptionSecret");
+    authenticationSecret = localStorage.getItem("authenticationSecret");
+
+    return authenticateAndDecrypt(encryptedPassword, encryptionSecret, authenticationSecret);
 };
 
 /**
@@ -185,7 +192,7 @@ chrome.runtime.onConnect.addListener(function (port) {
         const credentials = user.passwords.filter((item) => item.url === msg.payload.url);
 
         if (credentials.length === 1) {
-            // TODO: decrypt password credentials[0].password =
+            credentials[0].password = decryptUserWebsitePassword(credentials[0].password);
             port.postMessage({
                 type: PasswordListActionsConstants.GET_CREDENTIALS_SUCCESS,
                 payload: {credentials: credentials[0]},
@@ -215,7 +222,7 @@ chrome.runtime.onConnect.addListener(function (port) {
         // TODO: should be a general set state action
         localStorage.setItem(msg.payload.key, JSON.stringify(msg.payload.value));
     } else if (msg.type === PasswordListActionsConstants.SAVE_PASSWORD) {
-        msg.payload.password = handleUserWebsitePassword(msg.payload.password);
+        msg.payload.password = encryptUserWebsitePassword(msg.payload.password);
         fetch(baseApi + "/user/" + JSON.parse(localStorage.getItem("user")).id + "/passwords", {
             method: "POST",
             headers: {
@@ -244,7 +251,7 @@ chrome.runtime.onConnect.addListener(function (port) {
                 port.postMessage({ type: PasswordListActionsConstants.SAVE_PASSWORD_FAILURE, payload: { errorMessage: "Internal server error" }})
             );
     } else if (msg.type === PasswordListActionsConstants.UPDATE_PASSWORD) {
-        msg.payload.password = handleUserWebsitePassword(msg.payload.password);
+        msg.payload.password = encryptUserWebsitePassword(msg.payload.password);
         fetch(baseApi + "/user/" + JSON.parse(localStorage.getItem("user")).id + "/password/" + msg.payload.id, {
             method: "PUT",
             headers: {

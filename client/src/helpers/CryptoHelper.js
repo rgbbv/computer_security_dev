@@ -2,6 +2,7 @@ import sha256 from "crypto-js/sha256";
 import hmacSHA256 from "crypto-js/hmac-sha256";
 import aes from "crypto-js/aes";
 import encHex from "crypto-js/enc-hex";
+import CryptoJS from "crypto-js";
 
 /**
  * The client login with a master password, then it derives from the master password three secretes: K1, K2, K3.
@@ -43,8 +44,8 @@ export const encryptAndAuthenticate = (
   encryptionSecret,
   authenticationSecret
 ) => {
-  const c = encrypt(message, encryptionSecret);
-  const t = authenticate(c, authenticationSecret);
+  const c = CryptoJS.AES.encrypt(message, encryptionSecret).toString();
+  const t = CryptoJS.HmacSHA256(c, authenticationSecret).toString(CryptoJS.enc.Hex);
 
   return c + t;
 };
@@ -80,5 +81,18 @@ export const checkHMAC = (message, authenticationSecret) => {
   const cTag = message.substr(0, message.length - tTagLength);
   const tTag = message.substr(message.length - tTagLength);
 
-  return tTag === authenticate(cTag, authenticationSecret);
+  return tTag === CryptoJS.HmacSHA256(cTag, authenticationSecret).toString(CryptoJS.enc.Hex);
+};
+
+export const authenticateAndDecrypt = (
+    encryptedMessage,
+    encryptionSecret,
+    authenticationSecret
+) => {
+  if (checkHMAC(encryptedMessage, authenticationSecret)) {
+    return CryptoJS.enc.Utf8.stringify(CryptoJS.AES.decrypt(encryptedMessage.substr(0, encryptedMessage.length - 64),
+        encryptionSecret));
+  }
+
+  return false;
 };

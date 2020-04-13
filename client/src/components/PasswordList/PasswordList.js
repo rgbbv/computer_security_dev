@@ -22,13 +22,13 @@ function PasswordList(props) {
 
   // It's actually update user because the http request is PUT with updated passwords list in the body.. but for mean time..
   props.port.onMessage.addListener(function (msg) {
-    if (msg.type === PasswordListActionsConstants.UPDATE_PASSWORD_SUCCESS) {
-      // handle success
-    } else if (
-      msg.type === PasswordListActionsConstants.UPDATE_PASSWORD_FAILURE
-    ) {
-      // handle failure
-    }
+    // if (msg.type === PasswordListActionsConstants.UPDATE_PASSWORD_SUCCESS) {
+    //   // handle success
+    // } else if (
+    //   msg.type === PasswordListActionsConstants.UPDATE_PASSWORD_FAILURE
+    // ) {
+    //   // handle failure
+    // }
   });
 
   return user.passwords.length !== 0 ? (
