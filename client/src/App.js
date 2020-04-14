@@ -14,8 +14,7 @@ const port = chrome.runtime.connect({ name: "client_port" });
 
 port.onMessage.addListener(function (msg) {
     if (msg.type === LoginActionsConstants.IS_USER_LOGGED_IN_SUCCESS) {
-        console.log(msg);
-        if (msg.payload.history != null) {
+        if (msg.payload.history) {
           history.push(msg.payload.history, msg.payload);
         }
         else {
@@ -26,11 +25,15 @@ port.onMessage.addListener(function (msg) {
           });
         }
     } else if (msg.type === LoginActionsConstants.IS_USER_LOGGED_IN_FAILURE) {
-        history.push(HistoryConstants.LOGIN, msg.payload);
-        port.postMessage({
-          type: HistoryConstants.CHANGE_HISTORY,
-          payload: {history: HistoryConstants.LOGIN},
-        });
+        if (msg.payload.history) {
+            history.push(msg.payload.history, msg.payload);
+        } else {
+            history.push(HistoryConstants.LOGIN, msg.payload);
+            port.postMessage({
+                type: HistoryConstants.CHANGE_HISTORY,
+                payload: {history: HistoryConstants.LOGIN},
+            });
+        }
     }
 });
 

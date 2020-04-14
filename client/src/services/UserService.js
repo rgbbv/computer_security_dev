@@ -28,7 +28,7 @@ export const verifyUserLoggedIn = (port) => {
     } else {
         port.postMessage({
             type: LoginActionsConstants.IS_USER_LOGGED_IN_FAILURE,
-            payload: {},
+            payload: {history: localStorage.getItem("history")},
         })
     }
 };

@@ -16,6 +16,7 @@ import {
 import LockIcon from "@material-ui/icons/Lock";
 import Visibility from "@material-ui/icons/Visibility";
 import VisibilityOff from "@material-ui/icons/VisibilityOff";
+import CloseIcon from '@material-ui/icons/Close';
 import { RegisterActionsConstants } from "../../stores/Register/Constants";
 import {HistoryConstants} from "../../stores/History/Constants";
 import { history } from "../../index";
@@ -77,6 +78,17 @@ function Register(props) {
       justifyContent="space-around"
       alignItems="center"
     >
+      <Box alignSelf="flex-start">
+        <IconButton aria-label="close" size="small" onClick={() => {
+          history.push(HistoryConstants.LOGIN);
+          props.port.postMessage({
+            type: HistoryConstants.CHANGE_HISTORY,
+            payload: {history: HistoryConstants.LOGIN}
+          });
+        }} >
+          <CloseIcon fontSize="inherit" />
+        </IconButton>
+      </Box>
       <div style={{ "margin-top": 10 }}>
         <Avatar>
           <LockIcon />
