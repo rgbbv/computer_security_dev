@@ -49,7 +49,7 @@ export default function PasswordAction(props) {
                             alignItems="center"
                         >
                             <Typography variant="subtitle1" gutterBottom>
-                                {props.action} password?
+                                {props.action} credentials?
                             </Typography>
                             <TextField
                                 id="outlined-username"
@@ -95,7 +95,7 @@ export default function PasswordAction(props) {
                                     size="small"
                                     id="button"
                                 >
-                                    {props.action} password?
+                                    {props.action} credentials?
                                 </Button>
                                 <Button
                                     onClick={() => setIsOpen(false)}

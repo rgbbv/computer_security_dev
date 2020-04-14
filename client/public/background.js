@@ -1,14 +1,16 @@
 /*global chrome*/
 import { deriveSecrets, checkHMAC, encryptAndAuthenticate, authenticateAndDecrypt } from "../src/helpers/CryptoHelper.js"
-import Cookies from 'universal-cookie';
+import {updateCredentials, saveCredentials} from "../src/services/CredentialsService";
+import {setState, getState} from "../src/services/PersistenceService";
+import { verifyUserLoggedIn, logout } from "../src/services/UserService";
+import {updateNotification}  from "../src/services/NotificationService";
 import {LoginActionsConstants} from "../src/stores/Login/Constants";
 import {RegisterActionsConstants} from "../src/stores/Register/Constants";
 import {NotificationActionsConstants} from "../src/stores/Notification/Constants";
 import {PasswordListActionsConstants} from "../src/stores/PasswordList/Constants";
-import {ManagePasswordsActionsConstants} from "../src/stores/ManagePasswords/Constants";
+import {PersistenceActionsConstants} from "../src/stores/Persistence/Constants";
 
 const baseApi = "http://localhost:3000/api";
-const cookies = new Cookies();
 let encryptionSecret = '';
 let authenticationSecret = '';
 let serverSecret = '';
@@ -57,20 +59,6 @@ const decryptUserWebsitePassword = (encryptedPassword) => {
     authenticationSecret = localStorage.getItem("authenticationSecret");
 
     return authenticateAndDecrypt(encryptedPassword, encryptionSecret, authenticationSecret);
-};
-
-/**
- * Returns true is the user is logged in by validating a present, non-expired accessToken.
- */
-const isUserLoggedIn = () => {
-    // const accessToken = cookies.get("accessToken"); not working
-    const accessToken = localStorage.getItem("accessToken");
-    if (accessToken) {
-        const payload = JSON.parse(atob(accessToken.split('.')[1]));
-        return payload.exp > Date.now() / 1000;
-    }
-
-    return false
 };
 
 chrome.runtime.onConnect.addListener(function (port) {
@@ -144,49 +132,11 @@ chrome.runtime.onConnect.addListener(function (port) {
       // hmacResult = makeHMAC(encryptedPassword) //result to verify no change in the message
       // TODO: send to server {name, encryptedPassword, hmacResult}
     } else if (msg.type === NotificationActionsConstants.UPDATE_NOTIFICATION) {
-        //TODO: background should inject the accessToken from the cookie
-        fetch(baseApi + "/user/" + msg.payload.userId + "/notification/" + msg.payload.notification.id, {
-            method: "PUT",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: 'Bearer ' + localStorage.getItem("accessToken")
-            },
-            body: JSON.stringify(msg.payload.notification),
-        })
-            .then((res) =>
-                res.status === 200
-                    ? res.text().then((text) => {
-                        localStorage.setItem("user", text);
-                        port.postMessage({
-                            type: NotificationActionsConstants.UPDATE_NOTIFICATION_SUCCESS,
-                            payload: JSON.parse(text),
-                        })}
-                    )
-                    : res.text().then((text) =>
-                        port.postMessage({
-                            type: NotificationActionsConstants.UPDATE_NOTIFICATION_FAILURE,
-                            payload: JSON.parse(text),
-                        })
-                    )
-            )
-            .catch((err) =>
-                port.postMessage({ type: NotificationActionsConstants.UPDATE_NOTIFICATION_FAILURE, payload: { errorMessage: "Internal server error" }})
-            );
+        updateNotification(baseApi, msg.payload.notification, port);
     } else if (msg.type === LoginActionsConstants.IS_USER_LOGGED_IN) {
-        isUserLoggedIn() ? port.postMessage({
-                type: LoginActionsConstants.IS_USER_LOGGED_IN_SUCCESS,
-                payload: { user: JSON.parse(localStorage.getItem("user")) },
-            }) :
-            port.postMessage({
-                type: LoginActionsConstants.IS_USER_LOGGED_IN_FAILURE,
-                payload: {},
-            })
+        verifyUserLoggedIn(port);
     } else if (msg.type === LoginActionsConstants.LOGOUT) {
-        localStorage.clear();
-        port.postMessage({
-            type: LoginActionsConstants.LOGOUT_SUCCESS,
-            payload: {},
-        })
+       logout(port);
     } else if (msg.type === PasswordListActionsConstants.GET_CREDENTIALS) {
         const user = JSON.parse(localStorage.getItem("user"));
         const credentials = user.passwords.filter((item) => item.url === msg.payload.url);
@@ -203,82 +153,16 @@ chrome.runtime.onConnect.addListener(function (port) {
                 payload: {},
             })
         }
-    } else if (msg.type === ManagePasswordsActionsConstants.GET_MANAGE_PASSWORDS_STATE) {
-        // TODO: should be general get state action (post message type in payload)
-        const state = JSON.parse(localStorage.getItem(msg.payload.key));
-        if (state) {
-            localStorage.removeItem(msg.payload.key);
-            port.postMessage({
-                type: ManagePasswordsActionsConstants.GET_MANAGE_PASSWORDS_STATE_SUCCESS,
-                payload: {state: state}
-            })
-        } else {
-            port.postMessage({
-                type: ManagePasswordsActionsConstants.GET_MANAGE_PASSWORDS_STATE_FAILURE,
-                payload: {}
-            })
-        }
-    } else if (msg.type === ManagePasswordsActionsConstants.SET_MANAGE_PASSWORDS_STATE) {
-        // TODO: should be a general set state action
-        localStorage.setItem(msg.payload.key, JSON.stringify(msg.payload.value));
+    } else if (msg.type === PersistenceActionsConstants.GET_STATE) {
+        getState(msg.payload.key, port, msg.payload.onSuccessType, msg.payload.onFailureType);
+    } else if (msg.type === PersistenceActionsConstants.SET_STATE) {
+        setState(msg.payload.key, msg.payload.value);
     } else if (msg.type === PasswordListActionsConstants.SAVE_PASSWORD) {
         msg.payload.password = encryptUserWebsitePassword(msg.payload.password);
-        fetch(baseApi + "/user/" + JSON.parse(localStorage.getItem("user")).id + "/passwords", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: 'Bearer ' + localStorage.getItem("accessToken")
-            },
-            body: JSON.stringify(msg.payload),
-        })
-            .then((res) =>
-                res.status === 200
-                    ? res.text().then((text) => {
-                        localStorage.setItem("user", text);
-                        port.postMessage({
-                            type: PasswordListActionsConstants.SAVE_PASSWORD_SUCCESS,
-                            payload: JSON.parse(text),
-                        })}
-                    )
-                    : res.text().then((text) =>
-                        port.postMessage({
-                            type: PasswordListActionsConstants.SAVE_PASSWORD_FAILURE,
-                            payload: JSON.parse(text),
-                        })
-                    )
-            )
-            .catch((err) =>
-                port.postMessage({ type: PasswordListActionsConstants.SAVE_PASSWORD_FAILURE, payload: { errorMessage: "Internal server error" }})
-            );
+        saveCredentials(baseApi, msg.payload, port);
     } else if (msg.type === PasswordListActionsConstants.UPDATE_PASSWORD) {
         msg.payload.password = encryptUserWebsitePassword(msg.payload.password);
-        fetch(baseApi + "/user/" + JSON.parse(localStorage.getItem("user")).id + "/password/" + msg.payload.id, {
-            method: "PUT",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: 'Bearer ' + localStorage.getItem("accessToken")
-            },
-            body: JSON.stringify(msg.payload),
-        })
-            .then((res) =>
-                res.status === 200
-                    ? res.text().then((text) => {
-                        localStorage.setItem("user", text);
-                        port.postMessage({
-                            type: PasswordListActionsConstants.UPDATE_PASSWORD_SUCCESS,
-                            payload: JSON.parse(text),
-                        })}
-                    )
-                    : res.text().then((text) =>
-                        port.postMessage({
-                            type: PasswordListActionsConstants.UPDATE_PASSWORD_FAILURE,
-                            payload: JSON.parse(text),
-                        })
-                    )
-            )
-            .catch((err) =>
-                port.postMessage({ type: PasswordListActionsConstants.UPDATE_PASSWORD_FAILURE, payload: { errorMessage: "Internal server error" }})
-            );
+        updateCredentials(baseApi, msg.payload, port);
     }
   });
 });

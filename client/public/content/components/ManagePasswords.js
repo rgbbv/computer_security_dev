@@ -15,6 +15,7 @@ import { PasswordListActionsConstants } from "../../../src/stores/PasswordList/C
 import { ManagePasswordsActionsConstants } from "../../../src/stores/ManagePasswords/Constants";
 import PasswordAction from "./PasswordAction";
 import VpnKeyIcon from "@material-ui/icons/VpnKey";
+import {PersistenceActionsConstants} from "../../../src/stores/Persistence/Constants";
 
 export default function ManagePasswords(props) {
   const [anchorEl, setAnchorEl] = useState(null);
@@ -31,8 +32,9 @@ export default function ManagePasswords(props) {
     });
 
     props.port.postMessage({
-      type: ManagePasswordsActionsConstants.GET_MANAGE_PASSWORDS_STATE,
-      payload: {key: "managePasswords"},
+      type: PersistenceActionsConstants.GET_STATE,
+      payload: {key: "managePasswords", onSuccessType: ManagePasswordsActionsConstants.GET_MANAGE_PASSWORDS_STATE_SUCCESS,
+                onFailureType: ManagePasswordsActionsConstants.GET_MANAGE_PASSWORDS_STATE_FAILURE},
     });
   }
 
@@ -44,8 +46,8 @@ export default function ManagePasswords(props) {
     } else if (msg.type === PasswordListActionsConstants.GET_CREDENTIALS_FAILURE) {
       setGetCredentials(true);
     } else if (msg.type === ManagePasswordsActionsConstants.GET_MANAGE_PASSWORDS_STATE_SUCCESS) {
-      setCredentials(msg.payload.state.credentials);
-      setShowPasswordAction(msg.payload.state.showPasswordAction);
+      setCredentials(msg.payload.state.credentials || {});
+      setShowPasswordAction(msg.payload.state.showPasswordAction || "");
       setPasswordAction(msg.payload.state.passwordAction);
     }
   });
@@ -59,6 +61,12 @@ export default function ManagePasswords(props) {
         }
       }));
 
+  // Add listeners to close the options on user change values
+  ["input:password", "input:text", "input[type=email]"].map((item) =>
+      jq(item).first().on("change", () => {
+        setShowOptions(false);
+      }));
+
   /**
    * When user submit login form, check if we have the user credentials, then verify if he updated his password,
    * if so interact and ask him to update our saved password.
@@ -68,10 +76,11 @@ export default function ManagePasswords(props) {
     const enteredPassword = jq("input:password").val();
     const enteredUsername = jq("input:text").val();
 
-    // The user has changed the saved password ask him whether to update the password
-    if (Object.keys(credentials).length !== 0 && credentials.password !== enteredPassword) {
+    // The user has changed the saved password / username ask him whether to update
+    if (Object.keys(credentials).length !== 0 && (credentials.password !== enteredPassword ||
+        credentials.username !== enteredUsername)) {
       props.port.postMessage({
-        type: ManagePasswordsActionsConstants.SET_MANAGE_PASSWORDS_STATE,
+        type: PersistenceActionsConstants.SET_STATE,
         payload: {value: {credentials: {username: enteredUsername, password: enteredPassword, url: credentials.url, id: credentials.id},
           showPasswordAction: true, passwordAction: "Update"}, key: "managePasswords"},
       });
@@ -80,9 +89,17 @@ export default function ManagePasswords(props) {
     // We dont have this website credentials, ask the user whether to store them
     else if (Object.keys(credentials).length === 0) {
       props.port.postMessage({
-        type: ManagePasswordsActionsConstants.SET_MANAGE_PASSWORDS_STATE,
+        type: PersistenceActionsConstants.SET_STATE,
         payload: {value: {credentials: {username: enteredUsername, password: enteredPassword, url: window.location.toString(), id: credentials.id},
             showPasswordAction: true, passwordAction: "Save"}, key: "managePasswords"},
+      });
+    }
+
+    // We want to avoid showing the save password popup
+    else {
+      props.port.postMessage({
+        type: PersistenceActionsConstants.SET_STATE,
+        payload: {value: {showPasswordAction: false}, key: "managePasswords"},
       });
     }
   });
