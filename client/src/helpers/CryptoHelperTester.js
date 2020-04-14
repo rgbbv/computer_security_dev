@@ -2,6 +2,8 @@ const sha256 = require('crypto-js/sha256');
 const hmacSHA256 = require('crypto-js/hmac-sha256');
 const aes = require('crypto-js/aes');
 const encHex = require('crypto-js/enc-hex');
+const encUtf8 = require('crypto-js/enc-utf8');
+const CryptoJS = require('crypto-js');
 
 // import sha256 from 'crypto-js/sha256';
 // import hmacSHA256 from 'crypto-js/hmac-sha256';
@@ -74,4 +76,16 @@ const [encryptionSecret, authenticationSecret, serverSecret]  = deriveSecrets("s
 const pass = 'myPass';
 const ct = encryptAndAuthenticate(pass, encryptionSecret, authenticationSecret);
 const auth = checkHMAC(ct, authenticationSecret);
-console.log(auth);
+// console.log(auth);
+
+const ciphertext = "20233b9ee234e6e83b70bcac882e0c6dc38d78da467b88065686b04c0e279fd0eb0ae5a3a576796e26ca7225cba7562b";
+const authSec = "4814d92093ac8a0f4a2163ab87dee509ba306a58f5888be0edcb2fcd0712028b";
+const encSec = "7dc96f776c8423e57a2785489a3f9c43fb6e756876d6ad9a9cac4aa4e72ec193";
+const encc = CryptoJS.AES.encrypt("hello", encSec).toString();
+const authc = CryptoJS.HmacSHA256(encc, authSec).toString(CryptoJS.enc.Hex);
+const candt = encc + authc;
+console.log(checkHMAC(candt, authSec));
+const decrypted = CryptoJS.AES.decrypt(candt.substr(0, candt.length - 64), encSec);
+console.log(CryptoJS.enc.Utf8.stringify(decrypted));
+
+console.log(CryptoJS.enc.Utf8.stringify([]) || false);

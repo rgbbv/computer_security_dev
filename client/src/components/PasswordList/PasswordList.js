@@ -12,35 +12,21 @@ import {
 } from "@material-ui/core";
 import {Visibility, VisibilityOff}  from "@material-ui/icons";
 import ReportProblemIcon from "@material-ui/icons/ReportProblem";
-import { PasswordListActionsConstants } from "../../stores/PasswordList/Constants";
 import "./PasswordList.css";
-import {findIndex} from "lodash";
 
 function PasswordList(props) {
   const [user, setUser] = useState(props.location.state.user);
   const [showPassword, setShowPassword] = useState(
-    props.location.state.user.passwords.map((i) => false)
+    props.location.state.user.passwords.map(() => false)
   );
   const [corruptedMsg, setCorruptedMsg] = React.useState(null);
 
   const open = Boolean(corruptedMsg);
   const id = open ? 'simple-popover' : undefined;
 
-  const isCorrupted = (url) =>{
-    const corrupted = user.corrupted;
-    return findIndex(corrupted, ['url', url]) != -1;
-  }
-
-  // It's actually update user because the http request is PUT with updated passwords list in the body.. but for mean time..
-  props.port.onMessage.addListener(function (msg) {
-    if (msg.type === PasswordListActionsConstants.UPDATE_PASSWORD_SUCCESS) {
-      // handle success
-    } else if (
-      msg.type === PasswordListActionsConstants.UPDATE_PASSWORD_FAILURE
-    ) {
-      // handle failure
-    }
-  });
+  const isCorrupted = (url) => {
+    return user.corrupted.some((item) => item.url === url);
+  };
 
   return user.passwords.length !== 0 ? (
     <TableContainer component={Paper} id="container" >

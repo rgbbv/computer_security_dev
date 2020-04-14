@@ -48,7 +48,7 @@ function Login(props) {
       type: HistoryConstants.CHANGE_HISTORY,
       payload: {history: HistoryConstants.REGISTER}
     });
-  }
+  };
 
   function login() {
     setLoginLoading(true);

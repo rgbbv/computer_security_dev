@@ -6,6 +6,7 @@ const User = require('../models/user');
 const jwtHelper = require('../helpers/jwtHelper');
 const BoomHelper = require("../helpers/BoomHelper");
 const {verifyUserAccess} = require("../controllers/user.controller");
+const PassVault = require('../models/passVault');
 
 router.route('/users')
     .post((req, res, next) => {
@@ -45,6 +46,33 @@ router.route('/user/:userId/notification/:notificationId')
         User.findOneAndUpdate(filter, {$set: update}, {new: true}).exec()
             .then((doc) => res.status(200).json(doc))
             .catch((err) => res.status(500).send(err));
+    });
+
+router.route('/user/:userId/password/:passwordId')
+    .put(jwtHelper.verifyJwtToken, verifyUserAccess, (req, res, next) => {
+        if (!ObjectId.isValid(req.params.userId))
+            return res.status(400).send('No record with given id: ' + req.params.userId);
+
+        const filter = {'_id': req.params.userId, 'passwords._id': req.params.passwordId};
+        const update = Object.entries(req.body).reduce((acc, [k, v]) => {
+            acc['passwords.$.' + k] = v;
+            return acc
+        }, {});
+        User.findOneAndUpdate(filter, {$set: update}, {new: true}).exec()
+            .then((doc) => res.status(200).json(doc))
+            .catch((err) => res.status(500).send(err));
+    });
+
+router.route('/user/:userId/passwords')
+    .post(jwtHelper.verifyJwtToken, verifyUserAccess, (req, res, next) => {
+        if (!ObjectId.isValid(req.params.userId))
+            return res.status(400).send('No record with given id: ' + req.params.userId);
+
+        let password = new PassVault(req.body);
+        User.findByIdAndUpdate(req.params.userId, {$push: {passwords: password}}, {new: true},
+            (err, doc) => {
+                BoomHelper.apiResponseHandler(res, doc, err);
+            });
     });
 
 router.post('/user/login', (req, res, next) => {
