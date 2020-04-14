@@ -10,30 +10,27 @@ import {
   TextField,
   InputAdornment,
 } from "@material-ui/core";
-import Visibility from "@material-ui/icons/Visibility";
-import VisibilityOff from "@material-ui/icons/VisibilityOff";
-import { PasswordListActionsConstants } from "../../stores/PasswordList/Constants";
+import {Visibility, VisibilityOff}  from "@material-ui/icons";
+import ReportProblemIcon from "@material-ui/icons/ReportProblem";
+import "./PasswordList.css";
 
 function PasswordList(props) {
   const [user, setUser] = useState(props.location.state.user);
   const [showPassword, setShowPassword] = useState(
-    props.location.state.user.passwords.map((i) => false)
+    props.location.state.user.passwords.map(() => false)
   );
+  const [corruptedMsg, setCorruptedMsg] = React.useState(null);
 
-  // It's actually update user because the http request is PUT with updated passwords list in the body.. but for mean time..
-  props.port.onMessage.addListener(function (msg) {
-    // if (msg.type === PasswordListActionsConstants.UPDATE_PASSWORD_SUCCESS) {
-    //   // handle success
-    // } else if (
-    //   msg.type === PasswordListActionsConstants.UPDATE_PASSWORD_FAILURE
-    // ) {
-    //   // handle failure
-    // }
-  });
+  const open = Boolean(corruptedMsg);
+  const id = open ? 'simple-popover' : undefined;
+
+  const isCorrupted = (url) => {
+    return user.corrupted.some((item) => item.url === url);
+  };
 
   return user.passwords.length !== 0 ? (
-    <TableContainer component={Paper}>
-      <Table aria-label="simple table">
+    <TableContainer component={Paper} id="container" >
+      <Table aria-label="simple table" >
         <TableHead>
           <TableRow>
             <TableCell>URL</TableCell>
@@ -41,7 +38,7 @@ function PasswordList(props) {
             <TableCell>Password</TableCell>
           </TableRow>
         </TableHead>
-        <TableBody>
+        <TableBody >
           {user.passwords.map((row, index) => (
             <TableRow key={row.name}>
               <TableCell component="th" scope="row">
@@ -49,6 +46,7 @@ function PasswordList(props) {
               </TableCell>
               <TableCell>{row.username}</TableCell>
               <TableCell>
+                <div style={{display: "flex"}}>
                 <TextField
                   disabled
                   type={showPassword[index] ? "text" : "password"}
@@ -73,6 +71,15 @@ function PasswordList(props) {
                   }}
                   defaultValue={row.password}
                 />
+                {isCorrupted(row.url) ?
+                <div title="The password has been corrupted!" id="corrupted">
+                <ReportProblemIcon
+                 color="secondary" position="end" 
+                 aria-label="corrupted">
+                 </ReportProblemIcon>
+                </div>:
+                <div/>}
+                </div>
               </TableCell>
             </TableRow>
           ))}

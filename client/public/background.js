@@ -1,5 +1,5 @@
 /*global chrome*/
-import { deriveSecrets, checkHMAC, encryptAndAuthenticate, authenticateAndDecrypt } from "../src/helpers/CryptoHelper.js"
+import { deriveSecrets, checkHMAC, encryptAndAuthenticate, authenticateAndDecrypt, authenticateRes } from "../src/helpers/CryptoHelper.js"
 import {updateCredentials, saveCredentials} from "../src/services/CredentialsService";
 import {setState, getState} from "../src/services/PersistenceService";
 import { verifyUserLoggedIn, logout } from "../src/services/UserService";
@@ -9,6 +9,7 @@ import {RegisterActionsConstants} from "../src/stores/Register/Constants";
 import {NotificationActionsConstants} from "../src/stores/Notification/Constants";
 import {PasswordListActionsConstants} from "../src/stores/PasswordList/Constants";
 import {PersistenceActionsConstants} from "../src/stores/Persistence/Constants";
+import {HistoryConstants} from "../src/stores/History/Constants";
 
 const baseApi = "http://localhost:3000/api";
 let encryptionSecret = '';
@@ -35,16 +36,13 @@ const handlePreSignIn = (masterPassword) => {
  * @param res The server login / signUp response
  */
 const handlePostSignIn = (res) => {
-    // TODO: check cookie (chrome.cookies)
-    // cookies.set("accessToken", res.accessToken);
     localStorage.setItem("accessToken", res.accessToken);
     localStorage.setItem("user", JSON.stringify(res.user));
 
-    const authenticationSecret = localStorage.getItem("authenticationSecret");
-
-    // TODO: verify passwords integrity
-    // res.user["passwords"].map((item) => checkHMAC(item.password, authenticationSecret) ? console.log("success auth") :
-    //     console.log("failure auth"));
+    // Verify passwords integrity
+    return {user: authenticateRes(res.user,
+        localStorage.getItem("encryptionSecret"),
+        localStorage.getItem("authenticationSecret"))};
 };
 
 const encryptUserWebsitePassword = (password) => {
@@ -76,10 +74,9 @@ chrome.runtime.onConnect.addListener(function (port) {
           if (res.status === 200) {
              res.text().then((text) => {
                  const res = JSON.parse(text);
-                 handlePostSignIn(res);
                 port.postMessage({
                   type: RegisterActionsConstants.REGISTER_SUCCESS,
-                  payload: res,
+                  payload: handlePostSignIn(res),
                 })}
               )}
           else {
@@ -105,10 +102,9 @@ chrome.runtime.onConnect.addListener(function (port) {
           res.status === 200
             ? res.text().then((text) => {
                   const res = JSON.parse(text);
-                  handlePostSignIn(res);
                   port.postMessage({
                       type: LoginActionsConstants.LOGIN_SUCCESS,
-                      payload: res,
+                      payload: handlePostSignIn(res),
                   })
               })
             : res.text().then((text) =>
@@ -119,18 +115,6 @@ chrome.runtime.onConnect.addListener(function (port) {
               )
         )
         .catch((err) => port.postMessage({ type: LoginActionsConstants.LOGIN_FAILURE, payload: { errorMessage: "Internal server error" }}));
-    } else if (msg.name === "new password") {
-      // console.log(`add new password name:${msg.name} password:${msg.password}`)
-      // encryptedPassword = encrypt(msg.password)
-      // hmacResult = makeHMAC(encryptedPassword) //result to verify no change in the message
-      // TODO: send to server {name, encryptedPassword, hmacResult}
-    } else if (msg.name === "update password") {
-      // console.log(
-      //     `update existing password name: ${msg.name}
-      //   old password: ${passwords.find(elemnent => elemnent.name === msg.name)} new password: ${msg.password}`)
-      // encryptedPassword = encrypt(msg.password) //encrypt before sending to server
-      // hmacResult = makeHMAC(encryptedPassword) //result to verify no change in the message
-      // TODO: send to server {name, encryptedPassword, hmacResult}
     } else if (msg.type === NotificationActionsConstants.UPDATE_NOTIFICATION) {
         updateNotification(baseApi, msg.payload.notification, port);
     } else if (msg.type === LoginActionsConstants.IS_USER_LOGGED_IN) {
@@ -142,7 +126,8 @@ chrome.runtime.onConnect.addListener(function (port) {
         const credentials = user.passwords.filter((item) => item.url === msg.payload.url);
 
         if (credentials.length === 1) {
-            credentials[0].password = decryptUserWebsitePassword(credentials[0].password);
+            const decryptedPassword = decryptUserWebsitePassword(credentials[0].password);
+            decryptedPassword ? credentials[0].password = decryptedPassword : credentials[0].password = "";
             port.postMessage({
                 type: PasswordListActionsConstants.GET_CREDENTIALS_SUCCESS,
                 payload: {credentials: credentials[0]},
@@ -163,6 +148,8 @@ chrome.runtime.onConnect.addListener(function (port) {
     } else if (msg.type === PasswordListActionsConstants.UPDATE_PASSWORD) {
         msg.payload.password = encryptUserWebsitePassword(msg.payload.password);
         updateCredentials(baseApi, msg.payload, port);
+    } else if (msg.type === HistoryConstants.CHANGE_HISTORY) {
+        localStorage.setItem("history", msg.payload.history);
     }
   });
 });

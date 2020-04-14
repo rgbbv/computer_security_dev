@@ -48,7 +48,7 @@ export default function ManagePasswords(props) {
     } else if (msg.type === ManagePasswordsActionsConstants.GET_MANAGE_PASSWORDS_STATE_SUCCESS) {
       setCredentials(msg.payload.state.credentials || {});
       setShowPasswordAction(msg.payload.state.showPasswordAction || "");
-      setPasswordAction(msg.payload.state.passwordAction);
+      setPasswordAction(msg.payload.state.passwordAction || "");
     }
   });
 

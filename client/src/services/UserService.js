@@ -1,5 +1,5 @@
 import {LoginActionsConstants} from "../stores/Login/Constants";
-import {RegisterActionsConstants} from "../stores/Register/Constants";
+import {authenticateRes} from "../helpers/CryptoHelper";
 
 /**
  * Returns true iff the user is logged in by validating a present, non-expired accessToken.
@@ -15,14 +15,22 @@ const isUserLoggedIn = () => {
 };
 
 export const verifyUserLoggedIn = (port) => {
-    isUserLoggedIn() ? port.postMessage({
-        type: LoginActionsConstants.IS_USER_LOGGED_IN_SUCCESS,
-        payload: { user: JSON.parse(localStorage.getItem("user")) },
-    }) :
-    port.postMessage({
-        type: LoginActionsConstants.IS_USER_LOGGED_IN_FAILURE,
-        payload: {},
-    })
+    if(isUserLoggedIn()) {
+        // If the user is logged in then validate his passwords
+        const user = authenticateRes(JSON.parse(localStorage.getItem("user")),
+            localStorage.getItem("encryptionSecret"),
+            localStorage.getItem("authenticationSecret"));
+
+        port.postMessage({
+            type: LoginActionsConstants.IS_USER_LOGGED_IN_SUCCESS,
+            payload: {user: user, history: localStorage.getItem("history")},
+        })
+    } else {
+        port.postMessage({
+            type: LoginActionsConstants.IS_USER_LOGGED_IN_FAILURE,
+            payload: {},
+        })
+    }
 };
 
 export const logout = (port) => {

@@ -18,6 +18,7 @@ import Visibility from "@material-ui/icons/Visibility";
 import VisibilityOff from "@material-ui/icons/VisibilityOff";
 import { history } from "../../index";
 import { LoginActionsConstants } from "../../stores/Login/Constants";
+import {HistoryConstants} from "../../stores/History/Constants";
 
 function Login(props) {
   const [errorMessage, setErrorMessage] = useState("");
@@ -30,12 +31,24 @@ function Login(props) {
     if (msg.type === LoginActionsConstants.LOGIN_SUCCESS) {
       setErrorMessage("");
       setLoginLoading(false);
-      history.push("/home", msg.payload);
+      history.push(HistoryConstants.HOME, msg.payload);
+      props.port.postMessage({
+        type: HistoryConstants.CHANGE_HISTORY,
+        payload: {history: HistoryConstants.HOME}
+      });
     } else if (msg.type === LoginActionsConstants.LOGIN_FAILURE) {
       setLoginLoading(false);
       setErrorMessage(msg.payload.errorMessage);
     }
   });
+
+  const switchToRegister = () => {
+    history.push(HistoryConstants.REGISTER);
+    props.port.postMessage({
+      type: HistoryConstants.CHANGE_HISTORY,
+      payload: {history: HistoryConstants.REGISTER}
+    });
+  };
 
   function login() {
     setLoginLoading(true);
@@ -110,7 +123,7 @@ function Login(props) {
       )}
       <Box display="flex" flexDirection="row" alignSelf="flex-start">
         <p>Not Registered? </p>
-        <Button size="small" onClick={() => history.push("register")}>
+        <Button size="small" onClick={switchToRegister.bind(this)}>
           Sign Up
         </Button>
       </Box>

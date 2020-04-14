@@ -87,3 +87,5 @@ const candt = encc + authc;
 console.log(checkHMAC(candt, authSec));
 const decrypted = CryptoJS.AES.decrypt(candt.substr(0, candt.length - 64), encSec);
 console.log(CryptoJS.enc.Utf8.stringify(decrypted));
+
+console.log(CryptoJS.enc.Utf8.stringify([]) || false);
