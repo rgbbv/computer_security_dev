@@ -12,9 +12,9 @@ import {
 } from "@material-ui/core";
 import {Visibility, VisibilityOff}  from "@material-ui/icons";
 import ReportProblemIcon from "@material-ui/icons/ReportProblem";
-import "./PasswordList.css";
 
 function PasswordList(props) {
+
   const [user, setUser] = useState(props.location.state.user);
   const [showPassword, setShowPassword] = useState(
     props.location.state.user.passwords.map(() => false)
@@ -28,9 +28,14 @@ function PasswordList(props) {
     return user.corrupted.some((item) => item.url === url);
   };
 
+  const showAddress = (url) => {
+    const splits = url.split("/", 4);
+    return splits.length < 4 ? url : url.split(splits[3])[0];
+  }
+
   return user.passwords.length !== 0 ? (
-    <TableContainer component={Paper} id="container" >
-      <Table aria-label="simple table" >
+    <TableContainer component={Paper} style={{ maxHeight: "330px", paddingBottom: "50px" }} >
+      <Table stickyHeader aria-label="simple table">
         <TableHead>
           <TableRow>
             <TableCell>URL</TableCell>
@@ -41,11 +46,12 @@ function PasswordList(props) {
         <TableBody >
           {user.passwords.map((row, index) => (
             <TableRow key={row.name}>
-              <TableCell component="th" scope="row">
-                {row.url}
+              <TableCell style={{ maxWidth: "100px", overflowX: "scroll", overflowY: "hidden"}} component="th" scope="row">
+                {showAddress(row.url)}
               </TableCell>
-              <TableCell>{row.username}</TableCell>
-              <TableCell>
+              <TableCell style={{ maxWidth: "20px", overflowX: "hidden", overflowY: "hidden"}}
+              >{row.username}</TableCell>
+              <TableCell style={{ minWidth: "50px" }}>
                 <div style={{display: "flex"}}>
                 <TextField
                   disabled
