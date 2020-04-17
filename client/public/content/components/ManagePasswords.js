@@ -24,6 +24,7 @@ export default function ManagePasswords(props) {
   const [showOptions, setShowOptions] = useState(false);
   const [showPasswordAction, setShowPasswordAction] = useState(false);
   const [passwordAction, setPasswordAction] = useState("");
+  const [error, setError] = useState(false);
 
   if (!getCredentials) {
     props.port.postMessage({
@@ -34,7 +35,8 @@ export default function ManagePasswords(props) {
     props.port.postMessage({
       type: PersistenceActionsConstants.GET_STATE,
       payload: {key: "managePasswords", onSuccessType: ManagePasswordsActionsConstants.GET_MANAGE_PASSWORDS_STATE_SUCCESS,
-                onFailureType: ManagePasswordsActionsConstants.GET_MANAGE_PASSWORDS_STATE_FAILURE},
+                onFailureType: ManagePasswordsActionsConstants.GET_MANAGE_PASSWORDS_STATE_FAILURE,
+        getAndDelete: true},
     });
   }
 
@@ -45,6 +47,7 @@ export default function ManagePasswords(props) {
       injectSavedCredentials();
     } else if (msg.type === PasswordListActionsConstants.GET_CREDENTIALS_FAILURE) {
       setGetCredentials(true);
+      if('errorMessage' in msg.payload) setError(true);
     } else if (msg.type === ManagePasswordsActionsConstants.GET_MANAGE_PASSWORDS_STATE_SUCCESS) {
       setCredentials(msg.payload.state.credentials || {});
       setShowPasswordAction(msg.payload.state.showPasswordAction || "");
@@ -110,7 +113,9 @@ export default function ManagePasswords(props) {
   };
 
   return (
-       !showPasswordAction ?
+      error ?
+          <div /> :
+      !showPasswordAction ?
       <Popper
           open={showOptions}
           anchorEl={anchorEl}
@@ -134,7 +139,10 @@ export default function ManagePasswords(props) {
                     />
                   </ListItem>
                   <Divider/>
-                  <ListItem button onClick={() => setShowOptions(false)}>
+                  <ListItem button onClick={() => {setShowOptions(false); props.port.postMessage({
+                    type: ManagePasswordsActionsConstants.OPEN_PASSWORDS_LIST_TAB,
+                    payload: {url: "PasswordList.html"}
+                  }) }}>
                     <ListItemText primary="Manage passwords"/>
                   </ListItem>
                 </List>
@@ -143,4 +151,4 @@ export default function ManagePasswords(props) {
         )}
       </Popper> : <PasswordAction port={props.port} credentials={credentials} action={passwordAction} />
   );
-}
+};

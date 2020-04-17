@@ -2,7 +2,7 @@
 import { deriveSecrets, checkHMAC, encryptAndAuthenticate, authenticateAndDecrypt, authenticateRes } from "../src/helpers/CryptoHelper.js"
 import {updateCredentials, saveCredentials} from "../src/services/CredentialsService";
 import {setState, getState} from "../src/services/PersistenceService";
-import { verifyUserLoggedIn, logout } from "../src/services/UserService";
+import { verifyUserLoggedIn, logout, isUserLoggedIn, authenticateUserPasswords } from "../src/services/UserService";
 import {updateNotification}  from "../src/services/NotificationService";
 import {LoginActionsConstants} from "../src/stores/Login/Constants";
 import {RegisterActionsConstants} from "../src/stores/Register/Constants";
@@ -10,6 +10,7 @@ import {NotificationActionsConstants} from "../src/stores/Notification/Constants
 import {PasswordListActionsConstants} from "../src/stores/PasswordList/Constants";
 import {PersistenceActionsConstants} from "../src/stores/Persistence/Constants";
 import {HistoryConstants} from "../src/stores/History/Constants";
+import {ManagePasswordsActionsConstants} from "../src/stores/ManagePasswords/Constants";
 
 const baseApi = "http://localhost:3000/api";
 let encryptionSecret = '';
@@ -40,9 +41,7 @@ const handlePostSignIn = (res) => {
     localStorage.setItem("user", JSON.stringify(res.user));
 
     // Verify passwords integrity
-    return {user: authenticateRes(res.user,
-        localStorage.getItem("encryptionSecret"),
-        localStorage.getItem("authenticationSecret"))};
+    return authenticateUserPasswords(res.user);
 };
 
 const encryptUserWebsitePassword = (password) => {
@@ -122,24 +121,31 @@ chrome.runtime.onConnect.addListener(function (port) {
     } else if (msg.type === LoginActionsConstants.LOGOUT) {
        logout(port);
     } else if (msg.type === PasswordListActionsConstants.GET_CREDENTIALS) {
-        const user = JSON.parse(localStorage.getItem("user"));
-        const credentials = user.passwords.filter((item) => item.url === msg.payload.url);
+        if (isUserLoggedIn()) {
+            const user = JSON.parse(localStorage.getItem("user"));
+            const credentials = user.passwords.filter((item) => item.url === msg.payload.url);
 
-        if (credentials.length === 1) {
-            const decryptedPassword = decryptUserWebsitePassword(credentials[0].password);
-            decryptedPassword ? credentials[0].password = decryptedPassword : credentials[0].password = "";
-            port.postMessage({
-                type: PasswordListActionsConstants.GET_CREDENTIALS_SUCCESS,
-                payload: {credentials: credentials[0]},
-            })
+            if (credentials.length === 1) {
+                const decryptedPassword = decryptUserWebsitePassword(credentials[0].password);
+                decryptedPassword ? credentials[0].password = decryptedPassword : credentials[0].password = "";
+                port.postMessage({
+                    type: PasswordListActionsConstants.GET_CREDENTIALS_SUCCESS,
+                    payload: {credentials: credentials[0]},
+                })
+            } else {
+                port.postMessage({
+                    type: PasswordListActionsConstants.GET_CREDENTIALS_FAILURE,
+                    payload: {},
+                })
+            }
         } else {
             port.postMessage({
                 type: PasswordListActionsConstants.GET_CREDENTIALS_FAILURE,
-                payload: {},
+                payload: {errorMessage: "user is not logged in"},
             })
         }
     } else if (msg.type === PersistenceActionsConstants.GET_STATE) {
-        getState(msg.payload.key, port, msg.payload.onSuccessType, msg.payload.onFailureType);
+        getState(msg.payload.key, port, msg.payload.onSuccessType, msg.payload.onFailureType, msg.payload.getAndDelete);
     } else if (msg.type === PersistenceActionsConstants.SET_STATE) {
         setState(msg.payload.key, msg.payload.value);
     } else if (msg.type === PasswordListActionsConstants.SAVE_PASSWORD) {
@@ -150,6 +156,8 @@ chrome.runtime.onConnect.addListener(function (port) {
         updateCredentials(baseApi, msg.payload, port);
     } else if (msg.type === HistoryConstants.CHANGE_HISTORY) {
         localStorage.setItem("history", msg.payload.history);
+    } else if (msg.type === ManagePasswordsActionsConstants.OPEN_PASSWORDS_LIST_TAB) {
+        chrome.tabs.create({url: msg.payload.url});
     }
   });
 });
