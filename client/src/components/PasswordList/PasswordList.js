@@ -14,7 +14,6 @@ import {Visibility, VisibilityOff}  from "@material-ui/icons";
 import ReportProblemIcon from "@material-ui/icons/ReportProblem";
 
 function PasswordList(props) {
-
   const [user, setUser] = useState(props.location.state.user);
   const [showPassword, setShowPassword] = useState(
     props.location.state.user.passwords.map(() => false)
@@ -31,7 +30,7 @@ function PasswordList(props) {
   const showAddress = (url) => {
     const splits = url.split("/", 4);
     return splits.length < 4 ? url : url.split(splits[3])[0];
-  }
+  };
 
   return user.passwords.length !== 0 ? (
     <TableContainer component={Paper} style={{ maxHeight: "330px", paddingBottom: "50px" }} >

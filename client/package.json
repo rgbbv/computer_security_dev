@@ -80,10 +80,11 @@
   },
   "scripts": {
     "start": "node scripts/start.js",
-    "build": "npm run build-app && npm run build-background && npm run build-content",
+    "build": "npm run build-app && npm run build-background && npm run build-content && npm run build-tab",
     "build-app": "cross-env NODE_ENV=production node scripts/build.js",
     "build-background": "cross-env NODE_ENV=production webpack --config config/webpack.background.config.js",
     "build-content": "cross-env NODE_ENV=production webpack --config config/webpack.content.config.js",
+    "build-tab": "cross-env NODE_ENV=production webpack --config config/webpack.passwords.config.js",
     "test": "node scripts/test.js",
     "prettier-fix": "prettier --write **/*.js"
   },
