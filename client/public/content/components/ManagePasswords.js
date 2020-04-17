@@ -78,18 +78,19 @@ export default function ManagePasswords(props) {
   jq("form").submit(function (event) {
     const enteredPassword = jq("input:password").val();
     const enteredUsername = jq("input:text").val();
+    const creds = credentials.filter((item) => item.username === enteredUsername);
 
     // The user has changed the saved password ask him whether to update
-    if (credentials.some((item) => item.username === enteredUsername && item.password !== enteredPassword)) {
+    if (creds.length > 0 && creds[0].password !== enteredPassword) {
       props.port.postMessage({
         type: PersistenceActionsConstants.SET_STATE,
-        payload: {value: {credentials: {username: enteredUsername, password: enteredPassword, url: credentials.url, id: credentials.id},
+        payload: {value: {credentials: {username: enteredUsername, password: enteredPassword, url: creds[0].url, id: creds[0].id},
           showPasswordAction: true, passwordAction: "Update"}, key: "managePasswords"},
       });
     }
 
     // We dont have this website credentials (or got new credentials - new username), ask the user whether to store them
-    else if (credentials.some((item) => item.username !== enteredUsername)) {
+    else if (creds.length === 0) {
       props.port.postMessage({
         type: PersistenceActionsConstants.SET_STATE,
         payload: {value: {credentials: {username: enteredUsername, password: enteredPassword, url: window.location.toString(), id: credentials.id},
