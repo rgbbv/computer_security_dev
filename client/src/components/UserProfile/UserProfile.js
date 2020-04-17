@@ -58,7 +58,7 @@ export default function UserProfile(props) {
         </ListItem>
         <Collapse in={openSecurityMenu} timeout="auto" unmountOnExit>
             <List component="div" disablePadding>
-                <ListItem button className={classes.nested}>
+                <ListItem button className={classes.nested} onClick={() => history.push("/twoStepsVerification")}>
                     <ListItemAvatar >
                         <Avatar
                             alt="s"

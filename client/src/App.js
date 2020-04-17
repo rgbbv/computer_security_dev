@@ -9,6 +9,7 @@ import { Switch, Route } from "react-router-dom";
 import { history } from "./index";
 import {LoginActionsConstants} from "./stores/Login/Constants";
 import {HistoryConstants} from "./stores/History/Constants";
+import TwoStepsVerification from "./components/TwoStepsVerification/TwoStepsVerification";
 
 const port = chrome.runtime.connect({ name: "client_port" });
 
@@ -75,6 +76,11 @@ export default class App extends React.Component {
             exact
             path="/notifications"
             render={(props) => <Notifications {...props} port={port} />}
+          />
+          <Route
+            exact
+            path="/twoStepsVerification"
+            render={(props) => <TwoStepsVerification {...props} port={port} />}
           />
         </Switch>
       </div>
