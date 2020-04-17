@@ -20,7 +20,7 @@ import {PersistenceActionsConstants} from "../../../src/stores/Persistence/Const
 export default function ManagePasswords(props) {
   const [anchorEl, setAnchorEl] = useState(null);
   const [getCredentials, setGetCredentials] = useState(false);
-  const [credentials, setCredentials] = useState({});
+  const [credentials, setCredentials] = useState([]);
   const [showOptions, setShowOptions] = useState(false);
   const [showPasswordAction, setShowPasswordAction] = useState(false);
   const [passwordAction, setPasswordAction] = useState("");
@@ -49,7 +49,7 @@ export default function ManagePasswords(props) {
       setGetCredentials(true);
       if('errorMessage' in msg.payload) setError(true);
     } else if (msg.type === ManagePasswordsActionsConstants.GET_MANAGE_PASSWORDS_STATE_SUCCESS) {
-      setCredentials(msg.payload.state.credentials || {});
+      setCredentials(msg.payload.state.credentials || []);
       setShowPasswordAction(msg.payload.state.showPasswordAction || "");
       setPasswordAction(msg.payload.state.passwordAction || "");
     }
@@ -79,9 +79,8 @@ export default function ManagePasswords(props) {
     const enteredPassword = jq("input:password").val();
     const enteredUsername = jq("input:text").val();
 
-    // The user has changed the saved password / username ask him whether to update
-    if (Object.keys(credentials).length !== 0 && (credentials.password !== enteredPassword ||
-        credentials.username !== enteredUsername)) {
+    // The user has changed the saved password ask him whether to update
+    if (credentials.some((item) => item.username === enteredUsername && item.password !== enteredPassword)) {
       props.port.postMessage({
         type: PersistenceActionsConstants.SET_STATE,
         payload: {value: {credentials: {username: enteredUsername, password: enteredPassword, url: credentials.url, id: credentials.id},
@@ -89,8 +88,8 @@ export default function ManagePasswords(props) {
       });
     }
 
-    // We dont have this website credentials, ask the user whether to store them
-    else if (Object.keys(credentials).length === 0) {
+    // We dont have this website credentials (or got new credentials - new username), ask the user whether to store them
+    else if (credentials.some((item) => item.username !== enteredUsername)) {
       props.port.postMessage({
         type: PersistenceActionsConstants.SET_STATE,
         payload: {value: {credentials: {username: enteredUsername, password: enteredPassword, url: window.location.toString(), id: credentials.id},
@@ -107,9 +106,9 @@ export default function ManagePasswords(props) {
     }
   });
 
-  const injectSavedCredentials = () => {
-    jq("input:text").val(credentials.username);
-    jq("input:password").val(credentials.password);
+  const injectSavedCredentials = (index) => {
+    jq("input:text").val(credentials[index].username);
+    jq("input:password").val(credentials[index].password);
   };
 
   return (
@@ -126,18 +125,20 @@ export default function ManagePasswords(props) {
             <Fade {...TransitionProps} timeout={350}>
               <Paper>
                 <List component="nav" aria-label="main mailbox folders">
+                  {credentials.map((item, index) =>
                   <ListItem button onClick={() => {
-                    injectSavedCredentials();
+                    injectSavedCredentials(index);
                     setShowOptions(false)
                   }}>
                     <ListItemIcon>
                       <VpnKeyIcon/>
                     </ListItemIcon>
                     <ListItemText
-                        primary={credentials.username}
-                        secondary={Array(credentials.password.length).fill("*")}
+                        primary={item.username}
+                        secondary={Array(item.password.length).fill("*")}
                     />
                   </ListItem>
+                  )}
                   <Divider/>
                   <ListItem button onClick={() => {setShowOptions(false); props.port.postMessage({
                     type: ManagePasswordsActionsConstants.OPEN_PASSWORDS_LIST_TAB,
