@@ -1,5 +1,5 @@
 /*global chrome*/
-import React from "react";
+import React, {useState} from "react";
 import {
     Avatar,
   Collapse,
@@ -17,7 +17,6 @@ import { LoginActionsConstants } from "../../stores/Login/Constants";
 import {HistoryConstants} from "../../stores/History/Constants";
 import ExpandLess from '@material-ui/icons/ExpandLess';
 import ExpandMore from '@material-ui/icons/ExpandMore';
-import StarBorder from '@material-ui/icons/StarBorder';
 import { history } from "../../index";
 
 const useStyles = makeStyles((theme) => ({
@@ -32,6 +31,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export default function UserProfile(props) {
+    console.log(props);
   const classes = useStyles();
   const [openSecurityMenu, setOpenSecurityMenu] = React.useState(false);
 
@@ -58,7 +58,8 @@ export default function UserProfile(props) {
         </ListItem>
         <Collapse in={openSecurityMenu} timeout="auto" unmountOnExit>
             <List component="div" disablePadding>
-                <ListItem button className={classes.nested} onClick={() => history.push("/twoStepsVerification")}>
+                <ListItem button className={classes.nested} onClick={() => history.push("/twoStepsVerification",
+                    {user: props.location.state.user})}>
                     <ListItemAvatar >
                         <Avatar
                             alt="s"

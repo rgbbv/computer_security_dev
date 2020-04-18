@@ -3,6 +3,7 @@ const PersistenceActionsConstants = {
     GET_STATE: "GET_STATE",
 
     SET_STATE: "SET_STATE",
+    OPEN_TAB: "OPEN_TAB",
 };
 
 export { PersistenceActionsConstants };

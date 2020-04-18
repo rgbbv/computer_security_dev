@@ -1,5 +1,6 @@
 import {LoginActionsConstants} from "../stores/Login/Constants";
 import {authenticateRes} from "../helpers/CryptoHelper";
+import {NotificationActionsConstants} from "../stores/Notification/Constants";
 
 export const authenticateUserPasswords = (user) => {
     return {
@@ -46,4 +47,34 @@ export const logout = (port) => {
         type: LoginActionsConstants.LOGOUT_SUCCESS,
         payload: {},
     })
+};
+
+export const updateUser = (baseApi, userData, port, onSuccessType, onFailureType) => {
+    fetch(baseApi + "/user/" + JSON.parse(localStorage.getItem("user")).id, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: 'Bearer ' + localStorage.getItem("accessToken")
+        },
+        body: JSON.stringify(userData),
+    })
+        .then((res) =>
+            res.status === 200
+                ? res.text().then((text) => {
+                    localStorage.setItem("user", text);
+                    port.postMessage({
+                        type: onSuccessType,
+                        payload: JSON.parse(text),
+                    })}
+                )
+                : res.text().then((text) =>
+                    port.postMessage({
+                        type: onFailureType,
+                        payload: JSON.parse(text),
+                    })
+                )
+        )
+        .catch((err) =>
+            port.postMessage({ type: onFailureType, payload: { errorMessage: "Internal server error" }})
+        );
 };

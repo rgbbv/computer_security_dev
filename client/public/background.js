@@ -2,8 +2,9 @@
 import { deriveSecrets, checkHMAC, encryptAndAuthenticate, authenticateAndDecrypt, authenticateRes } from "../src/helpers/CryptoHelper.js"
 import {updateCredentials, saveCredentials} from "../src/services/CredentialsService";
 import {setState, getState} from "../src/services/PersistenceService";
-import { verifyUserLoggedIn, logout, isUserLoggedIn, authenticateUserPasswords } from "../src/services/UserService";
+import { verifyUserLoggedIn, logout, isUserLoggedIn, authenticateUserPasswords, updateUser } from "../src/services/UserService";
 import {updateNotification}  from "../src/services/NotificationService";
+import {pair}  from "../src/services/SecurityService";
 import {LoginActionsConstants} from "../src/stores/Login/Constants";
 import {RegisterActionsConstants} from "../src/stores/Register/Constants";
 import {NotificationActionsConstants} from "../src/stores/Notification/Constants";
@@ -11,6 +12,8 @@ import {PasswordListActionsConstants} from "../src/stores/PasswordList/Constants
 import {PersistenceActionsConstants} from "../src/stores/Persistence/Constants";
 import {HistoryConstants} from "../src/stores/History/Constants";
 import {ManagePasswordsActionsConstants} from "../src/stores/ManagePasswords/Constants";
+import {UserActionsConstants} from "../src/stores/User/Constants";
+import {SecurityActionsConstants} from "../src/stores/Security/Constants";
 
 const baseApi = "http://localhost:3000/api";
 let encryptionSecret = '';
@@ -114,6 +117,8 @@ chrome.runtime.onConnect.addListener(function (port) {
               )
         )
         .catch((err) => port.postMessage({ type: LoginActionsConstants.LOGIN_FAILURE, payload: { errorMessage: "Internal server error" }}));
+    } else if (msg.type === UserActionsConstants.UPDATE_USER) {
+        updateUser(baseApi, msg.payload.userData, port, msg.payload.onSuccessType, msg.payload.onFailureType);
     } else if (msg.type === NotificationActionsConstants.UPDATE_NOTIFICATION) {
         updateNotification(baseApi, msg.payload.notification, port);
     } else if (msg.type === LoginActionsConstants.IS_USER_LOGGED_IN) {
@@ -161,6 +166,10 @@ chrome.runtime.onConnect.addListener(function (port) {
         localStorage.setItem("history", msg.payload.history);
     } else if (msg.type === ManagePasswordsActionsConstants.OPEN_PASSWORDS_LIST_TAB) {
         chrome.tabs.create({url: msg.payload.url});
+    } else if (msg.type === PersistenceActionsConstants.OPEN_TAB) {
+        chrome.tabs.create({url: msg.payload.url});
+    } else if (msg.type === SecurityActionsConstants.GET_QR_CODE) {
+        pair(msg.payload, port);
     }
   });
 });

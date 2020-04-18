@@ -20,6 +20,12 @@ let userSchema = new mongoose.Schema({
         required: 'Email cannot be empty',
         unique: true
     },
+    security: {
+        twoStepsVerification: {
+            type: Boolean,
+            default: false
+        }
+    },
     passwords: [PassVault.schema],
     notifications: [Notification.schema],
     salt: {type: String, hide: true},

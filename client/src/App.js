@@ -9,7 +9,7 @@ import { Switch, Route } from "react-router-dom";
 import { history } from "./index";
 import {LoginActionsConstants} from "./stores/Login/Constants";
 import {HistoryConstants} from "./stores/History/Constants";
-import TwoStepsVerification from "./components/TwoStepsVerification/TwoStepsVerification";
+import TwoStepsVerification from "./components/Security/TwoStepsVerification";
 
 const port = chrome.runtime.connect({ name: "client_port" });
 
