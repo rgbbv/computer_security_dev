@@ -13,11 +13,17 @@ import {
     Link,
     FormControlLabel,
     TextField,
+    CircularProgress,
     Checkbox
 } from "@material-ui/core";
 import {Alert, AlertTitle} from '@material-ui/lab';
 import SystemUpdateIcon from '@material-ui/icons/SystemUpdate';
 import {PersistenceActionsConstants} from "../../stores/Persistence/Constants";
+import {SecurityActionsConstants} from "../../stores/Security/Constants";
+import {LoginActionsConstants} from "../../stores/Login/Constants";
+import {history} from "../../index";
+import {HistoryConstants} from "../../stores/History/Constants";
+import {UserActionsConstants} from "../../stores/User/Constants";
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -36,8 +42,42 @@ const useStyles = makeStyles((theme) => ({
 export default function TwoStepsVerificationStepper(props) {
     const classes = useStyles();
     const [activeStep, setActiveStep] = React.useState(0);
-    const [checked, setChecked] = React.useState(false);
+    const [isVerifyingPin, setIsVerifyingPin] = React.useState(false);
+    const [errorMessage, setErrorMessage] = React.useState("");
+    // const [checked, setChecked] = React.useState(false);
     const steps = ['Download the Google authenticator app', 'Scan the QR code with the app', 'Enter the 6-digit code from the app'];
+
+    props.port.onMessage.addListener(function (msg) {
+        if (msg.type === SecurityActionsConstants.VALIDATE_PIN_SUCCESS) {
+            if (msg.payload === "True") {
+                setErrorMessage("");
+                props.port.postMessage({
+                    type: UserActionsConstants.UPDATE_USER,
+                    payload: {
+                        userData: {security: {twoStepsVerification: true, secret: props.secret}},
+                        onSuccessType: SecurityActionsConstants.UPDATE_USER_SECURITY_SUCCESS,
+                        onFailureType: SecurityActionsConstants.UPDATE_USER_SECURITY_FAILURE
+                    }
+                });
+            } else {
+                setIsVerifyingPin(false);
+                setErrorMessage("PIN Rejected");
+            }
+        } else if (msg.type === SecurityActionsConstants.VALIDATE_PIN_FAILURE) {
+            // Handle failure
+        }
+    });
+
+    function validatePin(e) {
+        const pin = e.target.value;
+        if (pin.length === 6) {
+            setIsVerifyingPin(true);
+            props.port.postMessage({
+                type: SecurityActionsConstants.VALIDATE_PIN,
+                payload: {pin: pin, secret: props.secret}
+            })
+        }
+    }
 
     function getStepContent(stepIndex) {
         switch (stepIndex) {
@@ -86,17 +126,6 @@ export default function TwoStepsVerificationStepper(props) {
                                 {props.secret}
                             </Typography>
                         </Box>
-                        <FormControlLabel
-                            control={
-                                <Checkbox
-                                    checked={checked}
-                                    onChange={(event) => setChecked(!checked)}
-                                    name="checkedB"
-                                    color="primary"
-                                />
-                            }
-                            label="I have read the important note"
-                        />
                     </Box>
                     );
             case 2:
@@ -108,7 +137,9 @@ export default function TwoStepsVerificationStepper(props) {
                         alignItems="center"
                     >
                         <Typography className={classes.instructions}>Enter the 6-digit code from your app:</Typography>
-                        <TextField required id="standard-required" label="Required" />
+                        { !isVerifyingPin ?
+                        <TextField error={errorMessage !== ""} helperText={errorMessage} required id="standard-required" label="Required" onChange={validatePin}/> :
+                            <CircularProgress /> }
                         <Typography className={classes.instructions}>A new code is generated every 30 seconds</Typography>
                     </Box>
                 );
@@ -127,28 +158,19 @@ export default function TwoStepsVerificationStepper(props) {
                 ))}
             </Stepper>
             <div>
-                {activeStep === steps.length ? (
-                    <div>
-                        <Typography className={classes.instructions}>All steps completed</Typography>
-                        <Button onClick={() => setActiveStep(0)}>Reset</Button>
-                    </div>
-                ) : (
-                    <div>
-                        {getStepContent(activeStep)}
-                        <div>
-                            <Button
-                                disabled={activeStep === 0}
-                                onClick={() => setActiveStep((prevActiveStep) => prevActiveStep - 1)}
-                                className={classes.backButton}
-                            >
-                                Back
-                            </Button>
-                            <Button variant="contained" color="primary" onClick={() => setActiveStep((prevActiveStep) => prevActiveStep + 1)}>
-                                {activeStep === steps.length - 1 ? 'Finish' : 'Next'}
-                            </Button>
-                        </div>
-                    </div>
-                )}
+                {getStepContent(activeStep)}
+                <div>
+                    <Button
+                        onClick={() => activeStep === 0 ? history.goBack() : setActiveStep((prevActiveStep) => prevActiveStep - 1)}
+                        className={classes.backButton}
+                    >
+                        Back
+                    </Button>
+                    {activeStep !== steps.length - 1 ?
+                    <Button variant="contained" color="primary" onClick={() => setActiveStep((prevActiveStep) => prevActiveStep + 1)}>
+                         Next
+                    </Button> : undefined }
+                </div>
             </div>
         </div>
     );

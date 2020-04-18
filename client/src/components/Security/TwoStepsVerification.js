@@ -12,13 +12,14 @@ import {
     CardActions,
     IconButton,
     Typography,
-    CircularProgress,
 } from "@material-ui/core";
 import { history } from "../../index";
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import {SecurityActionsConstants} from "../../stores/Security/Constants";
 import {UserActionsConstants} from "../../stores/User/Constants";
 import TwoStepsVerificationStepper from "./TwoStepsVerificationStepper";
+import Alert from "@material-ui/lab/Alert";
+import AlertTitle from "@material-ui/lab/AlertTitle";
 
 const useStyles = makeStyles({
     root: {
@@ -40,37 +41,38 @@ export default function TwoStepsVerification(props) {
     const [secret, setSecret] = useState("");
 
     props.port.onMessage.addListener(function (msg) {
-        if (msg.type === SecurityActionsConstants.UPDATE_USER_SECURITY_SUCCESS) {
-            setIsLoading(false);
-            setUser(msg.payload);
-            //    navigate to QR scan
-        } else if (msg.type === SecurityActionsConstants.UPDATE_USER_SECURITY_FAILURE) {
-            setIsLoading(false);
-        } else if (msg.type === SecurityActionsConstants.GET_QR_CODE_SUCCESS) {
+        if (msg.type === SecurityActionsConstants.GET_QR_CODE_SUCCESS) {
             setQR(msg.payload.QR);
             setSecret(msg.payload.secret);
             setIsLoading(false);
             setShowStepper(true);
+        }  else if (msg.type === SecurityActionsConstants.UPDATE_USER_SECURITY_SUCCESS) {
+            setUser(msg.payload);
+            setIsLoading(false);
+            setShowStepper(false);
+        } else if (msg.type === SecurityActionsConstants.UPDATE_USER_SECURITY_FAILURE) {
+            setIsLoading(false);
+            setShowStepper(false);
         }
     });
 
     const handleSecurityChangeClick = () => {
-        setIsLoading(true);
-        props.port.postMessage({
-            type: UserActionsConstants.UPDATE_USER,
-            payload: {
-                userData: {security: {twoStepsVerification: !user.security.twoStepsVerification}},
-                onSuccessType: SecurityActionsConstants.UPDATE_USER_SECURITY_SUCCESS,
-                onFailureType: SecurityActionsConstants.UPDATE_USER_SECURITY_FAILURE
-            }
-        })
-    };
-
-    const enableTwoStepsVerification = () => {
-        !user.security.twoStepsVerification ? props.port.postMessage({
-            type: SecurityActionsConstants.GET_QR_CODE,
-            payload: user
-        }) : console.log("s")
+        if (!user.security.twoStepsVerification) {
+            props.port.postMessage({
+                type: SecurityActionsConstants.GET_QR_CODE,
+                payload: user
+            });
+        } else {
+            setIsLoading(true);
+            props.port.postMessage({
+                type: UserActionsConstants.UPDATE_USER,
+                payload: {
+                    userData: {security: {twoStepsVerification: false, secret: ""}},
+                    onSuccessType: SecurityActionsConstants.UPDATE_USER_SECURITY_SUCCESS,
+                    onFailureType: SecurityActionsConstants.UPDATE_USER_SECURITY_FAILURE
+                }
+            })
+        }
     };
 
     return (
@@ -109,19 +111,27 @@ export default function TwoStepsVerification(props) {
                     </CardContent>
                 </CardActionArea>
                 <CardActions>
-                    {!isLoading ?
+                    {user.security.twoStepsVerification ?
+                        <Alert severity="success">
+                            <AlertTitle>Secured</AlertTitle>
+                           Your account is <strong>secured!</strong>
+                        </Alert>: <Alert severity="warning">
+                            <AlertTitle>Not Secured</AlertTitle>
+                            Please consider enabling <strong>2-steps verification</strong>
+                        </Alert>}
                     <FormControlLabel
                         control={
                             <Switch
                                 checked={user.security.twoStepsVerification}
-                                onChange={enableTwoStepsVerification}
+                                onChange={handleSecurityChangeClick}
                                 name="checked"
                                 color="primary"
+                                disabled={isLoading}
                             />
                         }
                         label={user.security.twoStepsVerification ? "Disable" : "Enable"}
                         labelPlacement="start"
-                    /> : <CircularProgress />}
+                    />
                 </CardActions>
             </Card>
         </Box> : <TwoStepsVerificationStepper {...props} QR={QR} secret={secret} />

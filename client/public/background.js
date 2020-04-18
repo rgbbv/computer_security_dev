@@ -4,7 +4,7 @@ import {updateCredentials, saveCredentials} from "../src/services/CredentialsSer
 import {setState, getState} from "../src/services/PersistenceService";
 import { verifyUserLoggedIn, logout, isUserLoggedIn, authenticateUserPasswords, updateUser } from "../src/services/UserService";
 import {updateNotification}  from "../src/services/NotificationService";
-import {pair}  from "../src/services/SecurityService";
+import {pair, validate} from "../src/services/SecurityService";
 import {LoginActionsConstants} from "../src/stores/Login/Constants";
 import {RegisterActionsConstants} from "../src/stores/Register/Constants";
 import {NotificationActionsConstants} from "../src/stores/Notification/Constants";
@@ -170,6 +170,8 @@ chrome.runtime.onConnect.addListener(function (port) {
         chrome.tabs.create({url: msg.payload.url});
     } else if (msg.type === SecurityActionsConstants.GET_QR_CODE) {
         pair(msg.payload, port);
+    } else if (msg.type === SecurityActionsConstants.VALIDATE_PIN) {
+        validate(msg.payload.pin, port, msg.payload.secret);
     }
   });
 });

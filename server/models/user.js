@@ -24,6 +24,9 @@ let userSchema = new mongoose.Schema({
         twoStepsVerification: {
             type: Boolean,
             default: false
+        },
+        secret: {
+            type: String,
         }
     },
     passwords: [PassVault.schema],
