@@ -91,7 +91,6 @@ function Login(props) {
 
   function validatePin(e) {
     const pin = e.target.value;
-    console.log(res);
     if (pin.length === 6) {
       setIsVerifyingPin(true);
       props.port.postMessage({

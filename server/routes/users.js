@@ -111,12 +111,10 @@ router.post('/user/validate', jwtHelper.verifyJwtToken, (req, res, next) => {
                     res.status(422).json({errorMessage: "PIN Rejected"})
                 }
             }).catch((err) => {
-                console.log(err);
                 res.status(500).json({errorMessage: "Internal server error"});
             });
         })
         .catch((err) => {
-            console.log(err);
             res.status(500).json({errorMessage: "Internal server error"});
         })
 });

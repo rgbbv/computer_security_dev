@@ -31,7 +31,6 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export default function UserProfile(props) {
-    console.log(props);
   const classes = useStyles();
   const [openSecurityMenu, setOpenSecurityMenu] = React.useState(false);
 
