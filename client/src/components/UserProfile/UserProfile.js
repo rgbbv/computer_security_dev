@@ -1,18 +1,40 @@
 /*global chrome*/
-import React from "react";
+import React, {useState} from "react";
 import {
+    Avatar,
+  Collapse,
   Divider,
   List,
   ListItem,
   ListItemIcon,
   ListItemText,
+  ListItemAvatar
 } from "@material-ui/core";
 import PowerSettingsNewIcon from "@material-ui/icons/PowerSettingsNew";
+import { makeStyles } from '@material-ui/core/styles';
+import SecurityIcon from '@material-ui/icons/Security';
 import { LoginActionsConstants } from "../../stores/Login/Constants";
 import {HistoryConstants} from "../../stores/History/Constants";
+import ExpandLess from '@material-ui/icons/ExpandLess';
+import ExpandMore from '@material-ui/icons/ExpandMore';
 import { history } from "../../index";
 
+const useStyles = makeStyles((theme) => ({
+    root: {
+        width: '100%',
+        maxWidth: 360,
+        backgroundColor: theme.palette.background.paper,
+    },
+    nested: {
+        paddingLeft: theme.spacing(4),
+    },
+}));
+
 export default function UserProfile(props) {
+    console.log(props);
+  const classes = useStyles();
+  const [openSecurityMenu, setOpenSecurityMenu] = React.useState(false);
+
   props.port.onMessage.addListener(function (msg) {
     if (msg.type === LoginActionsConstants.LOGOUT_SUCCESS) {
       history.push(HistoryConstants.LOGIN);
@@ -27,6 +49,28 @@ export default function UserProfile(props) {
 
   return (
     <List component="nav" aria-label="main mailbox folders">
+        <ListItem button onClick={() => setOpenSecurityMenu(!openSecurityMenu)}>
+            <ListItemIcon>
+                <SecurityIcon />
+            </ListItemIcon>
+            <ListItemText primary="Security" />
+            {openSecurityMenu ? <ExpandLess /> : <ExpandMore />}
+        </ListItem>
+        <Collapse in={openSecurityMenu} timeout="auto" unmountOnExit>
+            <List component="div" disablePadding>
+                <ListItem button className={classes.nested} onClick={() => history.push("/twoStepsVerification",
+                    {user: props.location.state.user})}>
+                    <ListItemAvatar >
+                        <Avatar
+                            alt="s"
+                            src={`/assets/2-steps-verification.jpg`}
+                        />
+                    </ListItemAvatar >
+                    <ListItemText primary="2-Steps Verification" />
+                </ListItem>
+            </List>
+        </Collapse>
+        <Divider />
       <ListItem
         button
         onClick={() =>
