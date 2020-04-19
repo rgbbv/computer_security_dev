@@ -84,7 +84,7 @@ export default function TwoStepsVerification(props) {
             alignItems="center"
         >
         <Box alignSelf="flex-start">
-            <IconButton aria-label="arrow-back" size="small" onClick={() => history.goBack() }>
+            <IconButton aria-label="arrow-back" size="small" onClick={() => history.push('/home', {user: user}) }>
                 <ArrowBackIcon fontSize="inherit" />
             </IconButton>
         </Box>

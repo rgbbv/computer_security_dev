@@ -44,7 +44,6 @@ export default function TwoStepsVerificationStepper(props) {
     const [activeStep, setActiveStep] = React.useState(0);
     const [isVerifyingPin, setIsVerifyingPin] = React.useState(false);
     const [errorMessage, setErrorMessage] = React.useState("");
-    // const [checked, setChecked] = React.useState(false);
     const steps = ['Download the Google authenticator app', 'Scan the QR code with the app', 'Enter the 6-digit code from the app'];
 
     props.port.onMessage.addListener(function (msg) {
@@ -122,7 +121,7 @@ export default function TwoStepsVerificationStepper(props) {
                             alignItems="center"
                         >
                             <div dangerouslySetInnerHTML={{ __html: props.QR }} />
-                            <Typography className={classes.instructions}>Authentication Key:
+                            <Typography className={classes.instructions}>{`Authentication Key:\n`}
                                 {props.secret}
                             </Typography>
                         </Box>
