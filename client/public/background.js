@@ -2,9 +2,10 @@
 import { deriveSecrets, checkHMAC, encryptAndAuthenticate, authenticateAndDecrypt, authenticateRes } from "../src/helpers/CryptoHelper.js"
 import {updateCredentials, saveCredentials} from "../src/services/CredentialsService";
 import {setState, getState} from "../src/services/PersistenceService";
-import { verifyUserLoggedIn, logout, isUserLoggedIn, authenticateUserPasswords, updateUser } from "../src/services/UserService";
+import { verifyUserLoggedIn, logout, isUserLoggedIn, authenticateUserPasswords, updateUser,
+    handlePreSignIn, handlePostSignIn} from "../src/services/UserService";
 import {updateNotification}  from "../src/services/NotificationService";
-import {pair, validate} from "../src/services/SecurityService";
+import {pair, validate, validateWithServer} from "../src/services/SecurityService";
 import {LoginActionsConstants} from "../src/stores/Login/Constants";
 import {RegisterActionsConstants} from "../src/stores/Register/Constants";
 import {NotificationActionsConstants} from "../src/stores/Notification/Constants";
@@ -16,47 +17,17 @@ import {UserActionsConstants} from "../src/stores/User/Constants";
 import {SecurityActionsConstants} from "../src/stores/Security/Constants";
 
 const baseApi = "http://localhost:3000/api";
-let encryptionSecret = '';
-let authenticationSecret = '';
-let serverSecret = '';
-
-/**
- * Gets the user masterPassword, derives encryptionSecret, authenticationSecret, serverSecret.
- * serverSecret is used as server's password.
- * @param masterPassword
- */
-const handlePreSignIn = (masterPassword) => {
-    [encryptionSecret, authenticationSecret, serverSecret] = deriveSecrets(masterPassword);
-    localStorage.setItem("encryptionSecret", encryptionSecret);
-    localStorage.setItem("authenticationSecret", authenticationSecret);
-
-    return serverSecret;
-};
-
-/**
- * Upon login / signUp we get a server response containing the user data and accessToken, then we should store
- * the user data and accessToken in local storage. Right after we verify the integrity of the user passwords.
- *
- * @param res The server login / signUp response
- */
-const handlePostSignIn = (res) => {
-    localStorage.setItem("accessToken", res.accessToken);
-    localStorage.setItem("user", JSON.stringify(res.user));
-
-    // Verify passwords integrity
-    return authenticateUserPasswords(res.user);
-};
 
 const encryptUserWebsitePassword = (password) => {
-    encryptionSecret = localStorage.getItem("encryptionSecret");
-    authenticationSecret = localStorage.getItem("authenticationSecret");
+    const encryptionSecret = localStorage.getItem("encryptionSecret");
+    const authenticationSecret = localStorage.getItem("authenticationSecret");
 
     return encryptAndAuthenticate(password, encryptionSecret, authenticationSecret);
 };
 
 const decryptUserWebsitePassword = (encryptedPassword) => {
-    encryptionSecret = localStorage.getItem("encryptionSecret");
-    authenticationSecret = localStorage.getItem("authenticationSecret");
+    const encryptionSecret = localStorage.getItem("encryptionSecret");
+    const authenticationSecret = localStorage.getItem("authenticationSecret");
 
     return authenticateAndDecrypt(encryptedPassword, encryptionSecret, authenticationSecret);
 };
@@ -104,9 +75,14 @@ chrome.runtime.onConnect.addListener(function (port) {
           res.status === 200
             ? res.text().then((text) => {
                   const res = JSON.parse(text);
+                  !res.user.security.twoStepsVerification ?
                   port.postMessage({
                       type: LoginActionsConstants.LOGIN_SUCCESS,
                       payload: handlePostSignIn(res),
+                  }) :
+                  port.postMessage({
+                      type: LoginActionsConstants.TWO_STEPS_VERIFICATION,
+                      payload: res,
                   })
               })
             : res.text().then((text) =>
@@ -172,6 +148,8 @@ chrome.runtime.onConnect.addListener(function (port) {
         pair(msg.payload, port);
     } else if (msg.type === SecurityActionsConstants.VALIDATE_PIN) {
         validate(msg.payload.pin, port, msg.payload.secret);
+    } else if (msg.type === SecurityActionsConstants.VALIDATE_PIN_SERVER) {
+        validateWithServer(baseApi, msg.payload.pin, port, msg.payload.accessToken);
     }
   });
 });

@@ -27,6 +27,7 @@ let userSchema = new mongoose.Schema({
         },
         secret: {
             type: String,
+            hide: true
         }
     },
     passwords: [PassVault.schema],
@@ -38,8 +39,8 @@ let userSchema = new mongoose.Schema({
     toJSON: { virtuals: true }
 });
 
-userSchema.methods.generateJwt = function () {
-    return jwt.sign({ id: this.id }, config.get("JWT_SECRET"), { expiresIn: config.get("JWT_EXP") });
+userSchema.methods.generateJwt = function (payload = {}) {
+    return jwt.sign(payload, config.get("JWT_SECRET"), { expiresIn: config.get("JWT_EXP") });
 };
 
 userSchema.methods.setPassword = function(password) {

@@ -1,5 +1,6 @@
 /*global chrome*/
 import React, { useState } from "react";
+import { makeStyles } from '@material-ui/core/styles';
 import {
   Button,
   FormControl,
@@ -11,7 +12,7 @@ import {
   InputLabel,
   Box,
   CircularProgress,
-  TextField,
+  TextField, Typography,
 } from "@material-ui/core";
 import LockIcon from "@material-ui/icons/Lock";
 import Visibility from "@material-ui/icons/Visibility";
@@ -19,18 +20,38 @@ import VisibilityOff from "@material-ui/icons/VisibilityOff";
 import { history } from "../../index";
 import { LoginActionsConstants } from "../../stores/Login/Constants";
 import {HistoryConstants} from "../../stores/History/Constants";
+import {SecurityActionsConstants} from "../../stores/Security/Constants";
+
+const useStyles = makeStyles((theme) => ({
+  root: {
+    width: 600,
+    height: 520
+  },
+  backButton: {
+    marginRight: theme.spacing(1),
+  },
+  instructions: {
+    marginTop: theme.spacing(1),
+    marginBottom: theme.spacing(1),
+  },
+}));
 
 function Login(props) {
+  const classes = useStyles();
   const [errorMessage, setErrorMessage] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loginLoading, setLoginLoading] = useState(false);
+  const [res, setRes] = useState({});
+  const [showTwoStep, setShowTwoStep] = useState(false);
+  const [isVerifyingPin, setIsVerifyingPin] = React.useState(false);
 
   props.port.onMessage.addListener(function (msg) {
-    if (msg.type === LoginActionsConstants.LOGIN_SUCCESS) {
+    if (msg.type === LoginActionsConstants.LOGIN_SUCCESS || msg.type === SecurityActionsConstants.VALIDATE_PIN_SERVER_SUCCESS) {
       setErrorMessage("");
       setLoginLoading(false);
+      setIsVerifyingPin(false);
       history.push(HistoryConstants.HOME, msg.payload);
       props.port.postMessage({
         type: HistoryConstants.CHANGE_HISTORY,
@@ -39,6 +60,13 @@ function Login(props) {
     } else if (msg.type === LoginActionsConstants.LOGIN_FAILURE) {
       setLoginLoading(false);
       setErrorMessage(msg.payload.errorMessage);
+    } else if (msg.type === LoginActionsConstants.TWO_STEPS_VERIFICATION) {
+      setRes(msg.payload);
+      setLoginLoading(false);
+      setShowTwoStep(true);
+    } else if (msg.type === SecurityActionsConstants.VALIDATE_PIN_SERVER_FAILURE) {
+      setErrorMessage(msg.payload.errorMessage);
+      setIsVerifyingPin(false);
     }
   });
 
@@ -61,7 +89,20 @@ function Login(props) {
     });
   }
 
+  function validatePin(e) {
+    const pin = e.target.value;
+    console.log(res);
+    if (pin.length === 6) {
+      setIsVerifyingPin(true);
+      props.port.postMessage({
+        type: SecurityActionsConstants.VALIDATE_PIN_SERVER,
+        payload: {pin: pin, accessToken: res.accessToken}
+      })
+    }
+  }
+
   return (
+      <div style={{ width: 200, height: 300}}>
     <Box
       display="flex"
       flexDirection="column"
@@ -74,7 +115,8 @@ function Login(props) {
         </Avatar>
       </div>
       <h3>Password Vault</h3>
-
+      { !showTwoStep ?
+          <div>
       <TextField
         id="outlined-email"
         label="Email"
@@ -127,7 +169,16 @@ function Login(props) {
           Sign Up
         </Button>
       </Box>
+          </div>
+          :
+          <div>
+            <Typography className={classes.instructions}>Enter the 6-digit code from your app:</Typography>
+            <TextField disabled={isVerifyingPin} error={errorMessage !== ""} helperText={errorMessage} required id="standard-required" label="Required" onChange={validatePin}/>
+            {isVerifyingPin ? <CircularProgress /> : undefined}
+          </div>
+          }
     </Box>
+      </div>
   );
 }
 

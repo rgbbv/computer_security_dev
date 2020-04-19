@@ -16,6 +16,7 @@ module.exports.verifyJwtToken = (req, res, next) => {
             }
             else {
                 req.id = decoded.id;
+                req.authenticate = decoded.authenticate;
                 next();
             }
         })

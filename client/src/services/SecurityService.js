@@ -1,4 +1,5 @@
 import {SecurityActionsConstants} from "../stores/Security/Constants";
+import {handlePostSignIn} from "./UserService";
 
 export const pair = (user, port) => {
     // Generating secret
@@ -51,5 +52,34 @@ export const validate = (pin, port, secret) => {
         )
         .catch((err) =>
             port.postMessage({ type: SecurityActionsConstants.VALIDATE_PIN_FAILURE, payload: { errorMessage: "Internal server error" }})
+        );
+};
+
+export const validateWithServer = (baseApi, pin, port, accessToken) => {
+    fetch(baseApi + "/user/validate?pin=" + pin, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: 'Bearer ' + accessToken
+        },
+    })
+        .then((res) =>
+            res.status === 200
+                ? res.text().then((text) => {
+                    port.postMessage({
+                        type: SecurityActionsConstants.VALIDATE_PIN_SERVER_SUCCESS,
+                        payload: handlePostSignIn(JSON.parse(text)),
+                    })}
+                )
+                : res.text().then((text) =>
+                    port.postMessage({
+                        type: SecurityActionsConstants.VALIDATE_PIN_SERVER_FAILURE,
+                        payload: JSON.parse(text),
+                    })
+                )
+        )
+        .catch((err) =>
+            port.postMessage({ type: SecurityActionsConstants.VALIDATE_PIN_SERVER_FAILURE,
+                payload: { errorMessage: "Internal server error" }})
         );
 };
