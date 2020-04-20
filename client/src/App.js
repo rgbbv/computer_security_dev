@@ -5,6 +5,8 @@ import Register from "./components/Register/Register";
 import PasswordList from "./components/PasswordList/PasswordList";
 import Notifications from "./components/Notifications/Notifications";
 import Home from './components/Home/Home';
+import AddPassword from './components/AddPassword/AddPassword';
+import UpdatePassword from './components/UpdatePassword/UpdatePassword';
 import { Switch, Route } from "react-router-dom";
 import { history } from "./index";
 import {LoginActionsConstants} from "./stores/Login/Constants";
@@ -48,7 +50,7 @@ export default class App extends React.Component {
 
     render() {
     return (
-      <div>
+      <div style={{minWidth: "250px"}}>
         <Switch>
           <Route exact path="/" component={App} />
           <Route
@@ -75,6 +77,16 @@ export default class App extends React.Component {
             exact
             path="/notifications"
             render={(props) => <Notifications {...props} port={port} />}
+          />
+          <Route
+            exact
+            path="/addPassword"
+            render={(props) => <AddPassword {...props} port={port} />}
+          />
+          <Route
+            exact
+            path="/updatePassword"
+            render={(props) => <UpdatePassword {...props} port={port} />}
           />
         </Switch>
       </div>

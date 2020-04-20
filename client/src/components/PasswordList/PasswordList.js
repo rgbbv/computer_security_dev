@@ -9,12 +9,18 @@ import {
   Paper,
   TextField,
   InputAdornment,
-} from "@material-ui/core";
+  } from "@material-ui/core";
 import {Visibility, VisibilityOff}  from "@material-ui/icons";
 import ReportProblemIcon from "@material-ui/icons/ReportProblem";
+import SearchIcon from '@material-ui/icons/Search';
+import EditIcon from '@material-ui/icons/Edit';
+import AddBoxIcon from '@material-ui/icons/AddBox';
+import {filter} from 'lodash';
+import {HistoryConstants} from "../../stores/History/Constants";
+import { history } from "../../index";
 
 function PasswordList(props) {
-
+  const [search, setSearch] = useState("");
   const [user, setUser] = useState(props.location.state.user);
   const [showPassword, setShowPassword] = useState(
     props.location.state.user.passwords.map(() => false)
@@ -29,69 +35,113 @@ function PasswordList(props) {
   };
 
   const showAddress = (url) => {
-    const splits = url.split("/", 4);
-    return splits.length < 4 ? url : url.split(splits[3])[0];
+    const replaced_url = url.replace("https://","").replace("www.","");
+    const splits = replaced_url.split("/", 2);
+    return splits[0];
+  }
+
+  const switchToAddPassword = () => {
+    history.push(HistoryConstants.ADD_PASSWORD, {user: user});
+    props.port.postMessage({
+      type: HistoryConstants.CHANGE_HISTORY,
+      payload: {history: HistoryConstants.ADD_PASSWORD}
+    });
+  };
+
+  const switchToUpdatePassword = (credentials) => {
+    history.push(HistoryConstants.UPDATE_PASSWORD, {user: user, credentials: credentials});
+    props.port.postMessage({
+      type: HistoryConstants.CHANGE_HISTORY,
+      payload: {
+        history:HistoryConstants.UPDATE_PASSWORD,
+      }
+    })
   }
 
   return user.passwords.length !== 0 ? (
-    <TableContainer component={Paper} style={{ maxHeight: "330px", paddingBottom: "50px" }} >
-      <Table stickyHeader aria-label="simple table">
-        <TableHead>
-          <TableRow>
-            <TableCell>URL</TableCell>
-            <TableCell>UserName</TableCell>
-            <TableCell>Password</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody >
-          {user.passwords.map((row, index) => (
-            <TableRow key={row.name}>
-              <TableCell style={{ maxWidth: "100px", overflowX: "scroll", overflowY: "hidden"}} component="th" scope="row">
-                {showAddress(row.url)}
-              </TableCell>
-              <TableCell style={{ maxWidth: "20px", overflowX: "hidden", overflowY: "hidden"}}
-              >{row.username}</TableCell>
-              <TableCell style={{ minWidth: "50px" }}>
-                <div style={{display: "flex"}}>
-                <TextField
-                  disabled
-                  type={showPassword[index] ? "text" : "password"}
-                  InputProps={{
-                    readOnly: true,
-                    endAdornment: (
-                      <InputAdornment
-                        position="end"
-                        onClick={() =>
-                          setShowPassword(
-                            showPassword.map((e, i) => (i === index ? !e : e))
-                          )
-                        }
-                      >
-                        {showPassword[index] ? (
-                          <VisibilityOff />
-                        ) : (
-                          <Visibility />
-                        )}
-                      </InputAdornment>
-                    ),
-                  }}
-                  defaultValue={row.password}
-                />
-                {isCorrupted(row.url) ?
-                <div title="The password has been corrupted!" id="corrupted">
-                <ReportProblemIcon
-                 color="secondary" position="end" 
-                 aria-label="corrupted">
-                 </ReportProblemIcon>
-                </div>:
-                <div/>}
-                </div>
-              </TableCell>
+    <div>
+      <div id="search" style={{display: "flex"}}>
+        <TextField label="Search field" type="search" size="small" fullWidth
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon />
+              </InputAdornment>
+            ),
+          }}
+        />
+        <Paper elevation={3} style={{minWidth: "60px", height: "115px"}}>
+          <h2 style={{textAlign: "center", marginBottom: "auto"}}>Add password</h2>
+          <AddBoxIcon color="secondary" style={{ fontSize: 50, display: "inline", width: "100" }}
+           onClick={switchToAddPassword.bind(this)}>Add password</AddBoxIcon>
+        </Paper>
+
+      </div>
+      <TableContainer component={Paper} style={{ maxHeight: "330px", paddingBottom: "50px" }} >
+        <Table stickyHeader aria-label="simple table">
+          <TableHead>
+            <TableRow>
+              <TableCell style={{fontWeight: "bold"}}>URL</TableCell>
+              <TableCell style={{fontWeight: "bold"}}>UserName</TableCell>
+              <TableCell style={{fontWeight: "bold"}}>Password</TableCell>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
+          </TableHead>
+          <TableBody >
+            {filter(user.passwords, (entry) => showAddress(entry.url).includes(search)).map((row, index) => (
+              <TableRow key={row.name}>
+                <TableCell style={{ maxWidth: "100px", overflowX: "scroll", overflowY: "hidden"}} component="th" scope="row">
+                  {showAddress(row.url)}
+                </TableCell>
+                <TableCell style={{ maxWidth: "20px", overflowX: "hidden", overflowY: "hidden"}}
+                >{row.username}</TableCell>
+                <TableCell style={{ width: "180px" }}>
+                  <div style={{display: "flex"}}>
+                  <TextField
+                    disabled
+                    type={showPassword[index] ? "text" : "password"}
+                    InputProps={{
+                      readOnly: true,
+                      endAdornment: (
+                        <InputAdornment
+                          position="end"
+                          onClick={() =>
+                            setShowPassword(
+                              showPassword.map((e, i) => (i === index ? !e : e))
+                            )
+                          }
+                        >
+                          {showPassword[index] ? (
+                            <VisibilityOff />
+                          ) : (
+                            <Visibility />
+                          )}
+                        </InputAdornment>
+                      ),
+                    }}
+                    defaultValue={row.password}
+                  />
+                  {isCorrupted(row.url) ?
+                  <div title="The password has been corrupted!" id="corrupted">
+                  <ReportProblemIcon
+                  color="secondary" position="end" 
+                  aria-label="corrupted">
+                  </ReportProblemIcon>
+                  </div>:
+                  <div/>}
+                  </div>
+                </TableCell>
+                <EditIcon 
+                  position="end" aria-label="edit"
+                  onClick={switchToUpdatePassword.bind(this, row)}
+                />
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </div>
   ) : (
     <p> You dont have any saved passwords yet </p>
   );

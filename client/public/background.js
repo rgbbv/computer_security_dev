@@ -1,5 +1,5 @@
 /*global chrome*/
-import { deriveSecrets, checkHMAC, encryptAndAuthenticate, authenticateAndDecrypt, authenticateRes } from "../src/helpers/CryptoHelper.js"
+import { deriveSecrets, encryptAndAuthenticate, authenticateAndDecrypt, authenticateRes } from "../src/helpers/CryptoHelper.js"
 import {updateCredentials, saveCredentials} from "../src/services/CredentialsService";
 import {setState, getState} from "../src/services/PersistenceService";
 import { verifyUserLoggedIn, logout } from "../src/services/UserService";
@@ -146,6 +146,7 @@ chrome.runtime.onConnect.addListener(function (port) {
         msg.payload.password = encryptUserWebsitePassword(msg.payload.password);
         saveCredentials(baseApi, msg.payload, port);
     } else if (msg.type === PasswordListActionsConstants.UPDATE_PASSWORD) {
+      console.log(JSON.stringify(msg.payload));
         msg.payload.password = encryptUserWebsitePassword(msg.payload.password);
         updateCredentials(baseApi, msg.payload, port);
     } else if (msg.type === HistoryConstants.CHANGE_HISTORY) {

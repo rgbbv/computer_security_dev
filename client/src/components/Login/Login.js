@@ -73,7 +73,7 @@ function Login(props) {
           <LockIcon />
         </Avatar>
       </div>
-      <h3>Password Vault</h3>
+      <h3>Pass Vault</h3>
 
       <TextField
         id="outlined-email"
@@ -83,9 +83,9 @@ function Login(props) {
         margin="dense"
         variant="outlined"
       />
-      <FormControl variant="outlined" fullWidth error={!!errorMessage}>
+      <FormControl variant="outlined" margin="dense" error={!!errorMessage}>
         <InputLabel htmlFor="outlined-adornment-password">
-          MasterPassword
+          Master Password
         </InputLabel>
         <OutlinedInput
           id="outlined-adornment-password"
