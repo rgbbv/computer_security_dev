@@ -32,10 +32,10 @@ function UpdatePassword(props) {
 
     props.port.onMessage.addListener(function (msg) {
         if (msg.type === PasswordListActionsConstants.UPDATE_PASSWORD_SUCCESS) {
-            history.push(HistoryConstants.PASSWORDS_LIST, {user: user});
+            history.push(HistoryConstants.HOME, {user: user});
             props.port.postMessage({
                 type: HistoryConstants.CHANGE_HISTORY,
-                payload: {history: HistoryConstants.PASSWORDS_LIST}
+                payload: {history: HistoryConstants.HOME}
             });
 
         } else if (msg.type === PasswordListActionsConstants.UPDATE_PASSWORD_FAILURE) {
@@ -49,10 +49,10 @@ function UpdatePassword(props) {
             <Box alignSelf="flex-start">
                 <IconButton aria-label="close" size="small" onClick={() => {
                     console.log(`update: ${JSON.stringify(props)}`);
-                    history.push(HistoryConstants.PASSWORDS_LIST, {user: user});
+                    history.push(HistoryConstants.HOME, {user: user});
                     props.port.postMessage({
                         type: HistoryConstants.CHANGE_HISTORY,
-                        payload: {history: HistoryConstants.PASSWORDS_LIST}
+                        payload: {history: HistoryConstants.HOME}
                     });
                     }} >
                     <CloseIcon fontSize="inherit" />

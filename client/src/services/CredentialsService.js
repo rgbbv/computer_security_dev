@@ -12,7 +12,6 @@ export const updateCredentials = (baseApi, credentials, port) => {
         .then((res) =>
             res.status === 200
                 ? res.text().then((text) => {
-                    localStorage.setItem("user", text);
                     port.postMessage({
                         type: PasswordListActionsConstants.UPDATE_PASSWORD_SUCCESS,
                         payload: JSON.parse(text),
@@ -42,7 +41,6 @@ export const saveCredentials = (baseApi, credentials, port) => {
         .then((res) =>
             res.status === 200
                 ? res.text().then((text) => {
-                    localStorage.setItem("user", text);
                     port.postMessage({
                         type: PasswordListActionsConstants.SAVE_PASSWORD_SUCCESS,
                         payload: JSON.parse(text),
@@ -72,7 +70,6 @@ export const patchCredentials = (baseApi, credentials, port) => {
         .then((res) =>
             res.status === 200
                 ? res.text().then((text) => {
-                    localStorage.setItem("user", text);
                     port.postMessage({
                         type: PasswordListActionsConstants.SAVE_PASSWORD_SUCCESS,
                         payload: JSON.parse(text),

@@ -83,7 +83,7 @@ export const authenticateAndDecrypt = (
   return false;
 };
 
-export const authenticateRes = (res, encryptionSecret, authenticationSecret) => {
+export const findCorrupted = (res, encryptionSecret, authenticationSecret) => {
   const {messages, failHMAC} = authenticateMessages(res.passwords, encryptionSecret, authenticationSecret);
   res.passwords = messages;
   res.corrupted = failHMAC;

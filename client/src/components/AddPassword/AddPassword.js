@@ -11,6 +11,7 @@ import {PasswordListActionsConstants} from "../../stores/PasswordList/Constants"
 import CloseIcon from '@material-ui/icons/Close';
 import {HistoryConstants} from "../../stores/History/Constants";
 import { history } from "../../index";
+import { concat } from "lodash";
 
 function AddPassword(props) {
     const [user, setUser] = useState(props.location.state.user);
@@ -47,11 +48,11 @@ function AddPassword(props) {
         <div id="form">
             <Box alignSelf="flex-start">
                 <IconButton aria-label="close" size="small" onClick={() => {
-                    console.log(`add: ${JSON.stringify(props)}`);
-                    history.push(HistoryConstants.PASSWORDS_LIST, {user: user});
+
+                    history.push(HistoryConstants.HOME, {user: user});
                     props.port.postMessage({
                         type: HistoryConstants.CHANGE_HISTORY,
-                        payload: {history: HistoryConstants.PASSWORDS_LIST}
+                        payload: {history: HistoryConstants.HOME}
                     });
                     }} >
                     <CloseIcon fontSize="inherit" />
