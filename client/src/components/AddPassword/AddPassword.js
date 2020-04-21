@@ -48,10 +48,10 @@ function AddPassword(props) {
             <Box alignSelf="flex-start">
                 <IconButton aria-label="close" size="small" onClick={() => {
                     console.log(`add: ${JSON.stringify(props)}`);
-                    history.push(HistoryConstants.PASSWORDS_LIST, {user: user});
+                    history.push(HistoryConstants.HOME, {user: user});
                     props.port.postMessage({
                         type: HistoryConstants.CHANGE_HISTORY,
-                        payload: {history: HistoryConstants.PASSWORDS_LIST}
+                        payload: {history: HistoryConstants.HOME}
                     });
                     }} >
                     <CloseIcon fontSize="inherit" />

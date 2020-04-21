@@ -49,6 +49,7 @@ function PasswordList(props) {
   };
 
   const switchToUpdatePassword = (credentials) => {
+    localStorage.setItem("credentials", JSON.stringify(credentials));
     history.push(HistoryConstants.UPDATE_PASSWORD, {user: user, credentials: credentials});
     props.port.postMessage({
       type: HistoryConstants.CHANGE_HISTORY,
@@ -74,8 +75,8 @@ function PasswordList(props) {
         />
         <Paper elevation={3} style={{minWidth: "60px", height: "115px"}}>
           <h2 style={{textAlign: "center", marginBottom: "auto"}}>Add password</h2>
-          <AddBoxIcon color="secondary" style={{ fontSize: 50, display: "inline", width: "100" }}
-           onClick={switchToAddPassword.bind(this)}>Add password</AddBoxIcon>
+          <AddBoxIcon style={{ fontSize: 50, display: "inline", width: "100" }}
+           onClick={switchToAddPassword.bind(this)} />
         </Paper>
 
       </div>
@@ -86,15 +87,16 @@ function PasswordList(props) {
               <TableCell style={{fontWeight: "bold"}}>URL</TableCell>
               <TableCell style={{fontWeight: "bold"}}>UserName</TableCell>
               <TableCell style={{fontWeight: "bold"}}>Password</TableCell>
+              <TableCell />
             </TableRow>
           </TableHead>
           <TableBody >
             {filter(user.passwords, (entry) => showAddress(entry.url).includes(search)).map((row, index) => (
               <TableRow key={row.name}>
-                <TableCell style={{ maxWidth: "100px", overflowX: "scroll", overflowY: "hidden"}} component="th" scope="row">
+                <TableCell style={{ maxWidth: "120px", overflowX: "overlay", overflowY: "hidden"}} component="th" scope="row">
                   {showAddress(row.url)}
                 </TableCell>
-                <TableCell style={{ maxWidth: "20px", overflowX: "hidden", overflowY: "hidden"}}
+                <TableCell style={{ maxWidth: "30px", overflowX: "overlay", overflowY: "hidden"}}
                 >{row.username}</TableCell>
                 <TableCell style={{ width: "180px" }}>
                   <div style={{display: "flex"}}>
@@ -132,10 +134,12 @@ function PasswordList(props) {
                   <div/>}
                   </div>
                 </TableCell>
-                <EditIcon 
-                  position="end" aria-label="edit"
-                  onClick={switchToUpdatePassword.bind(this, row)}
-                />
+                <TableCell>
+                  <EditIcon 
+                    position="end" aria-label="edit"
+                    onClick={switchToUpdatePassword.bind(this, row)}
+                  />
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>

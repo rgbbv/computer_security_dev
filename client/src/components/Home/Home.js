@@ -34,7 +34,7 @@ export default function Home(props) {
   ];
 
   return (
-    <div style={{ width: 500, height: 200 }}>
+    <div style={{ width: 550, height: 200 }}>
       {menuMap[value]}
       <BottomNavigation
         value={value}
