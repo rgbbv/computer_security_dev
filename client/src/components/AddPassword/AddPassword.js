@@ -48,11 +48,6 @@ function AddPassword(props) {
         <div id="form">
             <Box alignSelf="flex-start">
                 <IconButton aria-label="close" size="small" onClick={() => {
-<<<<<<< HEAD
-
-=======
-                    console.log(`add: ${JSON.stringify(props)}`);
->>>>>>> 06bde7c... fixed problems + persistent updating
                     history.push(HistoryConstants.HOME, {user: user});
                     props.port.postMessage({
                         type: HistoryConstants.CHANGE_HISTORY,

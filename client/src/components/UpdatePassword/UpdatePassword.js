@@ -35,12 +35,8 @@ function UpdatePassword(props) {
 
     props.port.onMessage.addListener(function (msg) {
         if (msg.type === PasswordListActionsConstants.UPDATE_PASSWORD_SUCCESS) {
-<<<<<<< HEAD
-            history.push(HistoryConstants.HOME, {user: user});
-=======
             console.log(`user: ${JSON.stringify(user)} payload: ${JSON.stringify(msg.payload)}`);
             history.push(HistoryConstants.HOME, {user: msg.payload});
->>>>>>> 06bde7c... fixed problems + persistent updating
             props.port.postMessage({
                 type: HistoryConstants.CHANGE_HISTORY,
                 payload: {history: HistoryConstants.HOME}
