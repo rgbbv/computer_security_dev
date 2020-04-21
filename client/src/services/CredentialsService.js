@@ -1,4 +1,5 @@
 import {PasswordListActionsConstants} from "../stores/PasswordList/Constants";
+import {authenticateRes} from "../helpers/CryptoHelper";
 
 export const updateCredentials = (baseApi, credentials, port) => {
     fetch(baseApi + "/user/" + JSON.parse(localStorage.getItem("user")).id + "/password/" + credentials.id, {
@@ -12,9 +13,16 @@ export const updateCredentials = (baseApi, credentials, port) => {
         .then((res) =>
             res.status === 200
                 ? res.text().then((text) => {
+<<<<<<< HEAD
+=======
+                    const user = authenticateRes(JSON.parse(text), 
+                        localStorage.getItem("encryptionSecret"),
+                        localStorage.getItem("authenticationSecret"));
+                    localStorage.setItem("user", JSON.stringify(user));
+>>>>>>> 06bde7c... fixed problems + persistent updating
                     port.postMessage({
                         type: PasswordListActionsConstants.UPDATE_PASSWORD_SUCCESS,
-                        payload: JSON.parse(text),
+                        payload: user,
                     })}
                 )
                 : res.text().then((text) =>
@@ -41,6 +49,7 @@ export const saveCredentials = (baseApi, credentials, port) => {
         .then((res) =>
             res.status === 200
                 ? res.text().then((text) => {
+<<<<<<< HEAD
                     port.postMessage({
                         type: PasswordListActionsConstants.SAVE_PASSWORD_SUCCESS,
                         payload: JSON.parse(text),
@@ -73,6 +82,15 @@ export const patchCredentials = (baseApi, credentials, port) => {
                     port.postMessage({
                         type: PasswordListActionsConstants.SAVE_PASSWORD_SUCCESS,
                         payload: JSON.parse(text),
+=======
+                    const user = authenticateRes(JSON.parse(text), 
+                        localStorage.getItem("encryptionSecret"),
+                        localStorage.getItem("authenticationSecret"));
+                    localStorage.setItem("user", JSON.stringify(user));
+                    port.postMessage({
+                        type: PasswordListActionsConstants.SAVE_PASSWORD_SUCCESS,
+                        payload: user,
+>>>>>>> 06bde7c... fixed problems + persistent updating
                     })}
                 )
                 : res.text().then((text) =>

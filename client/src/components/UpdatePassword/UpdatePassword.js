@@ -16,10 +16,13 @@ function UpdatePassword(props) {
     const [user, setUser] = useState(props.location.state.user);
     const [gotResponse, setGotResponse] = useState(false);
     const [editEntry, setEditEntry] = useState(false);
-    const [credentials, setCredentials] = useState(props.location.state.credentials);
-    const [url, setUrl] = useState(props.location.state.credentials.url);
-    const [username, setUsername] = useState(props.location.state.credentials.username);
-    const [password, setPassword] = useState(props.location.state.credentials.password);
+    const [credentials, setCredentials] = useState(
+        props.location.state.credentials === undefined ?
+         JSON.parse(localStorage.getItem("credentials")) : props.location.state.credentials
+         );
+    const [url, setUrl] = useState(credentials.url);
+    const [username, setUsername] = useState(credentials.username);
+    const [password, setPassword] = useState(credentials.password);
 
     const updatePassword = () => {
         console.log(`username: ${username}`);
@@ -32,7 +35,12 @@ function UpdatePassword(props) {
 
     props.port.onMessage.addListener(function (msg) {
         if (msg.type === PasswordListActionsConstants.UPDATE_PASSWORD_SUCCESS) {
+<<<<<<< HEAD
             history.push(HistoryConstants.HOME, {user: user});
+=======
+            console.log(`user: ${JSON.stringify(user)} payload: ${JSON.stringify(msg.payload)}`);
+            history.push(HistoryConstants.HOME, {user: msg.payload});
+>>>>>>> 06bde7c... fixed problems + persistent updating
             props.port.postMessage({
                 type: HistoryConstants.CHANGE_HISTORY,
                 payload: {history: HistoryConstants.HOME}
