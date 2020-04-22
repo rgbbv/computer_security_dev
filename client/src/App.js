@@ -11,6 +11,7 @@ import { Switch, Route } from "react-router-dom";
 import { history } from "./index";
 import {LoginActionsConstants} from "./stores/Login/Constants";
 import {HistoryConstants} from "./stores/History/Constants";
+import TwoStepsVerification from "./components/Security/TwoStepsVerification";
 
 const port = chrome.runtime.connect({ name: "client_port" });
 
@@ -87,6 +88,11 @@ export default class App extends React.Component {
             exact
             path="/updatePassword"
             render={(props) => <UpdatePassword {...props} port={port} />}
+          />
+          <Route
+            exact
+            path="/twoStepsVerification"
+            render={(props) => <TwoStepsVerification {...props} port={port} />}
           />
         </Switch>
       </div>

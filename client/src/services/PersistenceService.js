@@ -1,7 +1,10 @@
-export const getState = (key, port, onSuccessType, onFailureType) => {
-    const state = JSON.parse(localStorage.getItem(key));
+import {authenticateUserPasswords} from "./UserService";
+
+export const getState = (key, port, onSuccessType, onFailureType, getAndDelete) => {
+    let state = JSON.parse(localStorage.getItem(key));
     if (state) {
-        localStorage.removeItem(key);
+        if (getAndDelete) localStorage.removeItem(key);
+        if (key === "user") state = authenticateUserPasswords(state).user;
         port.postMessage({
             type: onSuccessType,
             payload: {state: state}

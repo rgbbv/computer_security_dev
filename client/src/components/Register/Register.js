@@ -72,6 +72,7 @@ function Register(props) {
   }
 
   return (
+      <div style={{ width: 200, height: 300}}>
     <Box
       display="flex"
       flexDirection="column"
@@ -168,6 +169,7 @@ function Register(props) {
         </Button>
       )}
     </Box>
+      </div>
   );
 }
 

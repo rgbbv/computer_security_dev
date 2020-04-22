@@ -20,10 +20,11 @@ import {PersistenceActionsConstants} from "../../../src/stores/Persistence/Const
 export default function ManagePasswords(props) {
   const [anchorEl, setAnchorEl] = useState(null);
   const [getCredentials, setGetCredentials] = useState(false);
-  const [credentials, setCredentials] = useState({});
+  const [credentials, setCredentials] = useState([]);
   const [showOptions, setShowOptions] = useState(false);
   const [showPasswordAction, setShowPasswordAction] = useState(false);
   const [passwordAction, setPasswordAction] = useState("");
+  const [error, setError] = useState(false);
 
   if (!getCredentials) {
     props.port.postMessage({
@@ -34,7 +35,8 @@ export default function ManagePasswords(props) {
     props.port.postMessage({
       type: PersistenceActionsConstants.GET_STATE,
       payload: {key: "managePasswords", onSuccessType: ManagePasswordsActionsConstants.GET_MANAGE_PASSWORDS_STATE_SUCCESS,
-                onFailureType: ManagePasswordsActionsConstants.GET_MANAGE_PASSWORDS_STATE_FAILURE},
+                onFailureType: ManagePasswordsActionsConstants.GET_MANAGE_PASSWORDS_STATE_FAILURE,
+        getAndDelete: true},
     });
   }
 
@@ -45,8 +47,9 @@ export default function ManagePasswords(props) {
       injectSavedCredentials();
     } else if (msg.type === PasswordListActionsConstants.GET_CREDENTIALS_FAILURE) {
       setGetCredentials(true);
+      if('errorMessage' in msg.payload) setError(true);
     } else if (msg.type === ManagePasswordsActionsConstants.GET_MANAGE_PASSWORDS_STATE_SUCCESS) {
-      setCredentials(msg.payload.state.credentials || {});
+      setCredentials(msg.payload.state.credentials || []);
       setShowPasswordAction(msg.payload.state.showPasswordAction || "");
       setPasswordAction(msg.payload.state.passwordAction || "");
     }
@@ -75,19 +78,19 @@ export default function ManagePasswords(props) {
   jq("form").submit(function (event) {
     const enteredPassword = jq("input:password").val();
     const enteredUsername = jq("input:text").val();
+    const creds = credentials.filter((item) => item.username === enteredUsername);
 
-    // The user has changed the saved password / username ask him whether to update
-    if (Object.keys(credentials).length !== 0 && (credentials.password !== enteredPassword ||
-        credentials.username !== enteredUsername)) {
+    // The user has changed the saved password ask him whether to update
+    if (creds.length > 0 && creds[0].password !== enteredPassword) {
       props.port.postMessage({
         type: PersistenceActionsConstants.SET_STATE,
-        payload: {value: {credentials: {username: enteredUsername, password: enteredPassword, url: credentials.url, id: credentials.id},
+        payload: {value: {credentials: {username: enteredUsername, password: enteredPassword, url: creds[0].url, id: creds[0].id},
           showPasswordAction: true, passwordAction: "Update"}, key: "managePasswords"},
       });
     }
 
-    // We dont have this website credentials, ask the user whether to store them
-    else if (Object.keys(credentials).length === 0) {
+    // We dont have this website credentials (or got new credentials - new username), ask the user whether to store them
+    else if (creds.length === 0) {
       props.port.postMessage({
         type: PersistenceActionsConstants.SET_STATE,
         payload: {value: {credentials: {username: enteredUsername, password: enteredPassword, url: window.location.toString(), id: credentials.id},
@@ -104,13 +107,15 @@ export default function ManagePasswords(props) {
     }
   });
 
-  const injectSavedCredentials = () => {
-    jq("input:text").val(credentials.username);
-    jq("input:password").val(credentials.password);
+  const injectSavedCredentials = (index) => {
+    jq("input:text").val(credentials[index].username);
+    jq("input:password").val(credentials[index].password);
   };
 
   return (
-       !showPasswordAction ?
+      error ?
+          <div /> :
+      !showPasswordAction ?
       <Popper
           open={showOptions}
           anchorEl={anchorEl}
@@ -121,20 +126,25 @@ export default function ManagePasswords(props) {
             <Fade {...TransitionProps} timeout={350}>
               <Paper>
                 <List component="nav" aria-label="main mailbox folders">
+                  {credentials.map((item, index) =>
                   <ListItem button onClick={() => {
-                    injectSavedCredentials();
+                    injectSavedCredentials(index);
                     setShowOptions(false)
                   }}>
                     <ListItemIcon>
                       <VpnKeyIcon/>
                     </ListItemIcon>
                     <ListItemText
-                        primary={credentials.username}
-                        secondary={Array(credentials.password.length).fill("*")}
+                        primary={item.username}
+                        secondary={Array(item.password.length).fill("*")}
                     />
                   </ListItem>
+                  )}
                   <Divider/>
-                  <ListItem button onClick={() => setShowOptions(false)}>
+                  <ListItem button onClick={() => {setShowOptions(false); props.port.postMessage({
+                    type: ManagePasswordsActionsConstants.OPEN_PASSWORDS_LIST_TAB,
+                    payload: {url: "PasswordList.html"}
+                  }) }}>
                     <ListItemText primary="Manage passwords"/>
                   </ListItem>
                 </List>
@@ -143,4 +153,4 @@ export default function ManagePasswords(props) {
         )}
       </Popper> : <PasswordAction port={props.port} credentials={credentials} action={passwordAction} />
   );
-}
+};
