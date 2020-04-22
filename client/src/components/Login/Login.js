@@ -49,6 +49,7 @@ function Login(props) {
 
   props.port.onMessage.addListener(function (msg) {
     if (msg.type === LoginActionsConstants.LOGIN_SUCCESS || msg.type === SecurityActionsConstants.VALIDATE_PIN_SERVER_SUCCESS) {
+      console.log("got login success")
       setErrorMessage("");
       setLoginLoading(false);
       setIsVerifyingPin(false);

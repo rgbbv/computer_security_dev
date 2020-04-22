@@ -1,5 +1,5 @@
 import {PasswordListActionsConstants} from "../stores/PasswordList/Constants";
-import {authenticateRes} from "../helpers/CryptoHelper";
+import {findCorrupted} from "../helpers/CryptoHelper";
 
 export const updateCredentials = (baseApi, credentials, port) => {
     fetch(baseApi + "/user/" + JSON.parse(localStorage.getItem("user")).id + "/password/" + credentials.id, {
@@ -13,7 +13,7 @@ export const updateCredentials = (baseApi, credentials, port) => {
         .then((res) =>
             res.status === 200
                 ? res.text().then((text) => {
-                    const user = authenticateRes(JSON.parse(text), 
+                    const user = findCorrupted(JSON.parse(text), 
                         localStorage.getItem("encryptionSecret"),
                         localStorage.getItem("authenticationSecret"));
                     localStorage.setItem("user", JSON.stringify(user));
@@ -46,7 +46,7 @@ export const saveCredentials = (baseApi, credentials, port) => {
         .then((res) =>
             res.status === 200
                 ? res.text().then((text) => {
-                    const user = authenticateRes(JSON.parse(text), 
+                    const user = findCorrupted(JSON.parse(text), 
                         localStorage.getItem("encryptionSecret"),
                         localStorage.getItem("authenticationSecret"));
                     localStorage.setItem("user", JSON.stringify(user));

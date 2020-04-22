@@ -17,38 +17,7 @@ import {UserActionsConstants} from "../src/stores/User/Constants";
 import {SecurityActionsConstants} from "../src/stores/Security/Constants";
 
 const baseApi = "http://localhost:3000/api";
-let encryptionSecret = '';
-let authenticationSecret = '';
-let serverSecret = '';
 
-/**
- * Gets the user masterPassword, derives encryptionSecret, authenticationSecret, serverSecret.
- * serverSecret is used as server's password.
- * @param masterPassword
- */
-const handlePreSignIn = (masterPassword) => {
-    [encryptionSecret, authenticationSecret, serverSecret] = deriveSecrets(masterPassword);
-    localStorage.setItem("encryptionSecret", encryptionSecret);
-    localStorage.setItem("authenticationSecret", authenticationSecret);
-
-    return serverSecret;
-};
-
-/**
- * Upon login / signUp we get a server response containing the user data and accessToken, then we should store
- * the user data and accessToken in local storage. Right after we verify the integrity of the user passwords.
- *
- * @param res The server login / signUp response
- */
-const handlePostSignIn = (res) => {
-    localStorage.setItem("accessToken", res.accessToken);
-    localStorage.setItem("user", JSON.stringify(res.user));
-
-    // Verify passwords integrity
-    return {user: findCorrupted(res.user,
-        localStorage.getItem("encryptionSecret"),
-        localStorage.getItem("authenticationSecret"))};
-};
 
 const encryptUserWebsitePassword = (password) => {
     const encryptionSecret = localStorage.getItem("encryptionSecret");
@@ -106,6 +75,7 @@ chrome.runtime.onConnect.addListener(function (port) {
         .then((res) =>
           res.status === 200
             ? res.text().then((text) => {
+                console.log(`entered login then`)
                   const res = JSON.parse(text);
                   !res.user.security.twoStepsVerification ?
                   port.postMessage({
