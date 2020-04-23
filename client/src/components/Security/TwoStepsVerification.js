@@ -47,7 +47,7 @@ export default function TwoStepsVerification(props) {
             setIsLoading(false);
             setShowStepper(true);
         }  else if (msg.type === SecurityActionsConstants.UPDATE_USER_SECURITY_SUCCESS) {
-            setUser(msg.payload);
+            setUser(msg.payload.user);
             setIsLoading(false);
             setShowStepper(false);
         } else if (msg.type === SecurityActionsConstants.UPDATE_USER_SECURITY_FAILURE) {

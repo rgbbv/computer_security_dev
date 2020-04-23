@@ -91,7 +91,7 @@ export const updateUser = (baseApi, userData, port, onSuccessType, onFailureType
                     localStorage.setItem("user", text);
                     port.postMessage({
                         type: onSuccessType,
-                        payload: JSON.parse(text),
+                        payload: authenticateUserPasswords(JSON.parse(text)),
                     })}
                 )
                 : res.text().then((text) =>
