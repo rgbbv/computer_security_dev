@@ -17,7 +17,6 @@ import EditIcon from '@material-ui/icons/Edit';
 import AddBoxIcon from '@material-ui/icons/AddBox';
 import {filter} from 'lodash';
 import {HistoryConstants} from "../../stores/History/Constants";
-import { history } from "../../index";
 
 function PasswordList(props) {
   const [search, setSearch] = useState("");
@@ -41,7 +40,7 @@ function PasswordList(props) {
   }
 
   const switchToAddPassword = () => {
-    history.push(HistoryConstants.ADD_PASSWORD, {user: user});
+    props.history.push(HistoryConstants.ADD_PASSWORD, {user: user});
     props.port.postMessage({
       type: HistoryConstants.CHANGE_HISTORY,
       payload: {history: HistoryConstants.ADD_PASSWORD}
@@ -50,7 +49,7 @@ function PasswordList(props) {
 
   const switchToUpdatePassword = (credentials) => {
     localStorage.setItem("credentials", JSON.stringify(credentials));
-    history.push(HistoryConstants.UPDATE_PASSWORD, {user: user, credentials: credentials});
+    props.history.push(HistoryConstants.UPDATE_PASSWORD, {user: user, credentials: credentials});
     props.port.postMessage({
       type: HistoryConstants.CHANGE_HISTORY,
       payload: {

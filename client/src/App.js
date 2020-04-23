@@ -72,7 +72,7 @@ export default class App extends React.Component {
           <Route
             exact
             path="/passwordsList"
-            render={(props) => <PasswordList {...props} port={port} />}
+            render={(props) => <PasswordList {...props} port={port} history={history} />}
           />
           <Route
             exact
