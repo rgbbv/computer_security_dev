@@ -1,5 +1,5 @@
 import {LoginActionsConstants} from "../stores/Login/Constants";
-import {findCorrupted, deriveSecrets} from "../helpers/CryptoHelper";
+import {findCorrupted, deriveSecrets, findCorruptedAndDecrypt} from "../helpers/CryptoHelper";
 
 /**
  * Gets the user masterPassword, derives encryptionSecret, authenticationSecret, serverSecret.
@@ -31,7 +31,7 @@ export const handlePostSignIn = (res) => {
 
 export const authenticateUserPasswords = (user) => {
     return {
-        user: findCorrupted(user,
+        user: findCorruptedAndDecrypt(user,
             localStorage.getItem("encryptionSecret"),
             localStorage.getItem("authenticationSecret"))
     }
@@ -52,7 +52,7 @@ export const isUserLoggedIn = () => {
 export const verifyUserLoggedIn = (port) => {
     if(isUserLoggedIn()) {
         // If the user is logged in then validate his passwords
-        const user = findCorrupted(JSON.parse(localStorage.getItem("user")),
+        const user = findCorruptedAndDecrypt(JSON.parse(localStorage.getItem("user")),
             localStorage.getItem("encryptionSecret"),
             localStorage.getItem("authenticationSecret"));
 
@@ -91,7 +91,7 @@ export const updateUser = (baseApi, userData, port, onSuccessType, onFailureType
                     localStorage.setItem("user", text);
                     port.postMessage({
                         type: onSuccessType,
-                        payload: JSON.parse(text),
+                        payload: authenticateUserPasswords(JSON.parse(text)),
                     })}
                 )
                 : res.text().then((text) =>

@@ -1,5 +1,5 @@
 import {PasswordListActionsConstants} from "../stores/PasswordList/Constants";
-import {findCorrupted} from "../helpers/CryptoHelper";
+import {findCorrupted, decryptMessages} from "../helpers/CryptoHelper";
 
 export const updateCredentials = (baseApi, credentials, port) => {
     fetch(baseApi + "/user/" + JSON.parse(localStorage.getItem("user")).id + "/password/" + credentials.id, {
@@ -13,10 +13,13 @@ export const updateCredentials = (baseApi, credentials, port) => {
         .then((res) =>
             res.status === 200
                 ? res.text().then((text) => {
-                    const user = findCorrupted(JSON.parse(text), 
+                    var user = findCorrupted(JSON.parse(text), 
                         localStorage.getItem("encryptionSecret"),
                         localStorage.getItem("authenticationSecret"));
                     localStorage.setItem("user", JSON.stringify(user));
+                    user.passwords = decryptMessages(user.passwords,
+                        localStorage.getItem("encryptionSecret"));
+                        console.log(`user.passwords: ${JSON.stringify(user.passwords)}`);
                     port.postMessage({
                         type: PasswordListActionsConstants.UPDATE_PASSWORD_SUCCESS,
                         payload: user,
@@ -46,10 +49,14 @@ export const saveCredentials = (baseApi, credentials, port) => {
         .then((res) =>
             res.status === 200
                 ? res.text().then((text) => {
-                    const user = findCorrupted(JSON.parse(text), 
+                    var user = findCorrupted(JSON.parse(text), 
                         localStorage.getItem("encryptionSecret"),
                         localStorage.getItem("authenticationSecret"));
                     localStorage.setItem("user", JSON.stringify(user));
+
+                    user.passwords = decryptMessages(user.passwords,
+                        localStorage.getItem("encryptionSecret"));
+                        console.log(`user.passwords: ${JSON.stringify(user.passwords)}`);
                     port.postMessage({
                         type: PasswordListActionsConstants.SAVE_PASSWORD_SUCCESS,
                         payload: user,

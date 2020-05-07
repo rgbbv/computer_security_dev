@@ -4,8 +4,10 @@ import {render} from "react-dom";
 import PasswordList from "./PasswordList";
 import {PersistenceActionsConstants} from "../../stores/Persistence/Constants";
 import {ManagePasswordsActionsConstants} from "../../stores/ManagePasswords/Constants";
+import {createBrowserHistory} from "history";
 
 const port = chrome.runtime.connect({ name: "client_port" });
+const history = createBrowserHistory();
 
 port.postMessage({type: PersistenceActionsConstants.GET_STATE, payload: {key: "user",
     onSuccessType: ManagePasswordsActionsConstants.GET_MANAGE_PASSWORDS_USER_STATE_SUCCESS,
@@ -18,6 +20,6 @@ port.onMessage.addListener(function (msg) {
         anchor.id = 'manage-passwords';
         document.body.insertBefore(anchor, document.body.childNodes[0]);
         render(
-            <PasswordList port={port} location={{state: {user: msg.payload.state}}}  />, document.getElementById('manage-passwords'));
+            <PasswordList port={port} location={{state: {user: msg.payload.state}}} history={history}  />, document.getElementById('manage-passwords'));
     }
 });

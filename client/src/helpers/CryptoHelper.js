@@ -53,11 +53,21 @@ export const authenticateMessages = (
   );
 
   // the authentication for these messages is failed
-  messages.forEach((entry) => {
-    entry.password = CryptoJS.enc.Utf8.stringify(CryptoJS.AES.decrypt(entry.password, encryptionSecret)) || "";
-  });
+  // messages.forEach((entry) => {
+  //   entry.password = CryptoJS.enc.Utf8.stringify(CryptoJS.AES.decrypt(entry.password, encryptionSecret)) || "";
+  // });
   return {messages, failHMAC};
 };
+
+export const decryptMessages = (
+  messages,
+  encryptionSecret
+) => {
+    messages.forEach((entry) => {
+    entry.password = CryptoJS.enc.Utf8.stringify(CryptoJS.AES.decrypt(entry.password, encryptionSecret)) || "";
+  });
+  return messages;
+}
 
 export const checkHMAC = (message, authenticationSecret) => {
   // We are using hmac-sha256 (256 bit) represented as hexadecimal so t' length is 256 / 4 = 64
@@ -86,6 +96,13 @@ export const authenticateAndDecrypt = (
 export const findCorrupted = (res, encryptionSecret, authenticationSecret) => {
   const {messages, failHMAC} = authenticateMessages(res.passwords, encryptionSecret, authenticationSecret);
   res.passwords = messages;
+  res.corrupted = failHMAC;
+  return res;
+};
+
+export const findCorruptedAndDecrypt = (res, encryptionSecret, authenticationSecret) => {
+  const {messages, failHMAC} = authenticateMessages(res.passwords, encryptionSecret, authenticationSecret);
+  res.passwords = decryptMessages(messages, encryptionSecret);
   res.corrupted = failHMAC;
   return res;
 };
