@@ -106,7 +106,7 @@ chrome.runtime.onConnect.addListener(function (port) {
     } else if (msg.type === PasswordListActionsConstants.GET_CREDENTIALS) {
         if (isUserLoggedIn()) {
             const user = JSON.parse(localStorage.getItem("user"));
-            let credentials = user.passwords.filter((item) => item.url === msg.payload.url);
+            let credentials = user.passwords.filter((item) => item.url.replace("http://","https://") === msg.payload.url.replace("http://","https://"));
 
             if (credentials.length >= 1) {
                 credentials = credentials.map((item, index) => {

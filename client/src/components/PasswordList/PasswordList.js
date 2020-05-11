@@ -34,7 +34,7 @@ function PasswordList(props) {
   };
 
   const showAddress = (url) => {
-    const replaced_url = url.replace("https://","").replace("www.","");
+    const replaced_url = url.replace("https://","").replace("http://", "").replace("www.","");
     const splits = replaced_url.split("/", 2);
     return splits[0];
   }
@@ -61,8 +61,9 @@ function PasswordList(props) {
   return user.passwords.length !== 0 ? (
     <div>
       <div id="search" style={{display: "flex"}}>
-        <TextField label="Search field" type="search" size="small" fullWidth
+        <TextField type="search" size="small" fullWidth
           value={search}
+          variant="outlined"
           onChange={(e) => setSearch(e.target.value)}
           InputProps={{
             startAdornment: (
@@ -74,7 +75,7 @@ function PasswordList(props) {
         />
         <Paper elevation={3} style={{minWidth: "60px", height: "115px"}}>
           <h2 style={{textAlign: "center", marginBottom: "auto"}}>Add password</h2>
-          <AddBoxIcon style={{ fontSize: 50, display: "inline", width: "100" }}
+          <AddBoxIcon style={{ fontSize: 50, display: "inline", width: "100", color: "brown" }}
            onClick={switchToAddPassword.bind(this)} />
         </Paper>
 
