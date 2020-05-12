@@ -60,9 +60,13 @@ function PasswordList(props) {
 
   return user.passwords.length !== 0 ? (
     <div>
-      <div id="search" style={{display: "flex"}}>
+      <div id="header" style={{display: "flex"}}>
+      <Paper elevation={3} style={{width: "100%", height: "115px"}}>
+          <h1 style={{textAlign: "center", marginBottom: "auto"}}>Pass Vault</h1>  
+          <div style={{ display: "flex", margin: "15px" }}>
         <TextField type="search" size="small" fullWidth
           value={search}
+          style={{width: "100%", marginTop: "5px"}}
           variant="outlined"
           onChange={(e) => setSearch(e.target.value)}
           InputProps={{
@@ -73,10 +77,9 @@ function PasswordList(props) {
             ),
           }}
         />
-        <Paper elevation={3} style={{minWidth: "60px", height: "115px"}}>
-          <h2 style={{textAlign: "center", marginBottom: "auto"}}>Add password</h2>
-          <AddBoxIcon style={{ fontSize: 50, display: "inline", width: "100", color: "brown" }}
+        <AddBoxIcon style={{ fontSize: 50, display: "inline", width: "100", color: "brown" }}
            onClick={switchToAddPassword.bind(this)} />
+           </div>
         </Paper>
 
       </div>
