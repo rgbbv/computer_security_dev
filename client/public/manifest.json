@@ -2,9 +2,7 @@
   "short_name": "React App",
   "name": "Pass vault",
   "icons": {
-    "16": "logo-small.png",
-    "48": "logo-small.png",
-    "128": "logo-small.png"
+    "512": "iconfinder_icon-116-lock-open_314694.png"
   },
   "permissions": ["storage", "http://localhost/*", "input", "tabs"],
 

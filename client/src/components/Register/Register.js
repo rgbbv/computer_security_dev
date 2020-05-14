@@ -31,6 +31,7 @@ function Register(props) {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [registerLoading, setRegisterLoading] = useState(false);
+  const [strength, setStrength] = useState("");
 
   props.port.onMessage.addListener(function (msg) {
     if (msg.type === RegisterActionsConstants.REGISTER_SUCCESS) {
@@ -49,13 +50,21 @@ function Register(props) {
 
   function onChangeEmail(event) {
     setEmail(event.target.value);
-    setIsValidEmail(
-      RegExp("^([\\w.%+-]+)@([\\w-]+\\.)+([\\w]{2,})$").test(event.target.value)
-    );
+  }
+
+  function checkValidEmail() {
+    setIsValidEmail((RegExp("^([\\w.%+-]+)@([\\w-]+\\.)+([\\w]{2,})$").test(email)));
   }
 
   function checkValidForm() {
-    return isValidEmail && firstName !== "";
+    return email !== "" && firstName !== "" && password !== "";
+  }
+
+  function preRegister() {
+    checkValidEmail();
+    if (!isValidEmail) {
+      register();
+    }
   }
 
   function register() {
@@ -81,11 +90,12 @@ function Register(props) {
     >
       <Box alignSelf="flex-start">
         <IconButton aria-label="close" size="small" onClick={() => {
-          history.push(HistoryConstants.LOGIN);
-          props.port.postMessage({
-            type: HistoryConstants.CHANGE_HISTORY,
-            payload: {history: HistoryConstants.LOGIN}
-          });
+            history.push(HistoryConstants.LOGIN);
+            props.port.postMessage({
+              type: HistoryConstants.CHANGE_HISTORY,
+              payload: {history: HistoryConstants.LOGIN}
+            });
+          
         }} >
           <CloseIcon fontSize="inherit" />
         </IconButton>
@@ -160,7 +170,7 @@ function Register(props) {
       ) : (
         <Button
           disabled={!checkValidForm()}
-          onClick={() => register()}
+          onClick={() => preRegister()}
           variant="contained"
           color="primary"
           id="button"

@@ -62,7 +62,7 @@ function PasswordList(props) {
     <div>
       <div id="header" style={{display: "flex"}}>
       <Paper elevation={3} style={{width: "100%", height: "115px"}}>
-          <h1 style={{textAlign: "center", marginBottom: "auto"}}>Pass Vault</h1>  
+          <h1 style={{textAlign: "center", marginBottom: "auto"}}>PassVault</h1>  
           <div style={{ display: "flex", margin: "15px" }}>
         <TextField type="search" size="small" fullWidth
           value={search}

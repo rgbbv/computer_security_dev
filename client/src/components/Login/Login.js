@@ -102,7 +102,7 @@ function Login(props) {
   }
 
   return (
-      <div style={{ width: 200, height: 300}}>
+      <div style={{ width: 200, height: 300, margin: "auto"}}>
     <Box
       display="flex"
       flexDirection="column"
