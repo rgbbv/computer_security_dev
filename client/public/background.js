@@ -1,5 +1,5 @@
 /*global chrome*/
-import { deriveSecrets, encryptAndAuthenticate, authenticateAndDecrypt, findCorrupted } from "../src/helpers/CryptoHelper.js"
+import { deriveSecrets, encryptAndAuthenticate, authenticateAndDecrypt, deriveUserEmail } from "../src/helpers/CryptoHelper.js"
 import {updateCredentials, saveCredentials} from "../src/services/CredentialsService";
 import {setState, getState} from "../src/services/PersistenceService";
 import { verifyUserLoggedIn, logout, isUserLoggedIn, authenticateUserPasswords, updateUser,
@@ -35,10 +35,17 @@ const decryptUserWebsitePassword = (encryptedPassword) => {
 
 chrome.runtime.onConnect.addListener(function (port) {
   console.assert(port.name === "client_port");
-
   port.onMessage.addListener(function (msg) {
     if (msg.type === RegisterActionsConstants.REGISTER) {
         msg.payload.password = handlePreSignIn(msg.payload.password);
+        msg.payload.email = deriveUserEmail(msg.payload.email);
+        msg.payload.firstName = encryptAndAuthenticate(msg.payload.firstName);
+        msg.payload.lastName = encryptAndAuthenticate(msg.payload.lastName);
+
+          console.log(
+              `email: ${msg.payload.email},
+              password: ${msg.payload.password}`
+          )
       fetch(baseApi + "/users", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -67,6 +74,12 @@ chrome.runtime.onConnect.addListener(function (port) {
         );
     } else if (msg.type === LoginActionsConstants.LOGIN) {
       msg.payload.password = handlePreSignIn(msg.payload.password);
+      msg.payload.email = deriveUserEmail(msg.payload.email);
+
+      console.log(
+          `email: ${msg.payload.email},
+          password: ${msg.payload.password}`
+      )
       fetch(baseApi + "/user/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -75,7 +88,6 @@ chrome.runtime.onConnect.addListener(function (port) {
         .then((res) =>
           res.status === 200
             ? res.text().then((text) => {
-                console.log(`entered login then`)
                   const res = JSON.parse(text);
                   !res.user.security.twoStepsVerification ?
                   port.postMessage({

@@ -33,6 +33,7 @@ function Register(props) {
   const [registerLoading, setRegisterLoading] = useState(false);
   const [strength, setStrength] = useState("");
 
+
   props.port.onMessage.addListener(function (msg) {
     if (msg.type === RegisterActionsConstants.REGISTER_SUCCESS) {
       setErrorMessage("");
@@ -50,21 +51,13 @@ function Register(props) {
 
   function onChangeEmail(event) {
     setEmail(event.target.value);
-  }
-
-  function checkValidEmail() {
-    setIsValidEmail((RegExp("^([\\w.%+-]+)@([\\w-]+\\.)+([\\w]{2,})$").test(email)));
+    setIsValidEmail(
+      RegExp("^([\\w.%+-]+)@([\\w-]+\\.)+([\\w]{2,})$").test(event.target.value)
+      );
   }
 
   function checkValidForm() {
-    return email !== "" && firstName !== "" && password !== "";
-  }
-
-  function preRegister() {
-    checkValidEmail();
-    if (!isValidEmail) {
-      register();
-    }
+    return isValidEmail && email !== "" && firstName !== "" && password !== "";
   }
 
   function register() {
@@ -170,7 +163,7 @@ function Register(props) {
       ) : (
         <Button
           disabled={!checkValidForm()}
-          onClick={() => preRegister()}
+          onClick={() => register()}
           variant="contained"
           color="primary"
           id="button"

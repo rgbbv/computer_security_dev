@@ -20,6 +20,12 @@ export const deriveSecrets = (masterPassword) => {
   return [encryptionSecret, authenticationSecret, serverSecret];
 };
 
+export const deriveUserEmail = (email) => {
+  const serverEmail = CryptoJS.enc.Hex.stringify(CryptoJS.SHA256((email + "3")));
+
+  return serverEmail;
+}
+
 /**
  * Encrypt message with encryptionSecret, uses CBC as the default mode, then authenticate the message
  * @param message A plain text user message to encrypt
