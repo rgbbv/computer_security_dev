@@ -58,7 +58,7 @@ function PasswordList(props) {
     })
   }
 
-  return user.passwords.length !== 0 ? (
+  return (
     <div>
       <div id="header" style={{display: "flex"}}>
       <Paper elevation={3} style={{width: "100%", height: "115px"}}>
@@ -149,8 +149,6 @@ function PasswordList(props) {
         </Table>
       </TableContainer>
     </div>
-  ) : (
-    <p> You dont have any saved passwords yet </p>
   );
 }
 

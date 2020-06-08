@@ -95,7 +95,7 @@ export default function PasswordAction(props) {
                                     size="small"
                                     id="button"
                                 >
-                                    {props.action} credentials?
+                                    {props.action} credentials
                                 </Button>
                                 <Button
                                     onClick={() => setIsOpen(false)}

@@ -69,10 +69,22 @@ export const decryptMessages = (
   messages,
   encryptionSecret
 ) => {
-    messages.forEach((entry) => {
-    entry.password = CryptoJS.enc.Utf8.stringify(CryptoJS.AES.decrypt(entry.password, encryptionSecret)) || "";
+    console.log(`messages before: ${JSON.stringify(messages)}`);
+    return messages.map((entry) => {
+      let new_entry = Object.fromEntries(
+
+        // convert to array, map, and then fromEntries gives back the object
+        Object.entries(entry).map(([key, value]) => {
+          if (key == 'url' || key == 'password' || key == 'username')
+            return [key, CryptoJS.enc.Utf8.stringify(CryptoJS.AES.decrypt(value, encryptionSecret)) || ""];
+          else
+            return [key, value];
+        })
+      );
+      console.log(`new_entry: ${JSON.stringify(new_entry)}`);
+      return new_entry;    
+    // entry.password = CryptoJS.enc.Utf8.stringify(CryptoJS.AES.decrypt(entry.password, encryptionSecret)) || "";
   });
-  return messages;
 }
 
 export const checkHMAC = (message, authenticationSecret) => {

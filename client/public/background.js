@@ -147,11 +147,23 @@ chrome.runtime.onConnect.addListener(function (port) {
     } else if (msg.type === PersistenceActionsConstants.SET_STATE) {
         setState(msg.payload.key, msg.payload.value);
     } else if (msg.type === PasswordListActionsConstants.SAVE_PASSWORD) {
-        msg.payload.password = encryptUserWebsitePassword(msg.payload.password);
-        saveCredentials(baseApi, msg.payload, port);
+          let new_payload = Object.fromEntries(
+            // convert to array, map, and then fromEntries gives back the object
+            Object.entries(msg.payload).map(([key, value]) => [key, encryptUserWebsitePassword(value)])
+          );
+        // msg.payload.password = encryptUserWebsitePassword(msg.payload.password);
+        saveCredentials(baseApi, new_payload, port);
     } else if (msg.type === PasswordListActionsConstants.UPDATE_PASSWORD) {
-        msg.payload.password = encryptUserWebsitePassword(msg.payload.password);
-        updateCredentials(baseApi, msg.payload, port);
+        let new_payload = Object.fromEntries(
+            // convert to array, map, and then fromEntries gives back the object
+            Object.entries(msg.payload).map(([key, value]) =>{
+                 if (key == 'url' || key == 'username' || key == 'password')
+                    return [key, encryptUserWebsitePassword(value)];
+                return [key, value];
+            })
+          );
+        // msg.payload.password = encryptUserWebsitePassword(msg.payload.password);
+        updateCredentials(baseApi, new_payload, port);
     } else if (msg.type === HistoryConstants.CHANGE_HISTORY) {
         localStorage.setItem("history", msg.payload.history);
     } else if (msg.type === ManagePasswordsActionsConstants.OPEN_PASSWORDS_LIST_TAB) {
