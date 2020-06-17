@@ -2,12 +2,20 @@ import {SecurityActionsConstants} from "../stores/Security/Constants";
 import {handlePostSignIn} from "./UserService";
 import crypto from 'crypto';
 import {decryptUserKeys} from "./KeysService";
+import {authenticateAndDecrypt} from "../helpers/CryptoHelper";
+
+const decryptFirstName = (encryptedPassword) => {
+    const encryptionSecret = localStorage.getItem("encryptionSecret");
+    const authenticationSecret = localStorage.getItem("authenticationSecret");
+
+    return authenticateAndDecrypt(encryptedPassword, encryptionSecret, authenticationSecret);
+};
 
 export const pair = (user, port) => {
     // Generating secret
     crypto.randomBytes(8, (err, buffer) => {
         const secret = buffer.toString('hex').toUpperCase();
-        const api = "https://www.authenticatorApi.com/pair.aspx?AppName=PassVault&AppInfo=" + user.firstName + "&SecretCode=" + secret;
+        const api = "https://www.authenticatorApi.com/pair.aspx?AppName=PassVault&AppInfo=" + decryptFirstName(user.firstName) + "&SecretCode=" + secret;
 
         fetch(api,{
             method: "GET",

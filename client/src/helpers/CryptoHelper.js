@@ -58,10 +58,6 @@ export const authenticateMessages = (
     [[], []]
   );
 
-  // the authentication for these messages is failed
-  // messages.forEach((entry) => {
-  //   entry.password = CryptoJS.enc.Utf8.stringify(CryptoJS.AES.decrypt(entry.password, encryptionSecret)) || "";
-  // });
   return {messages, failHMAC};
 };
 
@@ -69,7 +65,6 @@ export const decryptMessages = (
   messages,
   encryptionSecret
 ) => {
-    console.log(`messages before: ${JSON.stringify(messages)}`);
     return messages.map((entry) => {
       let new_entry = Object.fromEntries(
 
@@ -81,9 +76,7 @@ export const decryptMessages = (
             return [key, value];
         })
       );
-      console.log(`new_entry: ${JSON.stringify(new_entry)}`);
       return new_entry;    
-    // entry.password = CryptoJS.enc.Utf8.stringify(CryptoJS.AES.decrypt(entry.password, encryptionSecret)) || "";
   });
 }
 
