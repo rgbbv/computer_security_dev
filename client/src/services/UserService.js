@@ -1,5 +1,6 @@
 import {LoginActionsConstants} from "../stores/Login/Constants";
 import {findCorrupted, deriveSecrets, findCorruptedAndDecrypt} from "../helpers/CryptoHelper";
+import {decryptUserKeys, encryptUserKeys} from "./KeysService";
 
 /**
  * Gets the user masterPassword, derives encryptionSecret, authenticationSecret, serverSecret.
@@ -22,10 +23,10 @@ export const handlePreSignIn = (masterPassword) => {
  */
 export const handlePostSignIn = (res) => {
     localStorage.setItem("accessToken", res.accessToken);
+    console.log("post signin")
     localStorage.setItem("user", JSON.stringify(res.user));
 
     // Verify passwords integrity
-    console.log("before authenticateUserPasswords")
     return authenticateUserPasswords(res.user);
 };
 
@@ -83,23 +84,25 @@ export const updateUser = (baseApi, userData, port, onSuccessType, onFailureType
             "Content-Type": "application/json",
             Authorization: 'Bearer ' + localStorage.getItem("accessToken")
         },
-        body: JSON.stringify(userData),
+        body: JSON.stringify(encryptUserKeys(userData)),
     })
         .then((res) =>
             res.status === 200
                 ? res.text().then((text) => {
-                    localStorage.setItem("user", text);
+                    const user = decryptUserKeys(JSON.parse(text));
+                    localStorage.setItem("user", JSON.stringify(user));
                     port.postMessage({
                         type: onSuccessType,
-                        payload: authenticateUserPasswords(JSON.parse(text)),
+                        payload: authenticateUserPasswords(user),
                     })}
                 )
-                : res.text().then((text) =>
+                : res.text().then((text) => {
+                    const user = decryptUserKeys(JSON.parse(text));
                     port.postMessage({
                         type: onFailureType,
-                        payload: JSON.parse(text),
+                        payload: user,
                     })
-                )
+                })
         )
         .catch((err) =>
             port.postMessage({ type: onFailureType, payload: { errorMessage: "Internal server error" }})

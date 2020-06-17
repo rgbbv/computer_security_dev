@@ -15,8 +15,9 @@ import {HistoryConstants} from "../src/stores/History/Constants";
 import {ManagePasswordsActionsConstants} from "../src/stores/ManagePasswords/Constants";
 import {UserActionsConstants} from "../src/stores/User/Constants";
 import {SecurityActionsConstants} from "../src/stores/Security/Constants";
+import {decryptUserKeys, encryptUserKeys, encryptRegisterKeys} from "../src/services/KeysService";
 
-const baseApi = "https://pass-vault-server.azurewebsites.net/api";
+const baseApi = "http://localhost:3000/api";
 
 
 const encryptUserWebsitePassword = (password) => {
@@ -39,22 +40,19 @@ chrome.runtime.onConnect.addListener(function (port) {
     if (msg.type === RegisterActionsConstants.REGISTER) {
         msg.payload.password = handlePreSignIn(msg.payload.password);
         msg.payload.email = deriveUserEmail(msg.payload.email);
-        msg.payload.firstName = encryptAndAuthenticate(msg.payload.firstName);
-        msg.payload.lastName = encryptAndAuthenticate(msg.payload.lastName);
+        msg.payload.firstName = encryptUserWebsitePassword(msg.payload.firstName, );
+        msg.payload.lastName = encryptUserWebsitePassword(msg.payload.lastName);
 
-          console.log(
-              `email: ${msg.payload.email},
-              password: ${msg.payload.password}`
-          )
+        const payload = encryptRegisterKeys(msg.payload);
       fetch(baseApi + "/users", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(msg.payload),
+        body: JSON.stringify(payload),
       })
         .then((res) => {
           if (res.status === 200) {
              res.text().then((text) => {
-                 const res = JSON.parse(text);
+                 const res = decryptUserKeys(JSON.parse(text));
                 port.postMessage({
                   type: RegisterActionsConstants.REGISTER_SUCCESS,
                   payload: handlePostSignIn(res),
@@ -64,7 +62,7 @@ chrome.runtime.onConnect.addListener(function (port) {
               res.text().then((text) =>
                   port.postMessage({
                       type: RegisterActionsConstants.REGISTER_FAILURE,
-                      payload: JSON.parse(text),
+                      payload: decryptUserKeys(JSON.parse(text)),
                   })
               )}
           }
@@ -75,20 +73,18 @@ chrome.runtime.onConnect.addListener(function (port) {
     } else if (msg.type === LoginActionsConstants.LOGIN) {
       msg.payload.password = handlePreSignIn(msg.payload.password);
       msg.payload.email = deriveUserEmail(msg.payload.email);
-
-      console.log(
-          `email: ${msg.payload.email},
-          password: ${msg.payload.password}`
-      )
+      const payload = encryptRegisterKeys(msg.payload);
       fetch(baseApi + "/user/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(msg.payload),
+        body: JSON.stringify(payload),
       })
-        .then((res) =>
+        .then((res) => {
           res.status === 200
             ? res.text().then((text) => {
-                  const res = JSON.parse(text);
+                console.log(`text: ${text}`);
+                  const res = decryptUserKeys(JSON.parse(text));
+                  console.log(`res: ${JSON.stringify(res)}`);
                   !res.user.security.twoStepsVerification ?
                   port.postMessage({
                       type: LoginActionsConstants.LOGIN_SUCCESS,
@@ -99,13 +95,13 @@ chrome.runtime.onConnect.addListener(function (port) {
                       payload: res,
                   })
               })
-            : res.text().then((text) =>
+            : res.text().then((text) => 
                 port.postMessage({
                   type: LoginActionsConstants.LOGIN_FAILURE,
-                  payload: JSON.parse(text),
+                  payload: decryptUserKeys(JSON.parse(text)),
                 })
               )
-        )
+            })
         .catch((err) => port.postMessage({ type: LoginActionsConstants.LOGIN_FAILURE, payload: { errorMessage: "Internal server error" }}));
     } else if (msg.type === UserActionsConstants.UPDATE_USER) {
         updateUser(baseApi, msg.payload.userData, port, msg.payload.onSuccessType, msg.payload.onFailureType);

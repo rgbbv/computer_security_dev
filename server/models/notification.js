@@ -2,24 +2,24 @@ const mongoose = require('mongoose');
 let mongooseHidden = require('mongoose-hidden')();
 
 const notificationSchema = new mongoose.Schema({
-    date: {
+    db1: {   // date
         type: Date,
         required: true
     },
-    read: {
+    dc: {   // read
         type: Boolean,
         required: true
     },
-    content: {
+    dd: {   // content
         type: String,
         required: true
     },
-    severity: {
+    de: {   // severity
         type: String,
         enum: ['High', 'Medium', 'Low'],
         required: true
     },
-    sender: {
+    df: {   // sender
         type: String,
         required: true
     }

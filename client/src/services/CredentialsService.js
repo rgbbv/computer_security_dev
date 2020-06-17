@@ -1,5 +1,7 @@
 import {PasswordListActionsConstants} from "../stores/PasswordList/Constants";
 import {findCorrupted, decryptMessages} from "../helpers/CryptoHelper";
+import {encryptCredentialsKeys, decryptUserKeys} from "./KeysService";
+
 
 export const updateCredentials = (baseApi, credentials, port) => {
     fetch(baseApi + "/user/" + JSON.parse(localStorage.getItem("user")).id + "/password/" + credentials.id, {
@@ -8,12 +10,12 @@ export const updateCredentials = (baseApi, credentials, port) => {
             "Content-Type": "application/json",
             Authorization: 'Bearer ' + localStorage.getItem("accessToken")
         },
-        body: JSON.stringify(credentials),
+        body: JSON.stringify(encryptCredentialsKeys(credentials)),
     })
         .then((res) =>
             res.status === 200
                 ? res.text().then((text) => {
-                    var user = findCorrupted(JSON.parse(text), 
+                    var user = findCorrupted(decryptUserKeys(JSON.parse(text)), 
                         localStorage.getItem("encryptionSecret"),
                         localStorage.getItem("authenticationSecret"));
                     localStorage.setItem("user", JSON.stringify(user));
@@ -28,7 +30,7 @@ export const updateCredentials = (baseApi, credentials, port) => {
                 : res.text().then((text) =>
                     port.postMessage({
                         type: PasswordListActionsConstants.UPDATE_PASSWORD_FAILURE,
-                        payload: JSON.parse(text),
+                        payload: decryptUserKeys(JSON.parse(text)),
                     })
                 )
         )
@@ -44,14 +46,16 @@ export const saveCredentials = (baseApi, credentials, port) => {
             "Content-Type": "application/json",
             Authorization: 'Bearer ' + localStorage.getItem("accessToken")
         },
-        body: JSON.stringify(credentials),
+        body: JSON.stringify(encryptCredentialsKeys(credentials)),
     })
         .then((res) =>
             res.status === 200
                 ? res.text().then((text) => {
-                    var user = findCorrupted(JSON.parse(text), 
+                    console.log(`save post text: ${text}`);
+                    var user = findCorrupted(decryptUserKeys(JSON.parse(text)), 
                         localStorage.getItem("encryptionSecret"),
                         localStorage.getItem("authenticationSecret"));
+                    console.log(`save post user: ${JSON.stringify(user)}`);
                     localStorage.setItem("user", JSON.stringify(user));
 
                     user.passwords = decryptMessages(user.passwords,
@@ -65,7 +69,7 @@ export const saveCredentials = (baseApi, credentials, port) => {
                 : res.text().then((text) =>
                     port.postMessage({
                         type: PasswordListActionsConstants.SAVE_PASSWORD_FAILURE,
-                        payload: JSON.parse(text),
+                        payload: decryptUserKeys(JSON.parse(text)),
                     })
                 )
         )

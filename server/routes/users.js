@@ -67,11 +67,12 @@ router.route('/user/:userId/password/:passwordId')
 
 router.route('/user/:userId/passwords')
     .post(jwtHelper.verifyJwtToken, verifyUserAccess, (req, res, next) => {
+        console.log(req.params.userId);
         if (!ObjectId.isValid(req.params.userId))
             return res.status(400).send('No record with given id: ' + req.params.userId);
 
-        let password = new PassVault(req.body);
-        User.findByIdAndUpdate(req.params.userId, {$push: {passwords: password}}, {new: true},
+        let entry = new PassVault(req.body);
+        User.findByIdAndUpdate(req.params.userId, {$push: {af: entry}}, {new: true},
             (err, doc) => {
                 BoomHelper.apiResponseHandler(res, doc, err);
             });
@@ -84,10 +85,10 @@ router.post('/user/login', (req, res, next) => {
         }
         if (user){
             // If the user enabled 2-steps verification then dont return his details just yet, send a limited accessToken
-            if (!user.security.twoStepsVerification) {
+            if (!user.ab.ba) {
                 return res.json({user: user, accessToken: user.generateJwt({ id: user.id, authenticate: true })})
             } else {
-                return res.json({user: {security: {twoStepsVerification: true}},
+                return res.json({user: {ab: {ba: true}},
                     accessToken: user.generateJwt({ id: user.id, authenticate: false })})
             }
         } else {
@@ -103,7 +104,7 @@ router.post('/user/validate', jwtHelper.verifyJwtToken, (req, res, next) => {
             axios({
                 method: 'get',
                 url: "https://www.authenticatorApi.com/Validate.aspx",
-                params: {Pin: req.query.pin, SecretCode: user.security.secret}
+                params: {Pin: req.query.pin, SecretCode: user.ab.bb}
             }).then((result) => {
                 if (result["data"] === "True") {
                     res.json({user: user, accessToken: user.generateJwt({ id: user.id, authenticate: true })});

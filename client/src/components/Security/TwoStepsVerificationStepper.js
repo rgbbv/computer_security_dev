@@ -49,6 +49,7 @@ export default function TwoStepsVerificationStepper(props) {
     props.port.onMessage.addListener(function (msg) {
         if (msg.type === SecurityActionsConstants.VALIDATE_PIN_SUCCESS) {
             if (msg.payload === "True") {
+                console.log("got validate pin success");
                 setErrorMessage("");
                 props.port.postMessage({
                     type: UserActionsConstants.UPDATE_USER,

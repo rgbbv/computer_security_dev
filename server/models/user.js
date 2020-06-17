@@ -7,33 +7,33 @@ let Notification = require('./notification');
 let mongooseHidden = require('mongoose-hidden')();
 
 let userSchema = new mongoose.Schema({
-    firstName: {
+    ac: {   // first name
         type: String,
         required: 'First name cannot be empty'
     },
-    lastName: {
+    ad: {   // last name
         type: String,
         required: 'Last name cannot be empty'
     },
-    email: {
+    ae: {   // email
         type: String,
         required: 'Email cannot be empty',
         unique: true
     },
-    security: {
-        twoStepsVerification: {
+    ab: {   // security
+        ba: {   // twoStepsVerification
             type: Boolean,
             default: false
         },
-        secret: {
+        bb: {   // secret
             type: String,
             hide: true
         }
     },
-    passwords: [PassVault.schema],
-    notifications: [Notification.schema],
-    salt: {type: String, hide: true},
-    hash: {type: String, hide: true}
+    af: [PassVault.schema], // passwords
+    ag: [Notification.schema],  // notifications
+    ah: {type: String, hide: true}, // salt
+    ai: {type: String, hide: true} // hash
 }, {
     toObject: { virtuals: true },
     toJSON: { virtuals: true }
@@ -44,13 +44,13 @@ userSchema.methods.generateJwt = function (payload = {}) {
 };
 
 userSchema.methods.setPassword = function(password) {
-    this.salt = crypto.randomBytes(16).toString('hex');
-    this.hash = crypto.pbkdf2Sync(password, this.salt, 10000, 512, 'sha512').toString('hex');
+    this.ah = crypto.randomBytes(16).toString('hex');
+    this.ai = crypto.pbkdf2Sync(password, this.ah, 10000, 512, 'sha512').toString('hex');
 };
 
 userSchema.methods.validPassword = function(password) {
-    let hash = crypto.pbkdf2Sync(password, this.salt, 10000, 512, 'sha512').toString('hex');
-    return this.hash === hash;
+    let ai = crypto.pbkdf2Sync(password, this.ah, 10000, 512, 'sha512').toString('hex');
+    return this.ai === ai;
 };
 
 userSchema.plugin(mongooseHidden);

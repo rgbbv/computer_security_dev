@@ -14,5 +14,4 @@ const SecurityActionsConstants = {
     VALIDATE_PIN_SERVER_SUCCESS: 'VALIDATE_PIN_SERVER_SUCCESS',
     VALIDATE_PIN_SERVER_FAILURE: 'VALIDATE_PIN_SERVER_FAILURE',
 };
-
 export { SecurityActionsConstants };

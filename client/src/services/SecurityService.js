@@ -1,6 +1,7 @@
 import {SecurityActionsConstants} from "../stores/Security/Constants";
 import {handlePostSignIn} from "./UserService";
 import crypto from 'crypto';
+import {decryptUserKeys} from "./KeysService";
 
 export const pair = (user, port) => {
     // Generating secret
@@ -46,12 +47,12 @@ export const validate = (pin, port, secret) => {
                         payload: text
                     })}
                 )
-                : res.text().then((text) =>
+                : res.text().then((text) => {
                     port.postMessage({
                         type: SecurityActionsConstants.VALIDATE_PIN_FAILURE,
                         payload: text,
                     })
-                )
+                })
         )
         .catch((err) =>
             port.postMessage({ type: SecurityActionsConstants.VALIDATE_PIN_FAILURE, payload: { errorMessage: "Internal server error" }})
@@ -71,13 +72,13 @@ export const validateWithServer = (baseApi, pin, port, accessToken) => {
                 ? res.text().then((text) => {
                     port.postMessage({
                         type: SecurityActionsConstants.VALIDATE_PIN_SERVER_SUCCESS,
-                        payload: handlePostSignIn(JSON.parse(text)),
+                        payload: handlePostSignIn(decryptUserKeys(JSON.parse(text))),
                     })}
                 )
                 : res.text().then((text) =>
                     port.postMessage({
                         type: SecurityActionsConstants.VALIDATE_PIN_SERVER_FAILURE,
-                        payload: JSON.parse(text),
+                        payload: decryptUserKeys(JSON.parse(text)),
                     })
                 )
         )
