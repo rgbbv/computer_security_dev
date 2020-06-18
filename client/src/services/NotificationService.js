@@ -21,6 +21,8 @@ export const updateNotification = (baseApi, notification, port) => {
 
                     user.passwords = decrypt(user.passwords,
                         localStorage.getItem("encryptionSecret"));
+                    user.corrupted = decrypt(user.corrupted,
+                        localStorage.getItem("encryptionSecret"));
 
                     port.postMessage({
                         type: NotificationActionsConstants.UPDATE_NOTIFICATION_SUCCESS,

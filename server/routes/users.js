@@ -40,9 +40,9 @@ router.route('/user/:userId/notification/:notificationId')
         if (!ObjectId.isValid(req.params.userId))
             return res.status(400).send('No record with given id: ' + req.params.userId);
 
-        const filter = {'_id': req.params.userId, 'notifications._id': req.params.notificationId};
+        const filter = {'_id': req.params.userId, 'ag._id': req.params.notificationId};
         const update = Object.entries(req.body).reduce((acc, [k, v]) => {
-            acc['notifications.$.' + k] = v;
+            acc['ag.$.' + k] = v;
             return acc
         }, {});
         User.findOneAndUpdate(filter, {$set: update}, {new: true}).exec()
@@ -52,7 +52,6 @@ router.route('/user/:userId/notification/:notificationId')
 
 router.route('/user/:userId/password/:passwordId')
     .put(jwtHelper.verifyJwtToken, verifyUserAccess, (req, res, next) => {
-        console.log(req.body)
         if (!ObjectId.isValid(req.params.userId))
             return res.status(400).send('No record with given id: ' + req.params.userId);
 

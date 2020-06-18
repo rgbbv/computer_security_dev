@@ -50,7 +50,8 @@ export const authenticateMessages = (
   encryptionSecret,
   authenticationSecret
 ) => {
-  const [passHMAC, failHMAC] = messages.reduce(
+  console.log(`messages: ${JSON.stringify(messages)}`);
+  const [passHMAC0, passwordFailHMAC] = messages.reduce(
     ([pass, fail], e) =>
       checkHMAC(e.password, authenticationSecret)
         ? [[...pass, e], fail]
@@ -58,7 +59,24 @@ export const authenticateMessages = (
     [[], []]
   );
 
-  return {messages, failHMAC};
+  const [passHMAC1, UrlFailHMAC] = passHMAC0.reduce(
+    ([pass, fail], e) =>
+      checkHMAC(e.url, authenticationSecret)
+        ? [[...pass, e], fail]
+        : [pass, [...fail, e]],
+    [[], []]
+  );
+
+  const [passHMAC2, UsernameFailHMAC] = passHMAC1.reduce(
+    ([pass, fail], e) =>
+      checkHMAC(e.username, authenticationSecret)
+        ? [[...pass, e], fail]
+        : [pass, [...fail, e]],
+    [[], []]
+  );
+  const fails = passwordFailHMAC.concat(UrlFailHMAC).concat(UsernameFailHMAC);
+  console.log(`fails: ${JSON.stringify(fails)}`);
+  return {messages, fails};
 };
 
 export const decryptMessages = (
@@ -105,15 +123,16 @@ export const authenticateAndDecrypt = (
 };
 
 export const findCorrupted = (res, encryptionSecret, authenticationSecret) => {
-  const {messages, failHMAC} = authenticateMessages(res.passwords, encryptionSecret, authenticationSecret);
+  const {messages, fails} = authenticateMessages(res.passwords, encryptionSecret, authenticationSecret);
   res.passwords = messages;
-  res.corrupted = failHMAC;
+  res.corrupted = fails;
+  console.log(`res: ${JSON.stringify(res)}`);
   return res;
 };
 
 export const findCorruptedAndDecrypt = (res, encryptionSecret, authenticationSecret) => {
-  const {messages, failHMAC} = authenticateMessages(res.passwords, encryptionSecret, authenticationSecret);
+  const {messages, fails} = authenticateMessages(res.passwords, encryptionSecret, authenticationSecret);
   res.passwords = decryptMessages(messages, encryptionSecret);
-  res.corrupted = failHMAC;
+  res.corrupted = decryptMessages(fails, encryptionSecret);
   return res;
 };

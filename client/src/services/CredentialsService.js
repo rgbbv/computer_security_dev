@@ -22,6 +22,8 @@ export const updateCredentials = (baseApi, credentials, port) => {
                     localStorage.setItem("user", JSON.stringify(user));
                     user.passwords = decryptMessages(user.passwords,
                         localStorage.getItem("encryptionSecret"));
+                    user.corrupted = decryptMessages(user.corrupted,
+                        localStorage.getItem("encryptionSecret"));
                     port.postMessage({
                         type: PasswordListActionsConstants.UPDATE_PASSWORD_SUCCESS,
                         payload: user,
@@ -56,8 +58,9 @@ export const saveCredentials = (baseApi, credentials, port) => {
                         localStorage.getItem("encryptionSecret"),
                         localStorage.getItem("authenticationSecret"));
                     localStorage.setItem("user", JSON.stringify(user));
-
                     user.passwords = decryptMessages(user.passwords,
+                        localStorage.getItem("encryptionSecret"));
+                    user.corrupted = decryptMessages(user.corrupted,
                         localStorage.getItem("encryptionSecret"));
                     port.postMessage({
                         type: PasswordListActionsConstants.SAVE_PASSWORD_SUCCESS,

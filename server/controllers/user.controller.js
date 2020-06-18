@@ -14,9 +14,9 @@ module.exports.verifyUserAccess = function (req, res, next) {
         "User with ID: " + req.id + " tried to change your private information!";
 
     if (!req.authenticate || req.params.userId !== String(req.id)) {
-        let notification = new Notification({date: new Date(), read: false, content: unauthorizedNotification,
-                                             severity: 'High', sender: 'System'});
-        User.findByIdAndUpdate(req.params.userId, { $push: {notifications: notification} }, {new: false},
+        let notification = new Notification({db1: new Date(), dc: false, dd: unauthorizedNotification,
+                                             de: 'High', df: 'System'});
+        User.findByIdAndUpdate(req.params.userId, { $push: {ag: notification} }, {new: false},
             () => res.status(403).send({auth: false, message: unauthorizedMessage}))
     } else {
         next();
