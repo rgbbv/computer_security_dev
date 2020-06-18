@@ -15,13 +15,13 @@ export const updateCredentials = (baseApi, credentials, port) => {
         .then((res) =>
             res.status === 200
                 ? res.text().then((text) => {
-                    var user = findCorrupted(decryptUserKeys(JSON.parse(text)), 
+                    var text2 = {user: JSON.parse(text)};
+                    var user = findCorrupted(decryptUserKeys(text2).user, 
                         localStorage.getItem("encryptionSecret"),
                         localStorage.getItem("authenticationSecret"));
                     localStorage.setItem("user", JSON.stringify(user));
                     user.passwords = decryptMessages(user.passwords,
                         localStorage.getItem("encryptionSecret"));
-                        console.log(`user.passwords: ${JSON.stringify(user.passwords)}`);
                     port.postMessage({
                         type: PasswordListActionsConstants.UPDATE_PASSWORD_SUCCESS,
                         payload: user,
@@ -51,16 +51,14 @@ export const saveCredentials = (baseApi, credentials, port) => {
         .then((res) =>
             res.status === 200
                 ? res.text().then((text) => {
-                    console.log(`save post text: ${text}`);
-                    var user = findCorrupted(decryptUserKeys(JSON.parse(text)), 
+                    var text2 = {user: JSON.parse(text)};
+                    var user = findCorrupted(decryptUserKeys(text2).user, 
                         localStorage.getItem("encryptionSecret"),
                         localStorage.getItem("authenticationSecret"));
-                    console.log(`save post user: ${JSON.stringify(user)}`);
                     localStorage.setItem("user", JSON.stringify(user));
 
                     user.passwords = decryptMessages(user.passwords,
                         localStorage.getItem("encryptionSecret"));
-                        console.log(`user.passwords: ${JSON.stringify(user.passwords)}`);
                     port.postMessage({
                         type: PasswordListActionsConstants.SAVE_PASSWORD_SUCCESS,
                         payload: user,

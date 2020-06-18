@@ -23,7 +23,6 @@ export const handlePreSignIn = (masterPassword) => {
  */
 export const handlePostSignIn = (res) => {
     localStorage.setItem("accessToken", res.accessToken);
-    console.log("post signin")
     localStorage.setItem("user", JSON.stringify(res.user));
 
     // Verify passwords integrity

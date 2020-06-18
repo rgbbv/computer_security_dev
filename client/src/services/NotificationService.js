@@ -22,7 +22,6 @@ export const updateNotification = (baseApi, notification, port) => {
                     user.passwords = decrypt(user.passwords,
                         localStorage.getItem("encryptionSecret"));
 
-                        console.log(`user.passwords: ${JSON.stringify(user.passwords)}`);
                     port.postMessage({
                         type: NotificationActionsConstants.UPDATE_NOTIFICATION_SUCCESS,
                         payload: user,

@@ -25,8 +25,6 @@ function UpdatePassword(props) {
     const [password, setPassword] = useState(credentials.password);
 
     const updatePassword = () => {
-        console.log(`username: ${username}`);
-        console.log(`test: ${JSON.stringify({...credentials, url: url, username: username, password: password})}`)
         props.port.postMessage({
         type: PasswordListActionsConstants.UPDATE_PASSWORD,
             payload: {...credentials, url: url, username: username, password: password},
@@ -35,7 +33,6 @@ function UpdatePassword(props) {
 
     props.port.onMessage.addListener(function (msg) {
         if (msg.type === PasswordListActionsConstants.UPDATE_PASSWORD_SUCCESS) {
-            console.log(`user: ${JSON.stringify(user)} payload: ${JSON.stringify(msg.payload)}`);
             history.push(HistoryConstants.HOME, {user: msg.payload});
             props.port.postMessage({
                 type: HistoryConstants.CHANGE_HISTORY,
@@ -52,7 +49,6 @@ function UpdatePassword(props) {
         <div id="form">
             <Box alignSelf="flex-start">
                 <IconButton aria-label="close" size="small" onClick={() => {
-                    console.log(`update: ${JSON.stringify(props)}`);
                     history.push(HistoryConstants.HOME, {user: user});
                     props.port.postMessage({
                         type: HistoryConstants.CHANGE_HISTORY,

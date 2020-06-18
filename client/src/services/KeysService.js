@@ -1,7 +1,6 @@
 import {UserInfoMap, PasswordsMap, NotificationsMap, SecurityMap} from "../stores/Keys/Constants";
 
 export const decryptUserKeys = (res) => {
-    console.log(`user before: ${JSON.stringify(res)}`);
     res.user = Object.fromEntries(
         // convert to array, map, and then fromEntries gives back the object
         Object.entries(res.user).map(([key, value]) =>{
@@ -18,7 +17,6 @@ export const decryptUserKeys = (res) => {
         res.user.notifications = decryptNotificationsKeys(res.user.notifications);
       if (res.user.security !== undefined)
         res.user.security = decryptSecurityKeys(res.user.security);
-        console.log(`user after: ${JSON.stringify(res)}`);
     return res
 }
 
@@ -79,9 +77,7 @@ export const decryptNotificationsKeys = (notifications) => {
 }
 
 export const decryptCredentialsKeys = (credentials) => {
-    console.log(`credentials: ${JSON.stringify(credentials)}`);
     return credentials.map((entry) => {
-        console.log(`entry: ${JSON.stringify(entry)}`);
         return Object.fromEntries(
             // convert to array, map, and then fromEntries gives back the object
             Object.entries(entry).map(([key, value]) =>{
@@ -100,7 +96,9 @@ export const encryptCredentialsKeys = (credentials) => {
     return Object.fromEntries(
         // convert to array, map, and then fromEntries gives back the object
         Object.entries(credentials).map(([key, value]) =>{
-            return [PasswordsMap.get(key), value];
+            if (key !== 'id')
+                return [PasswordsMap.get(key), value];
+            return [key, value];
         })
       );
 }
@@ -118,7 +116,9 @@ export const encryptNotificationsKeys = (notifications) => {
     return Object.fromEntries(
         // convert to array, map, and then fromEntries gives back the object
         Object.entries(notifications).map(([key, value]) =>{
-            return [NotificationsMap.get(key), value];
+            if (key !== 'id')
+                return [NotificationsMap.get(key), value];
+            return [key, value];
         })
       );
 }

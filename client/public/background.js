@@ -82,9 +82,7 @@ chrome.runtime.onConnect.addListener(function (port) {
         .then((res) => {
           res.status === 200
             ? res.text().then((text) => {
-                console.log(`text: ${text}`);
                   const res = decryptUserKeys(JSON.parse(text));
-                  console.log(`res: ${JSON.stringify(res)}`);
                   !res.user.security.twoStepsVerification ?
                   port.postMessage({
                       type: LoginActionsConstants.LOGIN_SUCCESS,
