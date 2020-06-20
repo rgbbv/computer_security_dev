@@ -91,7 +91,7 @@ export const updateUser = (baseApi, userData, port, onSuccessType, onFailureType
         .then((res) =>
             res.status === 200
                 ? res.text().then((text) => {
-                    const user = decryptUserKeys(JSON.parse(text));
+                    const user = decryptUserKeys({user: JSON.parse(text)}).user;
                     localStorage.setItem("user", JSON.stringify(user));
                     port.postMessage({
                         type: onSuccessType,
@@ -107,6 +107,6 @@ export const updateUser = (baseApi, userData, port, onSuccessType, onFailureType
                 })
         )
         .catch((err) =>
-            port.postMessage({ type: onFailureType, payload: { errorMessage: "Internal server error" }})
+            port.postMessage({type: onFailureType, payload: {errorMessage: "Internal server error"}})
         );
 };
