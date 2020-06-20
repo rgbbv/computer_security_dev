@@ -1,6 +1,6 @@
 import {NotificationActionsConstants} from "../stores/Notification/Constants";
 import {findCorrupted, decrypt} from "../helpers/CryptoHelper";
-import {decryptNotificationsKeys, decryptUserKeys} from "./KeysService";
+import {encryptNotificationsKeys, decryptUserKeys} from "./KeysService";
 
 export const updateNotification = (baseApi, notification, port) => {
     fetch(baseApi + "/user/" + JSON.parse(localStorage.getItem("user")).id + "/notification/" + notification.id, {
@@ -9,7 +9,7 @@ export const updateNotification = (baseApi, notification, port) => {
             "Content-Type": "application/json",
             Authorization: 'Bearer ' + localStorage.getItem("accessToken")
         },
-        body: JSON.stringify(decryptNotificationsKeys(notification)),
+        body: JSON.stringify(encryptNotificationsKeys(notification)),
     })
         .then((res) =>
             res.status === 200
