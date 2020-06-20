@@ -96,7 +96,7 @@ chrome.runtime.onConnect.addListener(function (port) {
             : res.text().then((text) => 
                 port.postMessage({
                   type: LoginActionsConstants.LOGIN_FAILURE,
-                  payload: decryptUserKeys(JSON.parse(text)),
+                  payload: JSON.parse(text),
                 })
               )
             })
@@ -150,8 +150,8 @@ chrome.runtime.onConnect.addListener(function (port) {
     } else if (msg.type === PasswordListActionsConstants.UPDATE_PASSWORD) {
         let new_payload = Object.fromEntries(
             // convert to array, map, and then fromEntries gives back the object
-            Object.entries(msg.payload).map(([key, value]) =>{
-                 if (key == 'url' || key == 'username' || key == 'password')
+            Object.entries(msg.payload).map(([key, value]) => {
+                 if (key === 'url' || key === 'username' || key === 'password')
                     return [key, encryptUserWebsitePassword(value)];
                 return [key, value];
             })
