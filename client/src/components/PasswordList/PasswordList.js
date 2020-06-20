@@ -29,8 +29,8 @@ function PasswordList(props) {
   const open = Boolean(corruptedMsg);
   const id = open ? 'simple-popover' : undefined;
 
-  const isCorrupted = (url) => {
-    return user.corrupted.some((item) => item.url === url);
+  const isCorrupted = (url, username) => {
+    return user.corrupted.some((item) => item.url === url && item.username === username);
   };
 
   const showAddress = (url) => {
@@ -127,7 +127,7 @@ function PasswordList(props) {
                     }}
                     defaultValue={row.password}
                   />
-                  {isCorrupted(row.url) ?
+                  {isCorrupted(row.url, row.username) ?
                   <div title="The password has been corrupted!" id="corrupted">
                   <ReportProblemIcon
                   color="secondary" position="end" 
