@@ -23,6 +23,9 @@ export const handlePreSignIn = (masterPassword) => {
  */
 export const handlePostSignIn = (res) => {
     localStorage.setItem("accessToken", res.accessToken);
+
+    // Setting the user here before authenticating the passwords will result
+    // that the url & username & passwords will be kept hashed in local storage
     localStorage.setItem("user", JSON.stringify(res.user));
 
     // Verify passwords integrity

@@ -111,15 +111,15 @@ chrome.runtime.onConnect.addListener(function (port) {
        logout(port);
     } else if (msg.type === PasswordListActionsConstants.GET_CREDENTIALS) {
         if (isUserLoggedIn()) {
-            const user = JSON.parse(localStorage.getItem("user"));
+            const user = authenticateUserPasswords(JSON.parse(localStorage.getItem("user"))).user;
             let credentials = user.passwords.filter((item) => item.url.replace("http://","https://") === msg.payload.url.replace("http://","https://"));
 
             if (credentials.length >= 1) {
-                credentials = credentials.map((item, index) => {
-                    let decrypt = decryptUserWebsitePassword(item.password);
-                    decrypt ? item.password = decrypt : item.password = "";
-                    return item;
-                });
+                // credentials = credentials.map((item, index) => {
+                //     let decrypt = decryptUserWebsitePassword(item.password);
+                //     decrypt ? item.password = decrypt : item.password = "";
+                //     return item;
+                // });
                 port.postMessage({
                     type: PasswordListActionsConstants.GET_CREDENTIALS_SUCCESS,
                     payload: {credentials: credentials},

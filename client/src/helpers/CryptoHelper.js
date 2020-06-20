@@ -88,7 +88,7 @@ export const decryptMessages = (
 
         // convert to array, map, and then fromEntries gives back the object
         Object.entries(entry).map(([key, value]) => {
-          if (key == 'url' || key == 'password' || key == 'username')
+          if (key === 'url' || key === 'password' || key === 'username')
             return [key, CryptoJS.enc.Utf8.stringify(CryptoJS.AES.decrypt(value, encryptionSecret)) || ""];
           else
             return [key, value];
