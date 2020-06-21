@@ -100,7 +100,7 @@ chrome.runtime.onConnect.addListener(function (port) {
                 })
               )
             })
-        .catch((err) => port.postMessage({ type: LoginActionsConstants.LOGIN_FAILURE, payload: { errorMessage: "Internal server error" }}));
+        .catch((err) => port.postMessage({ type: LoginActionsConstants.LOGIN_FAILURE, payload: { errorMessage: "Incorrect password" }}));
     } else if (msg.type === UserActionsConstants.UPDATE_USER) {
         updateUser(baseApi, msg.payload.userData, port, msg.payload.onSuccessType, msg.payload.onFailureType);
     } else if (msg.type === NotificationActionsConstants.UPDATE_NOTIFICATION) {

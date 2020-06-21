@@ -74,25 +74,23 @@ function Register(props) {
   }
 
   return (
-      <div style={{ width: 200, height: 300}}>
-    <Box
-      display="flex"
-      flexDirection="column"
-      justifyContent="space-around"
-      alignItems="center"
+  <div style={{ display: "flex", height: 300, flexDirection: "column"}}>
+    <Box alignSelf="flex-start">
+      <IconButton aria-label="close" size="small" onClick={() => {
+          history.push(HistoryConstants.LOGIN);
+          props.port.postMessage({
+            type: HistoryConstants.CHANGE_HISTORY,
+            payload: {history: HistoryConstants.LOGIN}
+          });    }} >
+          <CloseIcon fontSize="default" />
+
+      </IconButton>
+    </Box>
+    <Box 
+    style={{ display: "flex", width: "200px", justifyContent: "center", alignItems: "center",
+      alignSelf: "center", flexDirection: "column", paddingBottom: "15px"}}
     >
-      <Box alignSelf="flex-start">
-        <IconButton aria-label="close" size="small" onClick={() => {
-            history.push(HistoryConstants.LOGIN);
-            props.port.postMessage({
-              type: HistoryConstants.CHANGE_HISTORY,
-              payload: {history: HistoryConstants.LOGIN}
-            });
-          
-        }} >
-          <CloseIcon fontSize="inherit" />
-        </IconButton>
-      </Box>
+
       <div style={{ "margin-top": 10 }}>
         <Avatar>
           <LockIcon />
@@ -134,7 +132,7 @@ function Register(props) {
         error={!isValidEmail}
         helperText={!isValidEmail ? "Invalid Email Address" : ""}
       />
-      <FormControl variant="outlined" fullWidth error={!!errorMessage}>
+      <FormControl variant="outlined" margin="dense" fullWidth error={!!errorMessage}>
         <InputLabel htmlFor="outlined-adornment-password">Password</InputLabel>
         <OutlinedInput
           id="outlined-adornment-password"
