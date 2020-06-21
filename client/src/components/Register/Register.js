@@ -20,6 +20,7 @@ import CloseIcon from '@material-ui/icons/Close';
 import { RegisterActionsConstants } from "../../stores/Register/Constants";
 import {HistoryConstants} from "../../stores/History/Constants";
 import { history } from "../../index";
+import PasswordStrengthMeter from './PasswordStrengthMeter';
 
 function Register(props) {
   const [errorMessage, setErrorMessage] = useState("");
@@ -31,7 +32,7 @@ function Register(props) {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [registerLoading, setRegisterLoading] = useState(false);
-  const [strength, setStrength] = useState("");
+  const [strength, setStrength] = useState(0);
 
 
   props.port.onMessage.addListener(function (msg) {
@@ -56,6 +57,12 @@ function Register(props) {
       );
   }
 
+  // medium: Password must contain at least one letter, at least one number, and be longer than six charaters.
+  // strong: Password must have at least 8 characters with at least one Capital letter, at least one lower case letter and at least one number or special character.
+  function onChangePassword(e) {
+
+  }
+
   function checkValidForm() {
     return isValidEmail && email !== "" && firstName !== "" && password !== "";
   }
@@ -72,6 +79,8 @@ function Register(props) {
       },
     });
   }
+
+  
 
   return (
   <div style={{ display: "flex", height: 300, flexDirection: "column"}}>
@@ -156,6 +165,7 @@ function Register(props) {
           {errorMessage ? errorMessage : ""}
         </FormHelperText>
       </FormControl>
+      <PasswordStrengthMeter password={password} />
       {registerLoading ? (
         <CircularProgress />
       ) : (
