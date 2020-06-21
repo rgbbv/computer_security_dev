@@ -9,7 +9,7 @@ const Notification = require('../models/notification');
  * @param next
  */
 module.exports.verifyUserAccess = function (req, res, next) {
-    const unauthorizedMessage = "Unauthorized to change this resource! incidence have been reported!";
+    const unauthorizedMessage = "Unauthorized to change this resource! Incidence has been reported!";
     const unauthorizedNotification = "We blocked an unauthorized activity. " +
         "User with ID: " + req.id + " tried to change your private information!";
 

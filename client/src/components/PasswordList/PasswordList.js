@@ -128,7 +128,7 @@ function PasswordList(props) {
                     defaultValue={row.password}
                   />
                   {isCorrupted(row.url, row.username) ?
-                  <div title="The password has been corrupted!" id="corrupted">
+                  <div title="This entry has been corrupted!" id="corrupted">
                   <ReportProblemIcon
                   color="secondary" position="end" 
                   aria-label="corrupted">
