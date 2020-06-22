@@ -11,6 +11,7 @@ import {PasswordListActionsConstants} from "../../stores/PasswordList/Constants"
 import CloseIcon from '@material-ui/icons/Close';
 import {HistoryConstants} from "../../stores/History/Constants";
 import { history } from "../../index";
+import PasswordStrengthMeter from "../../helpers/PasswordStrengthMeter";
 
 function UpdatePassword(props) {
     const [user, setUser] = useState(props.location.state.user);
@@ -70,7 +71,7 @@ function UpdatePassword(props) {
                     </Alert>)
                     :<div />
                 }
-                <Paper>
+                <Paper style={{alignItems: "center", display: "flex", flexDirection: "column"}}>
                     <h1>Update password</h1>
                     <TextField
                         label="URL"
@@ -90,13 +91,14 @@ function UpdatePassword(props) {
                         onChange={(e) => setPassword(e.target.value)}
                         margin="dense"
                     />
+                    <PasswordStrengthMeter password={password} />
                 </Paper>
             <Button
                 onClick={updatePassword.bind(this)}
                 variant="contained"
                 color="primary"
                 id="button"
-                style={{marginLeft: "20%"}}
+                style={{marginLeft: "15%"}}
             >
             update Password
             </Button>

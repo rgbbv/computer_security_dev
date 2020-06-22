@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import './PasswordStrengthMeter.css';
 
 class PasswordStrengthMeter extends Component {
 
@@ -11,18 +12,18 @@ class PasswordStrengthMeter extends Component {
       case 2:
         return 'Good';
       case 3:
-        return 'Strong'
+        return 'Strong';
       default:
         return 'Weak';
     }
   }
 
   calculateStrength = (password) => {
-    if (RegExp("((?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?!.*[()_\-\`\\/\"\'|\[\]}{:;'/>.<,])(?!.*\s)(?!.*\s).{8,50})").test(password))
+    if (RegExp("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[*.!@$%^#&(){}[:;<>,.?/~_+=|]).{8,}$").test(password))
       return 3;
-    if (RegExp("^(?=.*[0-9]+.*)(?=.*[a-zA-Z]+.*)[0-9a-zA-Z]{6,50}$").test(password))
+    if (RegExp("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{6,}$").test(password))
       return 2; 
-    if (RegExp("^.{4,50}$").test(password))
+    if (RegExp("(?=.*[a-z])(?=.*[A-Z]).{4,}$").test(password))
       return 1;
     return 0;
   }

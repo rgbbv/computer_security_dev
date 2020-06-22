@@ -20,7 +20,7 @@ import CloseIcon from '@material-ui/icons/Close';
 import { RegisterActionsConstants } from "../../stores/Register/Constants";
 import {HistoryConstants} from "../../stores/History/Constants";
 import { history } from "../../index";
-import PasswordStrengthMeter from './PasswordStrengthMeter';
+import PasswordStrengthMeter from '../../helpers/PasswordStrengthMeter';
 
 function Register(props) {
   const [errorMessage, setErrorMessage] = useState("");
@@ -32,7 +32,6 @@ function Register(props) {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [registerLoading, setRegisterLoading] = useState(false);
-  const [strength, setStrength] = useState(0);
 
 
   props.port.onMessage.addListener(function (msg) {
