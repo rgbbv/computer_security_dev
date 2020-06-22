@@ -17,7 +17,7 @@ import {UserActionsConstants} from "../src/stores/User/Constants";
 import {SecurityActionsConstants} from "../src/stores/Security/Constants";
 import {decryptUserKeys, encryptUserKeys, encryptRegisterKeys} from "../src/services/KeysService";
 
-const baseApi = "http://localhost:3000/api";
+const baseApi = "https://passvault-server.azurewebsites.net/api";
 
 
 const encryptUserWebsitePassword = (password) => {
