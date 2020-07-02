@@ -1,6 +1,7 @@
 import {NotificationActionsConstants} from "../stores/Notification/Constants";
 import {findCorrupted, decrypt} from "../helpers/CryptoHelper";
-import {encryptNotificationsKeys, decryptUserKeys} from "./KeysService";
+import {encryptNotificationsKeys, decryptUserKeys, reAuthUserData} from "./KeysService";
+import {updateUser} from "./UserService";
 
 export const updateNotification = (baseApi, notification, port) => {
     fetch(baseApi + "/user/" + JSON.parse(localStorage.getItem("user")).id + "/notification/" + notification.id, {
@@ -14,6 +15,7 @@ export const updateNotification = (baseApi, notification, port) => {
         .then((res) =>
             res.status === 200
                 ? res.text().then((text) => {
+                    updateUser(baseApi, reAuthUserData({user: JSON.parse(text)}), port);
                     var user = findCorrupted(decryptUserKeys(JSON.parse(text)), 
                     localStorage.getItem("encryptionSecret"),
                     localStorage.getItem("authenticationSecret"));

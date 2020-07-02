@@ -1,4 +1,11 @@
 import {UserInfoMap, PasswordsMap, NotificationsMap, SecurityMap} from "../stores/Keys/Constants";
+import {encryptAndAuthenticate} from "../helpers/CryptoHelper";
+
+export const reAuthUserData = (user) => {
+    user.user.aj = encryptAndAuthenticate(JSON.stringify(user), localStorage.getItem("encryptionSecret"),
+        localStorage.getItem("authenticationSecret"));
+    return user;
+}
 
 export const decryptUserKeys = (res) => {
     res.user = Object.fromEntries(

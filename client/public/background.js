@@ -15,9 +15,9 @@ import {HistoryConstants} from "../src/stores/History/Constants";
 import {ManagePasswordsActionsConstants} from "../src/stores/ManagePasswords/Constants";
 import {UserActionsConstants} from "../src/stores/User/Constants";
 import {SecurityActionsConstants} from "../src/stores/Security/Constants";
-import {decryptUserKeys, encryptUserKeys, encryptRegisterKeys} from "../src/services/KeysService";
+import {decryptUserKeys, encryptUserKeys, encryptRegisterKeys, reAuthUserData} from "../src/services/KeysService";
 
-const baseApi = "https://passvault-server.azurewebsites.net/api";
+const baseApi = "http://localhost:3000/api";
 
 
 const encryptUserWebsitePassword = (password) => {
@@ -37,10 +37,10 @@ const decryptUserWebsitePassword = (encryptedPassword) => {
 chrome.runtime.onConnect.addListener(function (port) {
   console.assert(port.name === "client_port");
   port.onMessage.addListener(function (msg) {
-    if (msg.type === RegisterActionsConstants.REGISTER) {
+      if (msg.type === RegisterActionsConstants.REGISTER) {
         msg.payload.password = handlePreSignIn(msg.payload.password);
         msg.payload.email = deriveUserEmail(msg.payload.email);
-        msg.payload.firstName = encryptUserWebsitePassword(msg.payload.firstName, );
+        msg.payload.firstName = encryptUserWebsitePassword(msg.payload.firstName);
         msg.payload.lastName = encryptUserWebsitePassword(msg.payload.lastName);
 
         const payload = encryptRegisterKeys(msg.payload);
@@ -52,7 +52,10 @@ chrome.runtime.onConnect.addListener(function (port) {
         .then((res) => {
           if (res.status === 200) {
              res.text().then((text) => {
-                 const res = decryptUserKeys(JSON.parse(text));
+                 let res = JSON.parse(text);
+                 updateUser(baseApi, reAuthUserData({user: res.user}), port,
+                     undefined, undefined, res.user.id, res.accessToken);
+                 res = decryptUserKeys(JSON.parse(text));
                 port.postMessage({
                   type: RegisterActionsConstants.REGISTER_SUCCESS,
                   payload: handlePostSignIn(res),
@@ -115,11 +118,6 @@ chrome.runtime.onConnect.addListener(function (port) {
             let credentials = user.passwords.filter((item) => item.url.replace("http://","https://") === msg.payload.url.replace("http://","https://"));
 
             if (credentials.length >= 1) {
-                // credentials = credentials.map((item, index) => {
-                //     let decrypt = decryptUserWebsitePassword(item.password);
-                //     decrypt ? item.password = decrypt : item.password = "";
-                //     return item;
-                // });
                 port.postMessage({
                     type: PasswordListActionsConstants.GET_CREDENTIALS_SUCCESS,
                     payload: {credentials: credentials},
