@@ -34,7 +34,7 @@ function UpdatePassword(props) {
 
     props.port.onMessage.addListener(function (msg) {
         if (msg.type === PasswordListActionsConstants.UPDATE_PASSWORD_SUCCESS) {
-            history.push(HistoryConstants.HOME, {user: msg.payload});
+            history.push(HistoryConstants.HOME, {user: msg.payload.user});
             props.port.postMessage({
                 type: HistoryConstants.CHANGE_HISTORY,
                 payload: {history: HistoryConstants.HOME}

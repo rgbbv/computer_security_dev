@@ -50,7 +50,6 @@ export const authenticateMessages = (
   encryptionSecret,
   authenticationSecret
 ) => {
-  console.log(`messages: ${JSON.stringify(messages)}`);
   const [passHMAC0, passwordFailHMAC] = messages.reduce(
     ([pass, fail], e) =>
       checkHMAC(e.password, authenticationSecret)
@@ -75,7 +74,6 @@ export const authenticateMessages = (
     [[], []]
   );
   const fails = passwordFailHMAC.concat(UrlFailHMAC).concat(UsernameFailHMAC);
-  console.log(`fails: ${JSON.stringify(fails)}`);
   return {messages, fails};
 };
 
@@ -126,7 +124,6 @@ export const findCorrupted = (res, encryptionSecret, authenticationSecret) => {
   const {messages, fails} = authenticateMessages(res.passwords, encryptionSecret, authenticationSecret);
   res.passwords = messages;
   res.corrupted = fails;
-  console.log(`res: ${JSON.stringify(res)}`);
   return res;
 };
 

@@ -14,7 +14,6 @@ export default function PasswordAction(props) {
     const [isOpen, setIsOpen] = useState(true);
     const [username, setUsername] = useState(props.credentials ? props.credentials.username : "");
     const [password, setPassword] = useState(props.credentials ? props.credentials.password : "");
-    const [id, setId] = useState(props.credentials ? props.credentials.id : -1);
     const [url, setUrl] = useState(props.credentials ? props.credentials.url : "");
     const [anchorEl, setAnchorEl] = useState(null);
     const [showPassword, setShowPassword] = useState(false);
@@ -24,7 +23,7 @@ export default function PasswordAction(props) {
         props.action === "Update" ?
             props.port.postMessage({
                 type: PasswordListActionsConstants.UPDATE_PASSWORD,
-                payload: {username: username, password: password, id: id}
+                payload: {username: username, password: password, url: url}
             }) :
             props.port.postMessage({
                 type: PasswordListActionsConstants.SAVE_PASSWORD,

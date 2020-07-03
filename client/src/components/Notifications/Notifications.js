@@ -35,7 +35,7 @@ function Notifications(props) {
 
   props.port.onMessage.addListener(function (msg) {
     if (msg.type === NotificationActionsConstants.UPDATE_NOTIFICATION_SUCCESS) {
-      setNotifications(msg.payload.notifications);
+      setNotifications(msg.payload.user.notifications);
     } else if (
       msg.type === NotificationActionsConstants.UPDATE_NOTIFICATION_FAILURE
     ) {
@@ -53,7 +53,7 @@ function Notifications(props) {
         type: NotificationActionsConstants.UPDATE_NOTIFICATION,
         payload: {
           userId: user.id,
-          notification: notifications[index],
+          notifications: notifications,
         },
       });
     } else {

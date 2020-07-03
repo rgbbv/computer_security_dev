@@ -51,7 +51,7 @@ export default function TwoStepsVerificationStepper(props) {
             if (msg.payload === "True") {
                 setErrorMessage("");
                 props.port.postMessage({
-                    type: UserActionsConstants.UPDATE_USER,
+                    type: SecurityActionsConstants.UPDATE_USER_SECURITY,
                     payload: {
                         userData: {security: {twoStepsVerification: true, secret: props.secret}},
                         onSuccessType: SecurityActionsConstants.UPDATE_USER_SECURITY_SUCCESS,

@@ -15,8 +15,7 @@ export const updateNotification = (baseApi, notification, port) => {
         .then((res) =>
             res.status === 200
                 ? res.text().then((text) => {
-                    updateUser(baseApi, reAuthUserData({user: JSON.parse(text)}), port);
-                    var user = findCorrupted(decryptUserKeys(JSON.parse(text)), 
+                    var user = findCorrupted(decryptUserKeys(JSON.parse(text)),
                     localStorage.getItem("encryptionSecret"),
                     localStorage.getItem("authenticationSecret"));
                     localStorage.setItem("user", JSON.stringify(user));

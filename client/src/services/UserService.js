@@ -1,5 +1,5 @@
 import {LoginActionsConstants} from "../stores/Login/Constants";
-import {findCorrupted, deriveSecrets, findCorruptedAndDecrypt} from "../helpers/CryptoHelper";
+import {checkHMAC, deriveSecrets, findCorruptedAndDecrypt} from "../helpers/CryptoHelper";
 import {decryptUserKeys, encryptUserKeys, reAuthUserData} from "./KeysService";
 
 /**
@@ -90,7 +90,7 @@ export const updateUser = (baseApi, userData, port, onSuccessType = false,
             "Content-Type": "application/json",
             Authorization: 'Bearer ' + at
         },
-        body: JSON.stringify(onSuccessType ? encryptUserKeys(userData) : userData.user),
+        body: JSON.stringify(onSuccessType ? reAuthUserData(encryptUserKeys(userData)) : userData),
     })
         .then((res) =>
             res.status === 200
