@@ -109,6 +109,12 @@ chrome.runtime.onConnect.addListener(function (port) {
 
                   if (!res.user.security.twoStepsVerification) {
                       res.user.manipulated = !verifyUserDataIntegrity(JSON.parse(text));
+                      if (res.user.manipulated) {
+                          res.user.notifications.push({
+                              date: new Date(), read: false, content: "An attacker manipulated your private data!",
+                              severity: 'High', sender: 'Client'
+                          })
+                      }
                       port.postMessage({
                           type: LoginActionsConstants.LOGIN_SUCCESS,
                           payload: handlePostSignIn(res),

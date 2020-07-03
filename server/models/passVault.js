@@ -15,6 +15,8 @@ const passVaultSchema = new mongoose.Schema({
         type: String,
         required: true
     }
+}, {
+    toObject: { virtuals: true }
 });
 
 passVaultSchema.plugin(mongooseHidden);

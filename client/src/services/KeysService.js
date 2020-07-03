@@ -8,7 +8,14 @@ export const reAuthUserData = (user) => {
     delete user.ab.bb;
     user.aj = encryptAndAuthenticate(JSON.stringify(user), localStorage.getItem("encryptionSecret"),
         localStorage.getItem("authenticationSecret"));
-    user.ab.bb = temp;
+
+    // 2-steps auth secret is hidden from the user, this operation prevent deleting it from DB on the PUT request
+    if (user.ab.ba && temp === undefined)
+        delete user.ab;
+    else {
+        user.ab.bb = temp;
+    }
+
     return user;
 }
 
@@ -29,6 +36,13 @@ export const decryptUserKeys = (res) => {
         res.user.notifications = decryptNotificationsKeys(res.user.notifications);
       if (res.user.security !== undefined)
         res.user.security = decryptSecurityKeys(res.user.security);
+    if (res.user.notifications !== undefined && res.user.manipulated) {
+        res.user.notifications.push({
+            date: new Date(), read: false, content: "An attacker manipulated your private data!",
+            severity: 'High', sender: 'Client'
+        })
+    }
+
     return res
 }
 
