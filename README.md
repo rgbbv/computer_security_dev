@@ -27,3 +27,5 @@
 - The newly loaded extension may sometimes not appear in the tool bar. Click on the extensions icon and pin it to the screen.
 - The server is running on Azure App Service and the client by default communicates with the production server. In order to run the server locally change "base_api" configuration in ./comp_sec_project/client/public/background.js to the local server URL (usually http://localhost:3000/api), rebuild the client, go to the server directory, then start the server:
 `$ npm run start`.
+
+### Extension installing tutorial: https://youtu.be/nAqG1f592C0
