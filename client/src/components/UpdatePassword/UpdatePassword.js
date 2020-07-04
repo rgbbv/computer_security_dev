@@ -28,7 +28,7 @@ function UpdatePassword(props) {
     const updatePassword = () => {
         props.port.postMessage({
         type: PasswordListActionsConstants.UPDATE_PASSWORD,
-            payload: {...credentials, url: url, username: username, password: password},
+            payload: {...credentials, url: url, username: username, password: password, index: props.location.state.index},
           });
     }
 

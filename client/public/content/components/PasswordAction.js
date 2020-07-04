@@ -52,15 +52,14 @@ export default function PasswordAction(props) {
                             </Typography>
                             <TextField
                                 id="outlined-username"
-                                label="Username"
                                 defaultValue={username}
                                 onChange={(e) => setUsername(e.target.value)}
                                 variant="outlined"
+                                size="small"
+                                disabled
+                                fullWidth
                             />
-                            <FormControl variant="outlined">
-                                <InputLabel htmlFor="outlined-adornment-password">
-                                    Password
-                                </InputLabel>
+                            <FormControl variant="outlined" size="small" disabled fullWidth>
                                 <OutlinedInput
                                     id="outlined-adornment-password"
                                     type={showPassword ? "text" : "password"}

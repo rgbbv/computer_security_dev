@@ -49,7 +49,11 @@ function PasswordList(props) {
 
   const switchToUpdatePassword = (credentials) => {
     localStorage.setItem("credentials", JSON.stringify(credentials));
-    props.history.push(HistoryConstants.UPDATE_PASSWORD, {user: user, credentials: credentials});
+    props.history.push(HistoryConstants.UPDATE_PASSWORD, {
+      user: user, credentials: credentials, index: user.passwords.findIndex(
+        (curr) => curr.url === credentials.url && curr.username === credentials.username && curr.password === credentials.password
+        )
+      });
     props.port.postMessage({
       type: HistoryConstants.CHANGE_HISTORY,
       payload: {

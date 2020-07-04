@@ -18,7 +18,7 @@ import {SecurityActionsConstants} from "../src/stores/Security/Constants";
 import {decryptUserKeys, encryptUserKeys, encryptRegisterKeys, reAuthUserData} from "../src/services/KeysService";
 import {checkHMAC} from "../src/helpers/CryptoHelper";
 
-const baseApi = "https://passvault-server.azurewebsites.net/api";
+const baseApi = "http://localhost:3000/api";
 
 
 const encryptUserWebsitePassword = (password) => {
@@ -177,7 +177,16 @@ chrome.runtime.onConnect.addListener(function (port) {
               PasswordListActionsConstants.SAVE_PASSWORD_FAILURE);
     } else if (msg.type === PasswordListActionsConstants.UPDATE_PASSWORD) {
           const user = JSON.parse(localStorage.getItem("user"));
-          user.passwords = user.passwords.map((e) => decryptUserWebsitePassword(e.url) === msg.payload.url &&
+          console.log(`index: ${msg.payload.index}`);
+          user.passwords = user.passwords.map((e, index) => msg.payload.index !== undefined ?
+          msg.payload.index === index ?
+          {
+            url: encryptUserWebsitePassword(msg.payload.url),
+            username:encryptUserWebsitePassword(msg.payload.username),
+            password: encryptUserWebsitePassword(msg.payload.password)
+          } : e
+          :
+          decryptUserWebsitePassword(e.url) === msg.payload.url &&
           decryptUserWebsitePassword(e.username) === msg.payload.username ?
               {
                   url: e.url,
