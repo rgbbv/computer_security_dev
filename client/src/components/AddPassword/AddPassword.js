@@ -33,7 +33,7 @@ function AddPassword(props) {
 
     props.port.onMessage.addListener(function (msg) {
         if (msg.type === PasswordListActionsConstants.SAVE_PASSWORD_SUCCESS) {
-            setUser(msg.payload);
+            setUser(msg.payload.user);
             setUrl("");
             setUsername("");
             setPassword("");
