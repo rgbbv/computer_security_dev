@@ -18,7 +18,7 @@ import {SecurityActionsConstants} from "../src/stores/Security/Constants";
 import {decryptUserKeys, encryptUserKeys, encryptRegisterKeys, reAuthUserData} from "../src/services/KeysService";
 import {checkHMAC} from "../src/helpers/CryptoHelper";
 
-const baseApi = "http://localhost:3000/api";
+const baseApi = "https://passvault-server.azurewebsites.net/api";
 
 
 const encryptUserWebsitePassword = (password) => {
@@ -41,13 +41,9 @@ export const verifyUserDataIntegrity = (user) => {
         let aj_temp = user.user.aj;
         delete user.user.aj;
         if (JSON.stringify(user.user) !== decryptUserWebsitePassword(aj_temp)) {
-            console.log("***");
-            console.log(JSON.stringify(user.user));
-            console.log(decryptUserWebsitePassword(aj_temp));
             return false;
         }
     } else {
-        console.log("***2");
         return false;
     }
 
