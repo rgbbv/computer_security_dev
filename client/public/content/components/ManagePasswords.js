@@ -44,7 +44,9 @@ export default function ManagePasswords(props) {
     if (msg.type === PasswordListActionsConstants.GET_CREDENTIALS_SUCCESS) {
       setCredentials(msg.payload.credentials);
       setGetCredentials(true);
-      injectSavedCredentials();
+      if (credentials.length > 0) {
+        injectSavedCredentials(0);
+      }
     } else if (msg.type === PasswordListActionsConstants.GET_CREDENTIALS_FAILURE) {
       setGetCredentials(true);
       if('errorMessage' in msg.payload) setError(true);
