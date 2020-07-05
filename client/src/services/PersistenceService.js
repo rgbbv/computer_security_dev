@@ -1,6 +1,7 @@
 import {authenticateUserPasswords} from "./UserService";
 
 export const getState = (key, port, onSuccessType, onFailureType, getAndDelete) => {
+    console.log(localStorage.getItem(key));
     let state = JSON.parse(localStorage.getItem(key));
     if (state) {
         if (getAndDelete) localStorage.removeItem(key);
