@@ -45,6 +45,7 @@ export const encryptAndAuthenticate = (
   return c + t;
 };
 
+// authenticate each part of each entry (url, username and password)
 export const authenticateMessages = (
   messages,
   encryptionSecret,
@@ -120,6 +121,7 @@ export const authenticateAndDecrypt = (
   return false;
 };
 
+// find corrupted entries in the passwords array and place them in corrupted field
 export const findCorrupted = (res, encryptionSecret, authenticationSecret) => {
   const {messages, fails} = authenticateMessages(res.passwords, encryptionSecret, authenticationSecret);
   res.passwords = messages;
@@ -127,6 +129,7 @@ export const findCorrupted = (res, encryptionSecret, authenticationSecret) => {
   return res;
 };
 
+// find corrupted entries in the passwords array and decrypt all the entries
 export const findCorruptedAndDecrypt = (res, encryptionSecret, authenticationSecret) => {
   const {messages, fails} = authenticateMessages(res.passwords, encryptionSecret, authenticationSecret);
   res.passwords = decryptMessages(messages, encryptionSecret);

@@ -18,7 +18,7 @@ import {SecurityActionsConstants} from "../src/stores/Security/Constants";
 import {decryptUserKeys, encryptUserKeys, encryptRegisterKeys, reAuthUserData} from "../src/services/KeysService";
 import {checkHMAC} from "../src/helpers/CryptoHelper";
 
-const baseApi = "http://localhost:3000/api";
+const baseApi = "https://passvault-server.azurewebsites.net/api";
 
 
 const encryptUserWebsitePassword = (password) => {
@@ -144,7 +144,8 @@ chrome.runtime.onConnect.addListener(function (port) {
     } else if (msg.type === PasswordListActionsConstants.GET_CREDENTIALS) {
         if (isUserLoggedIn()) {
             const user = authenticateUserPasswords(JSON.parse(localStorage.getItem("user"))).user;
-            let credentials = user.passwords.filter((item) => item.url.replace("http://","https://") === msg.payload.url.replace("http://","https://"));
+            // filters out urls that are not identical to the current url
+            let credentials = user.passwords.filter((item) => item.url.replace("http://","https://").replace("www.", "") === msg.payload.url.replace("http://","https://").replace("www.", ""));
 
             if (credentials.length >= 1) {
                 port.postMessage({

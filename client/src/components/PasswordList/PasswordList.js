@@ -29,16 +29,19 @@ function PasswordList(props) {
   const open = Boolean(corruptedMsg);
   const id = open ? 'simple-popover' : undefined;
 
+  //  Checks whether the credentials of a certain url are corrupted, if so we will mark it as such 
   const isCorrupted = (url, username) => {
     return user.corrupted.some((item) => item.url === url && item.username === username);
   };
 
+  //  We simplify the list by showing only the relevant part of the url
   const showAddress = (url) => {
     const replaced_url = url.replace("https://","").replace("http://", "").replace("www.","");
     const splits = replaced_url.split("/", 2);
     return splits[0];
   }
 
+  //  If the add button is clicked, we move to the add password page
   const switchToAddPassword = () => {
     props.history.push(HistoryConstants.ADD_PASSWORD, {user: user});
     props.port.postMessage({
@@ -47,6 +50,7 @@ function PasswordList(props) {
     });
   };
 
+  // If the edit button is clicked, we move to the edit password page
   const switchToUpdatePassword = (credentials) => {
     localStorage.setItem("credentials", JSON.stringify(credentials));
     props.history.push(HistoryConstants.UPDATE_PASSWORD, {
