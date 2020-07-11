@@ -92,7 +92,7 @@ export default function ManagePasswords(props) {
     }
 
     // We dont have this website credentials (or got new credentials - new username), ask the user whether to store them
-    else if (creds.length === 0) {
+    else if (creds.length === 0 && enteredPassword) {
       props.port.postMessage({
         type: PersistenceActionsConstants.SET_STATE,
         payload: {value: {credentials: {username: enteredUsername, password: enteredPassword, url: window.location.toString(), id: credentials.id},
