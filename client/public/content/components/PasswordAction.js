@@ -37,6 +37,7 @@ export default function PasswordAction(props) {
             anchorEl={anchorEl}
             placement="top"
             transition
+            style={{zIndex: 9999}}
         >
             {({TransitionProps}) => (
                 <Fade {...TransitionProps} timeout={350}>

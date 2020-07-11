@@ -123,6 +123,7 @@ export default function ManagePasswords(props) {
           anchorEl={anchorEl}
           placement="bottom"
           transition
+          style={{zIndex: 9999}}
       >
         {({TransitionProps}) => (
             <Fade {...TransitionProps} timeout={350}>
