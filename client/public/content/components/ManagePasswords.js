@@ -110,8 +110,10 @@ export default function ManagePasswords(props) {
   });
 
   const injectSavedCredentials = (index) => {
-    jq("input:text").val(credentials[index].username);
-    jq("input:password").val(credentials[index].password);
+    RegExp("^([\\w.%+-]+)@([\\w-]+\\.)+([\\w]{2,})$").test(credentials[index].username) ?
+        jq("input[type=email]").val(credentials[index].username) :
+        jq("input:text").first().val(credentials[index].username)
+    jq("input:password").first().val(credentials[index].password);
   };
 
   return (
