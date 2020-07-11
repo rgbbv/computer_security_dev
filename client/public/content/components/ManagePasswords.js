@@ -79,7 +79,7 @@ export default function ManagePasswords(props) {
    */
   jq("form").submit(function (event) {
     const enteredPassword = jq("input:password").val();
-    const enteredUsername = jq("input:text").val();
+    const enteredUsername = jq("input:text").val() ||  jq("input[type=email]").val();
     const creds = credentials.filter((item) => item.username === enteredUsername);
 
     // The user has changed the saved password ask him whether to update
