@@ -1,6 +1,7 @@
 import {LoginActionsConstants} from "../stores/Login/Constants";
 import {checkHMAC, deriveSecrets, findCorruptedAndDecrypt} from "../helpers/CryptoHelper";
 import {decryptUserKeys, encryptUserKeys, reAuthUserData} from "./KeysService";
+import {HistoryConstants} from "../stores/History/Constants";
 
 /**
  * Gets the user masterPassword, derives encryptionSecret, authenticationSecret, serverSecret.
@@ -64,9 +65,14 @@ export const verifyUserLoggedIn = (port) => {
             payload: {user: user, history: localStorage.getItem("history")},
         })
     } else {
+        const history = localStorage.getItem("history") === HistoryConstants.REGISTER ? HistoryConstants.REGISTER : HistoryConstants.LOGIN;
+        if (localStorage.getItem("user")) {
+            localStorage.clear();
+            localStorage.setItem("history", history);
+        }
         port.postMessage({
             type: LoginActionsConstants.IS_USER_LOGGED_IN_FAILURE,
-            payload: {history: localStorage.getItem("history")},
+            payload: {history: history},
         })
     }
 };
