@@ -144,7 +144,7 @@ chrome.runtime.onConnect.addListener(function (port) {
     } else if (msg.type === PasswordListActionsConstants.GET_CREDENTIALS) {
         if (isUserLoggedIn()) {
             const user = authenticateUserPasswords(JSON.parse(localStorage.getItem("user"))).user;
-            // filters out urls that are not identical to the current url
+            // Filters out urls that are not identical to the current url
             let credentials = user.passwords.filter((item) => item.url.replace("http://","https://").replace("www.", "") === msg.payload.url.replace("http://","https://").replace("www.", ""));
 
             if (credentials.length >= 1) {

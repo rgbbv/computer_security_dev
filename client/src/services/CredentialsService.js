@@ -2,6 +2,7 @@ import {PasswordListActionsConstants} from "../stores/PasswordList/Constants";
 import {findCorrupted, decryptMessages} from "../helpers/CryptoHelper";
 import {encryptCredentialsKeys, decryptUserKeys} from "./KeysService";
 
+// Updating an entry in a user's passwords list by the entry's id
 export const updateCredentials = (baseApi, credentials, port) => {
     fetch(baseApi + "/user/" + JSON.parse(localStorage.getItem("user")).id + "/password/" + credentials.id, {
         method: "PUT",
@@ -40,6 +41,7 @@ export const updateCredentials = (baseApi, credentials, port) => {
         );
 };
 
+// Saving a new entry in a user's passwords list
 export const saveCredentials = (baseApi, credentials, port) => {
     fetch(baseApi + "/user/" + JSON.parse(localStorage.getItem("user")).id + "/passwords", {
         method: "POST",
