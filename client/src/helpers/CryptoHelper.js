@@ -45,7 +45,10 @@ export const encryptAndAuthenticate = (
   return c + t;
 };
 
-// authenticate each part of each entry (url, username and password)
+/**
+ * Authenticate each part of each entry (url, username and password).
+ * Returns a list of all the entries and a list of entries that failed the autentication
+ */
 export const authenticateMessages = (
   messages,
   encryptionSecret,
@@ -85,7 +88,7 @@ export const decryptMessages = (
     return messages.map((entry) => {
       let new_entry = Object.fromEntries(
 
-        // convert to array, map, and then fromEntries gives back the object
+        // Convert to array, map, and then fromEntries gives back the object
         Object.entries(entry).map(([key, value]) => {
           if (key === 'url' || key === 'password' || key === 'username')
             return [key, CryptoJS.enc.Utf8.stringify(CryptoJS.AES.decrypt(value.substr(0, value.length - 64),
@@ -122,7 +125,7 @@ export const authenticateAndDecrypt = (
   return false;
 };
 
-// find corrupted entries in the passwords array and place them in corrupted field
+// Find corrupted entries in the passwords array and place them in corrupted field
 export const findCorrupted = (res, encryptionSecret, authenticationSecret) => {
   const {messages, fails} = authenticateMessages(res.passwords, encryptionSecret, authenticationSecret);
   res.passwords = messages;
@@ -130,7 +133,11 @@ export const findCorrupted = (res, encryptionSecret, authenticationSecret) => {
   return res;
 };
 
-// find corrupted entries in the passwords array and decrypt all the entries
+/** 
+ * Find corrupted entries (entries that didn't pass the authentication) in the passwords array
+ * and decrypt all the passwords. All the decrypted passwords are returned to the passwords array
+ * and the corrupted entries are flagged in the corrupted field
+ */
 export const findCorruptedAndDecrypt = (res, encryptionSecret, authenticationSecret) => {
   const {messages, fails} = authenticateMessages(res.passwords, encryptionSecret, authenticationSecret);
   res.passwords = decryptMessages(messages, encryptionSecret);

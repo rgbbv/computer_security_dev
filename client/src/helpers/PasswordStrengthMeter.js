@@ -18,6 +18,10 @@ class PasswordStrengthMeter extends Component {
     }
   }
 
+  // Fair: atleast 4 characters with one lowercase and one uppercase
+  // Good: atleast 6 characters with one lowercase, one uppercase and one number
+  // Strong: atleast 8 characters with one lowercase, one uppercase, one number and one special character
+  // Weak: else, it's weak
   calculateStrength = (password) => {
     if (RegExp("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[*.!@$%^#&(){}[:;<>,.?/~_+=|]).{8,}$").test(password))
       return 3;

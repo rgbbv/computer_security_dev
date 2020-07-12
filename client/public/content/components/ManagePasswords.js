@@ -109,6 +109,7 @@ export default function ManagePasswords(props) {
     }
   });
 
+  // Identifying the relevant input box and injecting the data
   const injectSavedCredentials = (index) => {
     RegExp("^([\\w.%+-]+)@([\\w-]+\\.)+([\\w]{2,})$").test(credentials[index].username) ?
         jq("input[type=email]").val(credentials[index].username) :

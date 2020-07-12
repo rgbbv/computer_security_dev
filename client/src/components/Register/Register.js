@@ -49,6 +49,7 @@ function Register(props) {
     }
   });
 
+  // On each change of the email we make sure it is a valid email
   function onChangeEmail(event) {
     setEmail(event.target.value);
     setIsValidEmail(
@@ -56,12 +57,7 @@ function Register(props) {
       );
   }
 
-  // medium: Password must contain at least one letter, at least one number, and be longer than six charaters.
-  // strong: Password must have at least 8 characters with at least one Capital letter, at least one lower case letter and at least one number or special character.
-  function onChangePassword(e) {
-
-  }
-
+  // Checking if all the data has been entered by the user
   function checkValidForm() {
     return isValidEmail && email !== "" && firstName !== "" && password !== "";
   }

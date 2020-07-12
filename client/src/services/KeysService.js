@@ -19,9 +19,10 @@ export const reAuthUserData = (user) => {
     return user;
 }
 
+// Using the UserInfoMap we decrypt the names of the user's fields to their appropriate names
 export const decryptUserKeys = (res) => {
     res.user = Object.fromEntries(
-        // convert to array, map, and then fromEntries gives back the object
+        // Convert to array, map, and then fromEntries gives back the object
         Object.entries(res.user).map(([key, value]) =>{
             if (key !== 'id')
                return [[...UserInfoMap.entries()]
@@ -46,6 +47,7 @@ export const decryptUserKeys = (res) => {
     return res
 }
 
+// Using the UserInfoMap we encrypt the names of the user's fields before saving them in the DB
 export const encryptUserKeys = (user) => {
     if (user.passwords !== undefined)
         user.passwords = encryptCredentialsKeys(user.passwords);
@@ -55,7 +57,7 @@ export const encryptUserKeys = (user) => {
         user.security = encryptSecurityKeys(user.security);
 
     return Object.fromEntries(
-        // convert to array, map, and then fromEntries gives back the object
+        // Convert to array, map, and then fromEntries gives back the object
         Object.entries(user).map(([key, value]) =>{
             if (key !== 'password')
                 return [UserInfoMap.get(key), value];
@@ -64,9 +66,11 @@ export const encryptUserKeys = (user) => {
       );
 }
 
+// Using the UserInfoMap we encrypt the names of the user's fields before saving them in the DB
+// (only in the register flow)
 export const encryptRegisterKeys = (user) => {
     return Object.fromEntries(
-        // convert to array, map, and then fromEntries gives back the object
+        // Convert to array, map, and then fromEntries gives back the object
         Object.entries(user).map(([key, value]) =>{
             if (key !== 'password')
                 return [UserInfoMap.get(key), value];
@@ -75,9 +79,10 @@ export const encryptRegisterKeys = (user) => {
       );
 }
 
+// Using the SecurityMap we decrypt the names of the security's fields to their appropriate names
 export const decryptSecurityKeys = (security) => {
     return Object.fromEntries(
-        // convert to array, map, and then fromEntries gives back the object
+        // Convert to array, map, and then fromEntries gives back the object
         Object.entries(security).map(([key, value]) =>{
             if (key !== 'id')
                return [[...SecurityMap.entries()]
@@ -87,10 +92,12 @@ export const decryptSecurityKeys = (security) => {
         })
       );
 }
+
+// Using the NotificationsMap we decrypt the names of the notifications's fields to their appropriate names
 export const decryptNotificationsKeys = (notifications) => {
     return notifications.map((entry) => {
         return Object.fromEntries(
-            // convert to array, map, and then fromEntries gives back the object
+            // Convert to array, map, and then fromEntries gives back the object
             Object.entries(entry).map(([key, value]) =>{
                 if (key !== 'id')
                 return [[...NotificationsMap.entries()]
@@ -102,10 +109,11 @@ export const decryptNotificationsKeys = (notifications) => {
     })
 }
 
+// Using the PasswordsMap we decrypt the names of the credentials's fields to their appropriate names
 export const decryptCredentialsKeys = (credentials) => {
     return credentials.map((entry) => {
         return Object.fromEntries(
-            // convert to array, map, and then fromEntries gives back the object
+            // Convert to array, map, and then fromEntries gives back the object
             Object.entries(entry).map(([key, value]) =>{
                 if (key !== 'id')
                 return [[...PasswordsMap.entries()]
@@ -117,28 +125,30 @@ export const decryptCredentialsKeys = (credentials) => {
     })
 }
 
-
+// Using the PasswordsMap we encrypt the names of the credentials's fields before saving them in the DB
 export const encryptCredentialsKeys = (credentials) => {
     return credentials.map((e) => Object.fromEntries(
-        // convert to array, map, and then fromEntries gives back the object
+        // Convert to array, map, and then fromEntries gives back the object
         Object.entries(e).map(([key, value]) =>{
             return [PasswordsMap.get(key), value];
         })
       ));
 }
 
+// Using the SecurityMap we encrypt the names of the security's fields before saving them in the DB
 export const encryptSecurityKeys = (security) => {
     return Object.fromEntries(
-        // convert to array, map, and then fromEntries gives back the object
+        // Convert to array, map, and then fromEntries gives back the object
         Object.entries(security).map(([key, value]) =>{
             return [SecurityMap.get(key), value];
         })
       );
 }
 
+// Using the NotificationsMap we encrypt the names of the notifications's fields before saving them in the DB
 export const encryptNotificationsKeys = (notifications) => {
     return notifications.map((e) => Object.fromEntries(
-        // convert to array, map, and then fromEntries gives back the object
+        // Convert to array, map, and then fromEntries gives back the object
         Object.entries(e).map(([key, value]) => {
             return [NotificationsMap.get(key), value];
         })

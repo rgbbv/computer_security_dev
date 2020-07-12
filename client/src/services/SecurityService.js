@@ -18,6 +18,7 @@ export const pair = (user, port) => {
         const secret = buffer.toString('hex').toUpperCase();
         const api = "https://www.authenticatorApi.com/pair.aspx?AppName=PassVault&AppInfo=" + decryptFirstName(user.firstName) + "&SecretCode=" + secret;
 
+        // Receiving the QR code and sending it to the popup
         fetch(api,{
             method: "GET",
         })
@@ -42,6 +43,7 @@ export const pair = (user, port) => {
         });
 };
 
+// Validating the pin entered by the user
 export const validate = (pin, port, secret) => {
     const api = "https://www.authenticatorApi.com/Validate.aspx?Pin=" + pin + "&SecretCode=" + secret;
 
