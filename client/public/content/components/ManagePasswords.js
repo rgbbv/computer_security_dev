@@ -44,7 +44,9 @@ export default function ManagePasswords(props) {
     if (msg.type === PasswordListActionsConstants.GET_CREDENTIALS_SUCCESS) {
       setCredentials(msg.payload.credentials);
       setGetCredentials(true);
-      injectSavedCredentials();
+      if (credentials.length > 0) {
+        injectSavedCredentials(0);
+      }
     } else if (msg.type === PasswordListActionsConstants.GET_CREDENTIALS_FAILURE) {
       setGetCredentials(true);
       if('errorMessage' in msg.payload) setError(true);
@@ -77,7 +79,7 @@ export default function ManagePasswords(props) {
    */
   jq("form").submit(function (event) {
     const enteredPassword = jq("input:password").val();
-    const enteredUsername = jq("input:text").val();
+    const enteredUsername = jq("input:text").val() ||  jq("input[type=email]").val();
     const creds = credentials.filter((item) => item.username === enteredUsername);
 
     // The user has changed the saved password ask him whether to update
@@ -90,7 +92,7 @@ export default function ManagePasswords(props) {
     }
 
     // We dont have this website credentials (or got new credentials - new username), ask the user whether to store them
-    else if (creds.length === 0) {
+    else if (creds.length === 0 && enteredPassword) {
       props.port.postMessage({
         type: PersistenceActionsConstants.SET_STATE,
         payload: {value: {credentials: {username: enteredUsername, password: enteredPassword, url: window.location.toString(), id: credentials.id},
@@ -108,8 +110,10 @@ export default function ManagePasswords(props) {
   });
 
   const injectSavedCredentials = (index) => {
-    jq("input:text").val(credentials[index].username);
-    jq("input:password").val(credentials[index].password);
+    RegExp("^([\\w.%+-]+)@([\\w-]+\\.)+([\\w]{2,})$").test(credentials[index].username) ?
+        jq("input[type=email]").val(credentials[index].username) :
+        jq("input:text").first().val(credentials[index].username)
+    jq("input:password").first().val(credentials[index].password);
   };
 
   return (
@@ -121,6 +125,7 @@ export default function ManagePasswords(props) {
           anchorEl={anchorEl}
           placement="bottom"
           transition
+          style={{zIndex: 9999}}
       >
         {({TransitionProps}) => (
             <Fade {...TransitionProps} timeout={350}>

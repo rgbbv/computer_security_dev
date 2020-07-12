@@ -24,8 +24,7 @@ const notificationSchema = new mongoose.Schema({
         required: true
     }
 }, {
-    toObject: { virtuals: true },
-    toJSON: { virtuals: true }
+    toObject: { virtuals: true }
 });
 
 notificationSchema.plugin(mongooseHidden);

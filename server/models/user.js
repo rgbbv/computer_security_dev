@@ -33,7 +33,8 @@ let userSchema = new mongoose.Schema({
     af: [PassVault.schema], // passwords
     ag: [Notification.schema],  // notifications
     ah: {type: String, hide: true}, // salt
-    ai: {type: String, hide: true} // hash
+    ai: {type: String, hide: true}, // hash
+    aj: {type: String} // Encrypted & Authenticated user data
 }, {
     toObject: { virtuals: true },
     toJSON: { virtuals: true }

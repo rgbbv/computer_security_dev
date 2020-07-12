@@ -3,6 +3,7 @@ import {handlePostSignIn} from "./UserService";
 import crypto from 'crypto';
 import {decryptUserKeys} from "./KeysService";
 import {authenticateAndDecrypt} from "../helpers/CryptoHelper";
+import {verifyUserDataIntegrity} from "../../public/background";
 
 const decryptFirstName = (encryptedPassword) => {
     const encryptionSecret = localStorage.getItem("encryptionSecret");
@@ -78,9 +79,11 @@ export const validateWithServer = (baseApi, pin, port, accessToken) => {
         .then((res) =>
             res.status === 200
                 ? res.text().then((text) => {
+                    const res = JSON.parse(text);
+                    res.user.manipulated = !verifyUserDataIntegrity(JSON.parse(text));
                     port.postMessage({
                         type: SecurityActionsConstants.VALIDATE_PIN_SERVER_SUCCESS,
-                        payload: handlePostSignIn(decryptUserKeys(JSON.parse(text))),
+                        payload: handlePostSignIn(decryptUserKeys(res)),
                     })}
                 )
                 : res.text().then((text) =>

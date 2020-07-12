@@ -2,7 +2,6 @@ import {PasswordListActionsConstants} from "../stores/PasswordList/Constants";
 import {findCorrupted, decryptMessages} from "../helpers/CryptoHelper";
 import {encryptCredentialsKeys, decryptUserKeys} from "./KeysService";
 
-
 export const updateCredentials = (baseApi, credentials, port) => {
     fetch(baseApi + "/user/" + JSON.parse(localStorage.getItem("user")).id + "/password/" + credentials.id, {
         method: "PUT",

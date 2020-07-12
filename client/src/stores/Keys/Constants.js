@@ -1,5 +1,7 @@
 export const UserInfoMap = new Map([
-    ['_id', 'aa'],
+    ['_id', '_id'],
+    ['id', 'id'],
+    ['_v', '_v'],
     ['security', 'ab'],
     ['firstName', 'ac'],
     ['lastName', 'ad'],
@@ -8,7 +10,8 @@ export const UserInfoMap = new Map([
     ['notifications', 'ag'],
     ['salt', 'ah'],
     ['hash', 'ai'],
-    ['_v', 'ai']
+    ['auth_user_data', 'aj'],
+    ['manipulated', 'manipulated']
 ]);
 
 export const SecurityMap = new Map([
@@ -17,13 +20,18 @@ export const SecurityMap = new Map([
 ]);
 
 export const PasswordsMap = new Map([
+    ['_id', '_id'],
+    ['id', 'id'],
+    ['_v', '_v'],
     ['url', 'ca'],
     ['password', 'cb'],
     ['username', 'cc']
 ]);
 
 export const NotificationsMap = new Map([
-    ['_id', 'da'],
+    ['_id', '_id'],
+    ['id', 'id'],
+    ['_v', '_v'],
     ['date', 'db1'],
     ['read', 'dc'],
     ['content', 'dd'],

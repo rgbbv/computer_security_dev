@@ -1,6 +1,7 @@
 import {LoginActionsConstants} from "../stores/Login/Constants";
-import {findCorrupted, deriveSecrets, findCorruptedAndDecrypt} from "../helpers/CryptoHelper";
-import {decryptUserKeys, encryptUserKeys} from "./KeysService";
+import {checkHMAC, deriveSecrets, findCorruptedAndDecrypt} from "../helpers/CryptoHelper";
+import {decryptUserKeys, encryptUserKeys, reAuthUserData} from "./KeysService";
+import {HistoryConstants} from "../stores/History/Constants";
 
 /**
  * Gets the user masterPassword, derives encryptionSecret, authenticationSecret, serverSecret.
@@ -64,9 +65,14 @@ export const verifyUserLoggedIn = (port) => {
             payload: {user: user, history: localStorage.getItem("history")},
         })
     } else {
+        const history = localStorage.getItem("history") === HistoryConstants.REGISTER ? HistoryConstants.REGISTER : HistoryConstants.LOGIN;
+        if (localStorage.getItem("user")) {
+            localStorage.clear();
+            localStorage.setItem("history", history);
+        }
         port.postMessage({
             type: LoginActionsConstants.IS_USER_LOGGED_IN_FAILURE,
-            payload: {history: localStorage.getItem("history")},
+            payload: {history: history},
         })
     }
 };
@@ -79,34 +85,46 @@ export const logout = (port) => {
     })
 };
 
-export const updateUser = (baseApi, userData, port, onSuccessType, onFailureType) => {
-    fetch(baseApi + "/user/" + JSON.parse(localStorage.getItem("user")).id, {
+export const updateUser = (baseApi, userData, port, onSuccessType = false,
+                           onFailureType = false, id = false,
+                           accessToken = false) => {
+    const uid = id ? id : JSON.parse(localStorage.getItem("user")).id;
+    const at = accessToken ? accessToken : localStorage.getItem("accessToken");
+    fetch(baseApi + "/user/" + uid, {
         method: "PUT",
         headers: {
             "Content-Type": "application/json",
-            Authorization: 'Bearer ' + localStorage.getItem("accessToken")
+            Authorization: 'Bearer ' + at
         },
-        body: JSON.stringify(encryptUserKeys(userData)),
+        body: JSON.stringify(onSuccessType ? reAuthUserData(encryptUserKeys(userData)) : userData),
     })
         .then((res) =>
             res.status === 200
                 ? res.text().then((text) => {
-                    const user = decryptUserKeys({user: JSON.parse(text)}).user;
-                    localStorage.setItem("user", JSON.stringify(user));
-                    port.postMessage({
-                        type: onSuccessType,
-                        payload: authenticateUserPasswords(user),
-                    })}
+                    if (onSuccessType) {
+                        const user = decryptUserKeys({user: JSON.parse(text)}).user;
+                        localStorage.setItem("user", JSON.stringify(user));
+                        port.postMessage({
+                            type: onSuccessType,
+                            payload: authenticateUserPasswords(user),
+                        })
+                    }
+                }
                 )
                 : res.text().then((text) => {
-                    const user = decryptUserKeys(JSON.parse(text));
-                    port.postMessage({
-                        type: onFailureType,
-                        payload: user,
-                    })
+                    if (onFailureType) {
+                        const user = decryptUserKeys(JSON.parse(text));
+                        port.postMessage({
+                            type: onFailureType,
+                            payload: user,
+                        })
+                    }
                 })
         )
-        .catch((err) =>
-            port.postMessage({type: onFailureType, payload: {errorMessage: "Internal server error"}})
+        .catch((err) => {
+                if (onFailureType) {
+                    port.postMessage({type: onFailureType, payload: {errorMessage: "Internal server error"}})
+                }
+            }
         );
 };

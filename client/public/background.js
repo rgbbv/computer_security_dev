@@ -15,7 +15,8 @@ import {HistoryConstants} from "../src/stores/History/Constants";
 import {ManagePasswordsActionsConstants} from "../src/stores/ManagePasswords/Constants";
 import {UserActionsConstants} from "../src/stores/User/Constants";
 import {SecurityActionsConstants} from "../src/stores/Security/Constants";
-import {decryptUserKeys, encryptUserKeys, encryptRegisterKeys} from "../src/services/KeysService";
+import {decryptUserKeys, encryptUserKeys, encryptRegisterKeys, reAuthUserData} from "../src/services/KeysService";
+import {checkHMAC} from "../src/helpers/CryptoHelper";
 
 const baseApi = "https://passvault-server.azurewebsites.net/api";
 
@@ -34,13 +35,28 @@ const decryptUserWebsitePassword = (encryptedPassword) => {
     return authenticateAndDecrypt(encryptedPassword, encryptionSecret, authenticationSecret);
 };
 
+export const verifyUserDataIntegrity = (user) => {
+
+    if (checkHMAC(user.user.aj, localStorage.getItem("authenticationSecret"))) {
+        let aj_temp = user.user.aj;
+        delete user.user.aj;
+        if (JSON.stringify(user.user) !== decryptUserWebsitePassword(aj_temp)) {
+            return false;
+        }
+    } else {
+        return false;
+    }
+
+    return true;
+}
+
 chrome.runtime.onConnect.addListener(function (port) {
   console.assert(port.name === "client_port");
   port.onMessage.addListener(function (msg) {
-    if (msg.type === RegisterActionsConstants.REGISTER) {
+      if (msg.type === RegisterActionsConstants.REGISTER) {
         msg.payload.password = handlePreSignIn(msg.payload.password);
         msg.payload.email = deriveUserEmail(msg.payload.email);
-        msg.payload.firstName = encryptUserWebsitePassword(msg.payload.firstName, );
+        msg.payload.firstName = encryptUserWebsitePassword(msg.payload.firstName);
         msg.payload.lastName = encryptUserWebsitePassword(msg.payload.lastName);
 
         const payload = encryptRegisterKeys(msg.payload);
@@ -52,7 +68,10 @@ chrome.runtime.onConnect.addListener(function (port) {
         .then((res) => {
           if (res.status === 200) {
              res.text().then((text) => {
-                 const res = decryptUserKeys(JSON.parse(text));
+                 let res = JSON.parse(text);
+                 updateUser(baseApi, reAuthUserData(res.user), port,
+                     undefined, undefined, res.user.id, res.accessToken);
+                 res = decryptUserKeys(JSON.parse(text));
                 port.postMessage({
                   type: RegisterActionsConstants.REGISTER_SUCCESS,
                   payload: handlePostSignIn(res),
@@ -83,15 +102,25 @@ chrome.runtime.onConnect.addListener(function (port) {
           res.status === 200
             ? res.text().then((text) => {
                   const res = decryptUserKeys(JSON.parse(text));
-                  !res.user.security.twoStepsVerification ?
-                  port.postMessage({
-                      type: LoginActionsConstants.LOGIN_SUCCESS,
-                      payload: handlePostSignIn(res),
-                  }) :
-                  port.postMessage({
-                      type: LoginActionsConstants.TWO_STEPS_VERIFICATION,
-                      payload: res,
-                  })
+
+                  if (!res.user.security.twoStepsVerification) {
+                      res.user.manipulated = !verifyUserDataIntegrity(JSON.parse(text));
+                      if (res.user.manipulated) {
+                          res.user.notifications.push({
+                              date: new Date(), read: false, content: "An attacker manipulated your private data!",
+                              severity: 'High', sender: 'Client'
+                          })
+                      }
+                      port.postMessage({
+                          type: LoginActionsConstants.LOGIN_SUCCESS,
+                          payload: handlePostSignIn(res),
+                      })
+                  } else {
+                      port.postMessage({
+                          type: LoginActionsConstants.TWO_STEPS_VERIFICATION,
+                          payload: res,
+                      })
+                  }
               })
             : res.text().then((text) => 
                 port.postMessage({
@@ -104,7 +133,10 @@ chrome.runtime.onConnect.addListener(function (port) {
     } else if (msg.type === UserActionsConstants.UPDATE_USER) {
         updateUser(baseApi, msg.payload.userData, port, msg.payload.onSuccessType, msg.payload.onFailureType);
     } else if (msg.type === NotificationActionsConstants.UPDATE_NOTIFICATION) {
-        updateNotification(baseApi, msg.payload.notification, port);
+          const user = JSON.parse(localStorage.getItem("user"));
+          user.notifications = msg.payload.notifications;
+          updateUser(baseApi, user, port, NotificationActionsConstants.UPDATE_NOTIFICATION_SUCCESS,
+              NotificationActionsConstants.UPDATE_NOTIFICATION_FAILURE);
     } else if (msg.type === LoginActionsConstants.IS_USER_LOGGED_IN) {
         verifyUserLoggedIn(port);
     } else if (msg.type === LoginActionsConstants.LOGOUT) {
@@ -112,14 +144,10 @@ chrome.runtime.onConnect.addListener(function (port) {
     } else if (msg.type === PasswordListActionsConstants.GET_CREDENTIALS) {
         if (isUserLoggedIn()) {
             const user = authenticateUserPasswords(JSON.parse(localStorage.getItem("user"))).user;
-            let credentials = user.passwords.filter((item) => item.url.replace("http://","https://") === msg.payload.url.replace("http://","https://"));
+            // filters out urls that are not identical to the current url
+            let credentials = user.passwords.filter((item) => item.url.replace("http://","https://").replace("www.", "") === msg.payload.url.replace("http://","https://").replace("www.", ""));
 
             if (credentials.length >= 1) {
-                // credentials = credentials.map((item, index) => {
-                //     let decrypt = decryptUserWebsitePassword(item.password);
-                //     decrypt ? item.password = decrypt : item.password = "";
-                //     return item;
-                // });
                 port.postMessage({
                     type: PasswordListActionsConstants.GET_CREDENTIALS_SUCCESS,
                     payload: {credentials: credentials},
@@ -141,23 +169,33 @@ chrome.runtime.onConnect.addListener(function (port) {
     } else if (msg.type === PersistenceActionsConstants.SET_STATE) {
         setState(msg.payload.key, msg.payload.value);
     } else if (msg.type === PasswordListActionsConstants.SAVE_PASSWORD) {
-          let new_payload = Object.fromEntries(
-            // convert to array, map, and then fromEntries gives back the object
-            Object.entries(msg.payload).map(([key, value]) => [key, encryptUserWebsitePassword(value)])
-          );
-        // msg.payload.password = encryptUserWebsitePassword(msg.payload.password);
-        saveCredentials(baseApi, new_payload, port);
+          const user = JSON.parse(localStorage.getItem("user"));
+          user.passwords.push({
+              url: encryptUserWebsitePassword(msg.payload.url),
+              username: encryptUserWebsitePassword(msg.payload.username),
+              password: encryptUserWebsitePassword(msg.payload.password)});
+          updateUser(baseApi, user, port, PasswordListActionsConstants.SAVE_PASSWORD_SUCCESS,
+              PasswordListActionsConstants.SAVE_PASSWORD_FAILURE);
     } else if (msg.type === PasswordListActionsConstants.UPDATE_PASSWORD) {
-        let new_payload = Object.fromEntries(
-            // convert to array, map, and then fromEntries gives back the object
-            Object.entries(msg.payload).map(([key, value]) => {
-                 if (key === 'url' || key === 'username' || key === 'password')
-                    return [key, encryptUserWebsitePassword(value)];
-                return [key, value];
-            })
-          );
-        // msg.payload.password = encryptUserWebsitePassword(msg.payload.password);
-        updateCredentials(baseApi, new_payload, port);
+          const user = JSON.parse(localStorage.getItem("user"));
+          console.log(`index: ${msg.payload.index}`);
+          user.passwords = user.passwords.map((e, index) => msg.payload.index !== undefined ?
+          msg.payload.index === index ?
+          {
+            url: encryptUserWebsitePassword(msg.payload.url),
+            username:encryptUserWebsitePassword(msg.payload.username),
+            password: encryptUserWebsitePassword(msg.payload.password)
+          } : e
+          :
+          decryptUserWebsitePassword(e.url) === msg.payload.url &&
+          decryptUserWebsitePassword(e.username) === msg.payload.username ?
+              {
+                  url: e.url,
+                  username: e.username,
+                  password: encryptUserWebsitePassword(msg.payload.password)
+              } : e);
+          updateUser(baseApi, user, port, PasswordListActionsConstants.UPDATE_PASSWORD_SUCCESS,
+              PasswordListActionsConstants.UPDATE_PASSWORD_FAILURE);
     } else if (msg.type === HistoryConstants.CHANGE_HISTORY) {
         localStorage.setItem("history", msg.payload.history);
     } else if (msg.type === ManagePasswordsActionsConstants.OPEN_PASSWORDS_LIST_TAB) {
@@ -170,6 +208,11 @@ chrome.runtime.onConnect.addListener(function (port) {
         validate(msg.payload.pin, port, msg.payload.secret);
     } else if (msg.type === SecurityActionsConstants.VALIDATE_PIN_SERVER) {
         validateWithServer(baseApi, msg.payload.pin, port, msg.payload.accessToken);
+    } else if (msg.type === SecurityActionsConstants.UPDATE_USER_SECURITY) {
+          const user = JSON.parse(localStorage.getItem("user"));
+          user.security = msg.payload.userData.security;
+          updateUser(baseApi, user, port, msg.payload.onSuccessType,
+              msg.payload.onFailureType);
     }
   });
 });

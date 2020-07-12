@@ -65,7 +65,7 @@ export default function TwoStepsVerification(props) {
         } else {
             setIsLoading(true);
             props.port.postMessage({
-                type: UserActionsConstants.UPDATE_USER,
+                type: SecurityActionsConstants.UPDATE_USER_SECURITY,
                 payload: {
                     userData: {security: {twoStepsVerification: false, secret: ""}},
                     onSuccessType: SecurityActionsConstants.UPDATE_USER_SECURITY_SUCCESS,

@@ -1,4 +1,23 @@
 import {UserInfoMap, PasswordsMap, NotificationsMap, SecurityMap} from "../stores/Keys/Constants";
+import {encryptAndAuthenticate} from "../helpers/CryptoHelper";
+
+export const reAuthUserData = (user) => {
+    delete user.aj;
+    delete user.manipulated;
+    let temp = user.ab.bb;
+    delete user.ab.bb;
+    user.aj = encryptAndAuthenticate(JSON.stringify(user), localStorage.getItem("encryptionSecret"),
+        localStorage.getItem("authenticationSecret"));
+
+    // 2-steps auth secret is hidden from the user, this operation prevent deleting it from DB on the PUT request
+    if (user.ab.ba && temp === undefined)
+        delete user.ab;
+    else {
+        user.ab.bb = temp;
+    }
+
+    return user;
+}
 
 export const decryptUserKeys = (res) => {
     res.user = Object.fromEntries(
@@ -17,6 +36,13 @@ export const decryptUserKeys = (res) => {
         res.user.notifications = decryptNotificationsKeys(res.user.notifications);
       if (res.user.security !== undefined)
         res.user.security = decryptSecurityKeys(res.user.security);
+    if (res.user.notifications !== undefined && res.user.manipulated) {
+        res.user.notifications.push({
+            date: new Date(), read: false, content: "An attacker manipulated your private data!",
+            severity: 'High', sender: 'Client'
+        })
+    }
+
     return res
 }
 
@@ -93,14 +119,12 @@ export const decryptCredentialsKeys = (credentials) => {
 
 
 export const encryptCredentialsKeys = (credentials) => {
-    return Object.fromEntries(
+    return credentials.map((e) => Object.fromEntries(
         // convert to array, map, and then fromEntries gives back the object
-        Object.entries(credentials).map(([key, value]) =>{
-            if (key !== 'id')
-                return [PasswordsMap.get(key), value];
-            return [key, value];
+        Object.entries(e).map(([key, value]) =>{
+            return [PasswordsMap.get(key), value];
         })
-      );
+      ));
 }
 
 export const encryptSecurityKeys = (security) => {
@@ -113,12 +137,10 @@ export const encryptSecurityKeys = (security) => {
 }
 
 export const encryptNotificationsKeys = (notifications) => {
-    return Object.fromEntries(
+    return notifications.map((e) => Object.fromEntries(
         // convert to array, map, and then fromEntries gives back the object
-        Object.entries(notifications).map(([key, value]) =>{
-            if (key !== 'id')
-                return [NotificationsMap.get(key), value];
-            return [key, value];
+        Object.entries(e).map(([key, value]) => {
+            return [NotificationsMap.get(key), value];
         })
-      );
+      ));
 }

@@ -45,12 +45,12 @@ export const encryptAndAuthenticate = (
   return c + t;
 };
 
+// authenticate each part of each entry (url, username and password)
 export const authenticateMessages = (
   messages,
   encryptionSecret,
   authenticationSecret
 ) => {
-  console.log(`messages: ${JSON.stringify(messages)}`);
   const [passHMAC0, passwordFailHMAC] = messages.reduce(
     ([pass, fail], e) =>
       checkHMAC(e.password, authenticationSecret)
@@ -75,7 +75,6 @@ export const authenticateMessages = (
     [[], []]
   );
   const fails = passwordFailHMAC.concat(UrlFailHMAC).concat(UsernameFailHMAC);
-  console.log(`fails: ${JSON.stringify(fails)}`);
   return {messages, fails};
 };
 
@@ -89,7 +88,8 @@ export const decryptMessages = (
         // convert to array, map, and then fromEntries gives back the object
         Object.entries(entry).map(([key, value]) => {
           if (key === 'url' || key === 'password' || key === 'username')
-            return [key, CryptoJS.enc.Utf8.stringify(CryptoJS.AES.decrypt(value, encryptionSecret)) || ""];
+            return [key, CryptoJS.enc.Utf8.stringify(CryptoJS.AES.decrypt(value.substr(0, value.length - 64),
+                encryptionSecret)) || ""];
           else
             return [key, value];
         })
@@ -122,14 +122,15 @@ export const authenticateAndDecrypt = (
   return false;
 };
 
+// find corrupted entries in the passwords array and place them in corrupted field
 export const findCorrupted = (res, encryptionSecret, authenticationSecret) => {
   const {messages, fails} = authenticateMessages(res.passwords, encryptionSecret, authenticationSecret);
   res.passwords = messages;
   res.corrupted = fails;
-  console.log(`res: ${JSON.stringify(res)}`);
   return res;
 };
 
+// find corrupted entries in the passwords array and decrypt all the entries
 export const findCorruptedAndDecrypt = (res, encryptionSecret, authenticationSecret) => {
   const {messages, fails} = authenticateMessages(res.passwords, encryptionSecret, authenticationSecret);
   res.passwords = decryptMessages(messages, encryptionSecret);
