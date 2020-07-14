@@ -85,7 +85,9 @@ export const decryptMessages = (
   messages,
   encryptionSecret
 ) => {
+
     return messages.map((entry) => {
+
       let new_entry = Object.fromEntries(
 
         // Convert to array, map, and then fromEntries gives back the object

@@ -66,7 +66,7 @@ export const validate = (pin, port, secret) => {
                 })
         )
         .catch((err) =>
-            port.postMessage({ type: SecurityActionsConstants.VALIDATE_PIN_FAILURE, payload: { errorMessage: "Internal server error" }})
+            port.postMessage({ type: SecurityActionsConstants.VALIDATE_PIN_FAILURE, payload: { errorMessage: "PIN Rejected" }})
         );
 };
 
@@ -97,6 +97,6 @@ export const validateWithServer = (baseApi, pin, port, accessToken) => {
         )
         .catch((err) =>
             port.postMessage({ type: SecurityActionsConstants.VALIDATE_PIN_SERVER_FAILURE,
-                payload: { errorMessage: "Internal server error" }})
+                payload: { errorMessage: "PIN Rejected" }})
         );
 };

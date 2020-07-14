@@ -52,8 +52,6 @@ const authenticateMessages = (messages, encryptionSecret, authenticationSecret) 
         messages.reduce(([pass, fail], e) =>
             (checkHMAC(e, authenticationSecret) ? [[...pass, e], fail] : [pass, [...fail, e]]), [[], []]);
 
-    failHMAC.forEach((fail) => console.log(`password for name: ${fail.name} was contaminated`));
-    // the authentication for these messages is failed
 
     const new_passwords = passHMAC.forEach(
         (cell) => {

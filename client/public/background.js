@@ -178,7 +178,6 @@ chrome.runtime.onConnect.addListener(function (port) {
               PasswordListActionsConstants.SAVE_PASSWORD_FAILURE);
     } else if (msg.type === PasswordListActionsConstants.UPDATE_PASSWORD) {
           const user = JSON.parse(localStorage.getItem("user"));
-          console.log(`index: ${msg.payload.index}`);
           user.passwords = user.passwords.map((e, index) => msg.payload.index !== undefined ?
           msg.payload.index === index ?
           {
